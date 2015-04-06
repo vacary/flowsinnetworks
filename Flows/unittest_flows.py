@@ -273,9 +273,44 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertTrue(np.linalg.norm(np.array(G['v']['t'][0]['thin_flow_overtime']) - np.array([0.0, 5/3.0, 2.0])) <= tol )
         self.assertTrue(np.linalg.norm(np.array(G['v']['w'][0]['thin_flow_overtime']) - np.array([3.0, 1.0, 0.0])) <= tol )
 
+        
+    def test_compute_dynamic_equilibrium_for_pwconstant_inputflow3(self):
+        
+        G=examples.example_Larre()
+        source = 's'
+        
+        timeofevent=[0.0,6.0]
+        inputflow=[4.0, 4.0]
+        
+        
+        param=flows.parameters()
+        param.tol_thin_flow=1e-10
+        param.tol_lp=1e-12
+        param.tol_cut=1e-12
+
+        tol =  param.tol_thin_flow*10
 
 
+        flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, timeofevent, inputflow,param)
 
+        print("******************************************************************",abs(G.node['v1']['label']- 16.0))
+        self.assertTrue(abs(G.node['s']['label_thin_flow']- 1.0) <= tol )
+        self.assertTrue(abs(G.node['v1']['label_thin_flow']- 1.0) <= tol )
+        self.assertTrue(abs(G.node['v2']['label_thin_flow']- 1.0) <= tol )
+        self.assertTrue(abs(G.node['t']['label_thin_flow']- 1.0) <= tol )
+
+        self.assertTrue(abs(G.node['s']['label']- 6.0) <= tol )
+        self.assertTrue(abs(G.node['v1']['label']- 8.0) <= tol )
+        self.assertTrue(abs(G.node['v2']['label']- 9.0) <= tol )
+        self.assertTrue(abs(G.node['t']['label']- 38.0/3.0) <= tol )
+
+        self.assertTrue(np.linalg.norm(np.array(G['s']['v1'][0]['thin_flow_overtime']) - np.array([4.0, 4.0, 4.0, 3.0])) <= tol )
+        self.assertTrue(np.linalg.norm(np.array(G['s']['v2'][0]['thin_flow_overtime']) - np.array([0.0, 0.0, 0.0, 1.0])) <= tol )
+        self.assertTrue(np.linalg.norm(np.array(G['v2']['t'][0]['thin_flow_overtime']) - np.array([4.0, 4/3.0, 4/3.0, 1.0])) <= tol )
+        self.assertTrue(np.linalg.norm(np.array(G['v1']['t'][0]['thin_flow_overtime']) - np.array([0.0, 8/3.0, 8/3.0, 3.0])) <= tol )
+        self.assertTrue(np.linalg.norm(np.array(G['v1']['v2'][0]['thin_flow_overtime']) - np.array([4.0, 4.0/3.0, 4.0/3.0, 0.0])) <= tol )
+
+        
 
 
 #if __name__ == '__main__':

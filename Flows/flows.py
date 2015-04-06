@@ -17,7 +17,8 @@ if withScipyOpt:
 if withSwiglpk:
     import swiglpk
 
-debug_var = True
+#debug_var = True
+debug_var = False
 
 
 

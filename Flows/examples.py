@@ -129,3 +129,23 @@ def example_Fig1_Cominetti_variant1():
     G.add_edge('r','t',time= 2, capacity=1.0, flow =0)
     G.add_edge('r','t',time= 1, capacity=1.0/2.0, flow =0)
     return G
+
+
+def example_Larre():
+    G=nx.MultiDiGraph()
+    #G.add_nodes_from("svwt")
+    G.add_node('s')
+    G.add_node('v1')
+    G.add_node('v2')
+    G.add_node('t')
+    
+    G.node['s']['label'] = 0
+    G.node['v1']['label'] = 0
+    G.node['v2']['label'] = 0
+    G.node['t']['label'] = 0
+    G.add_edge('s','v1',time= 1., capacity=3., flow =0)
+    G.add_edge('s','v2',time= 3., capacity=4., flow =0)
+    G.add_edge('v1','v2',time= 1., capacity=2., flow =0)
+    G.add_edge('v1','t',time= 14/3.0, capacity=3., flow =0)
+    G.add_edge('v2','t',time= 1., capacity=1., flow =0)
+    return G

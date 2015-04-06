@@ -380,6 +380,44 @@ def test14():
 
     print( '################ end test 14 ###############')
 
+def test15():
+    print( '################ start test 15 ###############')
+
+    G=examples.example_Larre()
+    source = 's'
+
+    timeofevent=[0.0,6.0]
+    inputflow=[4.0, 4.0]
+
+
+    param=flows.parameters()
+    param.tol_thin_flow=1e-10
+    param.tol_lp=1e-12
+    param.tol_cut=1e-12
+
+
+
+    flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, timeofevent, inputflow,param)
+    print("timeofevent=",timeofevent)
+    print("inputflow=",inputflow)
+
+    with_draw=True
+    if with_draw :
+        plt.close('all')
+        plt.figure("Thin flows and associated labels", figsize = [8,10])
+        flows.plot_thin_flows_and_labels(G,timeofevent)
+
+
+    flows.postprocess_flows_queues_cumulativeflows(G)
+    flows.display_graph(G)
+
+
+    if with_draw :
+        plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
+        flows.plot_flows_queues_cumulativeflows(G)
+
+    print( '################ end test 15 ###############')
+
 
 #whatisadjcency_iter()
 
@@ -399,8 +437,9 @@ def test14():
 
 # test9()
 # test10()
-test11()
+#test11()
 # test12()
 
-test13()
+#test13()
 #test14()
+test15()
