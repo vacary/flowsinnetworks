@@ -149,3 +149,18 @@ def example_Larre():
     G.add_edge('v1','t',time= 14/3.0, capacity=3., flow =0)
     G.add_edge('v2','t',time= 1., capacity=1., flow =0)
     return G
+
+
+def example_parallelpath():
+    G=nx.MultiDiGraph()
+    G.add_nodes_from("svwt")
+    
+    G.node['s']['label'] = 0
+    G.node['v']['label'] = 0
+    G.node['w']['label'] = 0
+    G.node['t']['label'] = 0
+    G.add_edge('s','v',time= 1., capacity=10., flow =0)
+    G.add_edge('s','w',time= 2., capacity=2., flow =0)
+    G.add_edge('v','t',time= 2., capacity=10., flow =0)
+    G.add_edge('w','t',time= 1., capacity=2., flow =0)
+    return G
