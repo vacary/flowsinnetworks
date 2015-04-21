@@ -1,0 +1,12 @@
+# vtk DataFile Version 3.0
+vtk output
+ASCII
+DATASET DIRECTED_GRAPH
+POINTS 3 float
+0 0 0 0 0 0 0 0 0 
+
+VERTICES 3
+EDGES 3
+0 1
+2 1
+2 0
