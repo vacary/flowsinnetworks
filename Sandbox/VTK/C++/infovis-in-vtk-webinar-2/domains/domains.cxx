@@ -72,9 +72,24 @@ protected:
   // ------------------------------------------------------------------------
   virtual float EdgeWidth(vtkIdType line, vtkIdType point)
   {
-    return 1.0f;
+    std::cout << "InEdgeWidth "<<  std::endl;
+    this->GetGraph()->GetEdgeData()->Print(cout);
+    std::cout << "=========" <<this->GetGraph()->GetEdgeData()->GetAbstractArray("Email")->GetVariantValue(line) <<std::endl;
+    return 1.0;
   }
-
+  
+  virtual float VertexSize	(	vtkIdType 	vertex	)	
+  {
+    std::cout << "vertex = "<< vertex << std::endl;
+    std::cout <<  float(vertex)+1.0<< std::endl;
+    std::cout << "degree = "<< this->GetGraph()->GetDegree(vertex) << std::endl;
+    this->GetGraph()->GetVertexData()->Print(cout);
+    vtkAbstractArray *ids = this->GetGraph()->GetVertexData()->GetAbstractArray("ids");
+    ids->Print(cout);
+    std::cout <<"ids->GetVariantValue(vertex)"<< ids->GetVariantValue(vertex) << std::endl;
+    return this->GetGraph()->GetDegree(vertex) ;
+  }
+  
   // ------------------------------------------------------------------------
   virtual void PaintBuffers(vtkContext2D *painter)
   {
