@@ -1,0 +1,12 @@
+This directory contains examples for the Infovis in VTK webinar,
+which is available here:
+
+http://vimeo.com/60774646
+
+Due to the use of some newer features, the code requires a development
+build of the VTK master branch (as of March 4, 2013).
+
+The domains and olympics examples can be used directly as in-source
+builds (i.e. the CMake build directory is the same as the source
+directory). You can also do out-of-source builds if you manually copy
+the .csv data files into the build directory.
