@@ -174,10 +174,11 @@ def current_shortest_path_graph(G, label='label'):
                 for k,keydata in eattr.items():
                     excess = G.node[nhead][label] - (G.node[ntail][label] + keydata['time'])
                     print_debug('excess =', excess)
-                    if excess >=-machine_epsilon:
+                    
+                    if excess >= -machine_epsilon:
                         print_debug('add edge (',ntail,nhead,k,') in E')
                         E.add_edge(ntail, nhead, k, keydata)
-                        if excess > -machine_epsilon:
+                        if excess > machine_epsilon:
                             E_star.add_edge(ntail, nhead, k , keydata)
                     else:
                         print_debug('add edge (',ntail,nhead,k,') in E_comp')
@@ -1258,38 +1259,9 @@ def compute_thin_flow_ofzerosize(G, source, b, E1):
             for k,keydata in eattr.items():
                 G[ntail][nhead][k]['thin_flow'] = 0.0
 
-    # compute the associated label in topological order
-    sorted_nodes =  nx.topological_sort(G)
-
-    if (source != sorted_nodes[0]):
-        raise RuntimeError( ' compute_thin_flow_ofzerosize(G,source, b, E1) FAILED\n \
-        source = %s\n \
-        sorted_nodes[0]= %s '%source%sorted_nodes[0])
-
-
-    G.node[source]['label_thin_flow']=1.0
-
-    for v in sorted_nodes[1:len(sorted_nodes)]:
-        in_edges = G.in_edges(v,keys=True)
-        e=in_edges[0]
-        if G[e[0]][e[1]][e[2]]['capacity'] < 1e-14 :
-            print('problem in computing congestion label with a very small (< 1e-14) capacity')
-            raise ZeroDivisionError
-        if e in set(E1.edges(keys=True)):
-            label_e = G[e[0]][e[1]][e[2]]['thin_flow']/G[e[0]][e[1]][e[2]]['capacity']
-        else :
-            label_e = max([G[e[0]][e[1]][e[2]]['thin_flow']/G[e[0]][e[1]][e[2]]['capacity'] ,G.node[e[0]]['label_thin_flow'] ])
-        G.node[v]['label_thin_flow']= label_e
-        for e in in_edges[1:len(in_edges)]:
-            if G[e[0]][e[1]][e[2]]['capacity'] < 1e-14  :
-                print('problem in computing congestion label with a very small (< 1e-14) capacity')
-                raise ZeroDivisionError
-            if e in set(E1.edges(keys=True)):
-                label_e = G[e[0]][e[1]][e[2]]['thin_flow']/G[e[0]][e[1]][e[2]]['capacity']
-            else :
-                label_e = max([E[e[0]][e[1]][e[2]]['thin_flow']/G[e[0]][e[1]][e[2]]['capacity'] ,G.node[e[0]]['label_thin_flow'] ])
-            G.node[v]['label_thin_flow']=  min([label_e, G.node[v]['label_thin_flow']])
-
+    for v in G.nodes():
+        G.node[v]['label_thin_flow']=1.0
+        
     print_debug('################ end compute_thin_flow_ofzerosize ###############')
 
 

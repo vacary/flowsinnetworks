@@ -466,7 +466,7 @@ def test16():
 def test17():
     print( '################ start test 17 ###############')
 
-    G=examples.example_Larre()
+    G=examples.example_Larre_bis()
     source = 's'
 
     l=decomposition.build_inputflow(decomposition.g,0,3,0.3)
