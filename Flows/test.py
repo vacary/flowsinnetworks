@@ -5,6 +5,11 @@ try:
 except:
     import flows
 
+try:
+    reload(decomposition)
+except:
+    import decomposition
+
 
 import networkx as nx
 
@@ -457,6 +462,46 @@ def test16():
 
     print( '################ end test 16 ###############')
 
+
+def test17():
+    print( '################ start test 17 ###############')
+
+    G=examples.example_Larre()
+    source = 's'
+
+    l=decomposition.build_inputflow(decomposition.g,0,3,0.3)
+
+    timeofevent=l[0]
+    inputflow=l[1]
+
+    param=flows.parameters()
+    param.tol_thin_flow=1e-10
+    param.tol_lp=1e-12
+    param.tol_cut=1e-12
+
+
+
+    flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, timeofevent, inputflow,param)
+    print("timeofevent=",timeofevent)
+    print("inputflow=",inputflow)
+
+    with_draw=True
+    if with_draw :
+        plt.close('all')
+        plt.figure("Thin flows and associated labels", figsize = [8,10])
+        flows.plot_thin_flows_and_labels(G,timeofevent)
+
+
+    flows.postprocess_flows_queues_cumulativeflows(G)
+    flows.display_graph(G)
+
+
+    if with_draw :
+        plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
+        flows.plot_flows_queues_cumulativeflows(G)
+
+    print( '################ end test 17 ###############')
+
 #whatisadjcency_iter()
 
 
@@ -480,5 +525,6 @@ def test16():
 
 #test13()
 #test14()
-test15()
+#test15()
 #test16()
+test17()

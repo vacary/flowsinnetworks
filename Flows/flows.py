@@ -17,10 +17,10 @@ if withScipyOpt:
 if withSwiglpk:
     import swiglpk
 
-#debug_var = True
-debug_var = False
-
-
+debug_var = True
+#debug_var = False
+import numpy as np
+machine_epsilon=np.finfo(float).eps*10
 
 class parameters:
 
@@ -173,10 +173,11 @@ def current_shortest_path_graph(G, label='label'):
             for nhead,eattr in nbrs.items():
                 for k,keydata in eattr.items():
                     excess = G.node[nhead][label] - (G.node[ntail][label] + keydata['time'])
-                    if excess >=0:
+                    print_debug('excess =', excess)
+                    if excess >=-machine_epsilon:
                         print_debug('add edge (',ntail,nhead,k,') in E')
                         E.add_edge(ntail, nhead, k, keydata)
-                        if excess > 0 :
+                        if excess > -machine_epsilon:
                             E_star.add_edge(ntail, nhead, k , keydata)
                     else:
                         print_debug('add edge (',ntail,nhead,k,') in E_comp')
@@ -272,9 +273,10 @@ def congestion_labels(G,source, flow='flow'):
     sorted_nodes =  nx.topological_sort(G)
     # we assume that the source is the least node in the topological order
     if (source != sorted_nodes[0]):
-        raise RuntimeError( 'congestion_labels(G,source) FAILED\n \
-        source = %s\n \
-        sorted_nodes[0] = %s '%source%sorted_nodes[0])
+        raise RuntimeError( 'congestion_labels(G,source) FAILED\n ')
+        #\
+        #source = %s\n \
+        #sorted_nodes[0] = %s '%source%sorted_nodes[0])
 
     G.node[source]['congestion_label']=0.0
     #print_debug( source, G.node[source])
