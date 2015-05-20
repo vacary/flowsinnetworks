@@ -13,6 +13,7 @@ except:
 
 import networkx as nx
 
+
 import matplotlib.pyplot as plt
 plt.ion()
 
@@ -21,6 +22,7 @@ try:
 except:
     import examples
 
+import math 
 
 def test1():
     print( '################ start test1 ###############')
@@ -292,7 +294,7 @@ def test12():
 def test13():
     print( '################ start test 13 ###############')
     G=examples.example_Fig1_Cominetti()
-    G=examples.example_Fig1_Cominetti_variant1()
+    #G=examples.example_Fig1_Cominetti_variant1()
 
 
     source = 's'
@@ -502,6 +504,59 @@ def test17():
 
     print( '################ end test 17 ###############')
 
+
+def flow_input_function(t):
+    return abs(math.sin(t))
+
+
+    
+def test18():
+    print( '################ start test 18 ###############')
+
+    G=examples.example_Larre_bis()
+    source = 's'
+
+    # l=decomposition.build_inputflow(decomposition.g,0,3,0.3)
+
+    # timeofevent=l[0]
+    # inputflow=l[1]
+
+    t0=0.0
+    N=30
+    h=0.1
+    
+    param=flows.parameters()
+    param.tol_thin_flow=1e-10
+    param.tol_lp=1e-12
+    param.tol_cut=1e-12
+
+
+
+    flows.compute_dynamic_equilibrium_timestepping(G, source, h, t0, N, flow_input_function ,param)
+
+    timeofevent=[]
+    for i in range(N+1):
+        timeofevent.append(t0+i*h)
+    
+    print("timeofevent=",timeofevent)
+  #  print("inputflow=",inputflow)
+
+    with_draw=True
+    if with_draw :
+        plt.close('all')
+        plt.figure("Thin flows and associated labels", figsize = [8,10])
+        flows.plot_thin_flows_and_labels(G,timeofevent)
+
+    # flows.postprocess_flows_queues_cumulativeflows(G)
+    # flows.display_graph(G)
+
+
+    # if with_draw :
+    #     plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
+    #     flows.plot_flows_queues_cumulativeflows(G)
+
+    print( '################ end test 18 ###############')
+
 #whatisadjcency_iter()
 
 
@@ -525,6 +580,7 @@ def test17():
 
 #test13()
 #test14()
-#test15()
+test15()
 #test16()
-test17()
+#test17()
+#test18()

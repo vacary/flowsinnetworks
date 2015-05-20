@@ -17,8 +17,8 @@ if withScipyOpt:
 if withSwiglpk:
     import swiglpk
 
-debug_var = True
-#debug_var = False
+#debug_var = True
+debug_var = False
 import numpy as np
 machine_epsilon=np.finfo(float).eps*10
 
@@ -1181,8 +1181,8 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
     err = 1e+24
     k=1
     while (err >= param.tol_thin_flow and k < param.nmax):
-        print_debug( '#################################################################################')
-        print_debug( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
+        print( '#################################################################################')
+        print( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
 
         biold=dict(bi)
         compute_thin_flow_without_resetting(G_anchored,source,bi,param=param)
@@ -1200,6 +1200,19 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
             for e in set.intersection(set(G.out_edges(n,keys=True)), set(E1.edges(keys=True))) :
                 #print_debug('e in intersection(set(G.out_edges(n)), set(E1.edges()))', e   )
                 bi[n] = bi[n] -  G_anchored[source][e[1]][e[2]]['thin_flow']
+
+        # test enumeration
+        tol_enumeration = 10e-6
+        P=[]
+        I=[]
+        for e in  set.difference (set(G_anchored.edges(keys=True)), set(E1.edges(keys=True)) ):
+            if G_anchored[e[0]][e[1]][e[2]]['thin_flow'] >= tol_enumeration :
+                P.append(e)
+                if (G_anchored.node[e[0]]['label_thin_flow'] <= G_anchored[e[0]][e[1]][e[2]]['thin_flow']/G_anchored[e[0]][e[1]][e[2]]['capacity'] ):
+                    I.append(e)
+
+        print("P=",P)
+        print("I=",I)
         err = 0.0
         #print_debug( "biold = ", biold)
         #print_debug( "bi = ", bi)
@@ -1234,7 +1247,7 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
         b['s0']=None
 
 
-    print_debug('################ end compute_thin_flow ###############')
+    print('################ end compute_thin_flow ###############')
 
 
 
@@ -1586,6 +1599,100 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, timeofevent,
         i=i+1
 
         print( "  End integration i = ",i-1, "with time--step h=", h," on the interval [", timeofevent[i-1] , ",", timeofevent[i] , "]")
+        print( '#################################################################################\n')
+
+
+def compute_dynamic_equilibrium_timestepping(G, source, h, t0, N, flow_function, param=None):
+
+    if param==None:
+        param = parameters()
+
+    # The disjkstra algorithm for shortest path seems to be adapted for multigraph
+    # it seems that it uses the mimimal weight over the common edges between to nodes
+    # a post-processing is then needed to know the edge that is really in the shortest path.
+    length,path=nx.single_source_dijkstra(G,'s', weight='time')
+
+    
+    # compute the initial labels and flows.
+    i = 0 # first events
+    t_i= t0
+    for ntail,nbrs in G.adjacency_iter():
+        G.node[ntail]['label'] = length[ntail]
+        G.node[ntail]['label_overtime']=[length[ntail]]
+        G.node[ntail]['label_thin_flow_overtime']=[]
+        for nhead,eattr in nbrs.items():
+             for k,keydata in eattr.items():
+                 #print( "node  ntail=",ntail)
+                 #print( "node  nhead=",nhead)
+                 #print("k=",k)
+                 G[ntail][nhead][k]['x']=0.0
+                 G[ntail][nhead][k]['x_overtime']=[0.0]
+                 G[ntail][nhead][k]['thin_flow_overtime']=[]
+
+    display_graph(G,print_debug)
+
+    while (i<N):
+        print('#################################################################################')
+        print("  Start integration step i = ",i,"<",N ,"on the interval  [", t_i , ",", t_i + h , "]" )
+        print(' ' )
+
+        # Compute the current_shortest_path_graph based on label in G
+        E,Estar,E_comp=current_shortest_path_graph(G)
+
+        # set the value of the flow input
+        u= {} # dictionary of flows in nodes
+        for n in G.nodes():
+            u[n] =0.0
+        u_i = flow_function(t_i)
+        u['s'] = u_i
+        u['t'] = - u_i
+        d = u_i
+
+        # Compute thin flow and associated labels (label_thin_flow) on E
+        if (abs (u_i) < machine_epsilon  ) :
+            compute_thin_flow_ofzerosize(E,'s',u,Estar)
+        else:
+            compute_thin_flow(E,'s',u,Estar,d, param)
+
+        display_graph(E)
+
+        assert_thin_flow(E,'s',u,Estar,d,param)
+
+        # set the thin flow  and associated labels (label_thin_flow) for the whole graph G
+        for ntail,nbrs in E_comp.adjacency_iter():
+            for nhead,eattr in nbrs.items():
+                for k,keydata in eattr.items():
+                    print_debug("Insert thin flow from Ecomp to G for edge", nhead, ntail, "and key", k)
+                    G[ntail][nhead][k]['thin_flow'] = 0.0
+                    G[ntail][nhead][k]['thin_flow_overtime'].append(0.0)
+
+        for ntail,nbrs in E.adjacency_iter():
+            G.node[ntail]['label_thin_flow'] = E.node[ntail]['label_thin_flow']
+            G.node[ntail]['label_thin_flow_overtime'].append( E.node[ntail]['label_thin_flow'])
+            for nhead,eattr in nbrs.items():
+                for k,keydata in eattr.items():
+                    print_debug("Insert thin flow from E to G for edge", nhead, ntail, "and key", k)
+                    G[ntail][nhead][k]['thin_flow'] =  E[ntail][nhead][k]['thin_flow']
+                    G[ntail][nhead][k]['thin_flow_overtime'].append(E[ntail][nhead][k]['thin_flow'])
+
+        print_debug( "G (after setting the thin flow) :")
+        display_graph(G,print_debug)
+
+        # integrate x and labels with respect to time.
+        for ntail,nbrs in G.adjacency_iter():
+            G.node[ntail]['label'] = G.node[ntail]['label'] + G.node[ntail]['label_thin_flow']*h
+            G.node[ntail]['label_overtime'].append(G.node[ntail]['label'])
+            for nhead,eattr in nbrs.items():
+                for k,keydata in eattr.items():
+                    G[ntail][nhead][k]['x']=G[ntail][nhead][k]['x'] + G[ntail][nhead][k]['thin_flow']*h
+                    G[ntail][nhead][k]['x_overtime'].append(G[ntail][nhead][k]['x'])
+
+        print_debug( "G :")
+        display_graph(G,print_debug)
+
+        i=i+1
+        t_i=t_i+h
+        print( "  End integration i = ",i-1, "with time--step h=", h," on the interval [", t_i , ",", t_i+h , "]")
         print( '#################################################################################\n')
 
 
