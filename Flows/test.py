@@ -309,8 +309,8 @@ def test13():
     # timeofevent=[0.0,1.0,2.0,6.0,10.0]
     # inputflow=[3.0,0.0,3.0,0.0]
 
-    timeofevent=[0.0,1.0,2.0,3.0,4.0,5.0,7.0,8.0,15.0]
-    inputflow=[3.0,0.0,3.0,0.0,3.0,0.0,1.0,0.0]
+    #timeofevent=[0.0,1.0,2.0,3.0,4.0,5.0,7.0,8.0,15.0]
+    #inputflow=[3.0,0.0,3.0,0.0,3.0,0.0,1.0,0.0]
 
 
 
@@ -338,6 +338,7 @@ def test13():
 
     plt.figure("Flows, Cumulative flows and queues for edge =('s','r'), key =0 ", figsize = [18,14])
     flows.plot_flows_queues_cumulativeflows(G,('s','r'),0)
+    
     plt.figure("Flows, Cumulative flows and queues for edge =('r','t'), key =0 ", figsize = [18,14])
     flows.plot_flows_queues_cumulativeflows(G,('r','t'),0)
     plt.figure("Flows, Cumulative flows and queues for edge =('r','t'), key =1 ", figsize = [18,14])
@@ -506,7 +507,17 @@ def test17():
 
 
 def flow_input_function(t):
-    return abs(math.sin(t))
+    return 4.0
+    #return abs(math.sin(t))
+
+def flow_input_function_Fig1_Cominetti(t):
+    input_flow=0.0
+    if t <= 1 :
+        input_flow=2.0
+    if t>=2 :
+        input_flow=1.0        
+    return input_flow
+
 
 
     
@@ -514,6 +525,8 @@ def test18():
     print( '################ start test 18 ###############')
 
     G=examples.example_Larre_bis()
+    G=examples.example_Larre()
+    G=examples.example_Fig1_Cominetti()
     source = 's'
 
     # l=decomposition.build_inputflow(decomposition.g,0,3,0.3)
@@ -522,7 +535,7 @@ def test18():
     # inputflow=l[1]
 
     t0=0.0
-    N=30
+    N=100
     h=0.1
     
     param=flows.parameters()
@@ -530,30 +543,28 @@ def test18():
     param.tol_lp=1e-12
     param.tol_cut=1e-12
 
+    flows.compute_dynamic_equilibrium_timestepping(G, source, h, t0, N, flow_input_function_Fig1_Cominetti,param)
 
-
-    flows.compute_dynamic_equilibrium_timestepping(G, source, h, t0, N, flow_input_function ,param)
-
-    timeofevent=[]
+    timesteps=[]
     for i in range(N+1):
-        timeofevent.append(t0+i*h)
+        timesteps.append(t0+i*h)
     
-    print("timeofevent=",timeofevent)
-  #  print("inputflow=",inputflow)
+    #print("timesteps=",timesteps)
+
 
     with_draw=True
     if with_draw :
         plt.close('all')
         plt.figure("Thin flows and associated labels", figsize = [8,10])
-        flows.plot_thin_flows_and_labels(G,timeofevent)
+        flows.plot_thin_flows_and_labels(G,timesteps)
 
-    # flows.postprocess_flows_queues_cumulativeflows(G)
-    # flows.display_graph(G)
+    flows.postprocess_flows_queues_cumulativeflows_timestepping(G,timesteps)
+    #flows.display_graph(G)
 
 
-    # if with_draw :
-    #     plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
-    #     flows.plot_flows_queues_cumulativeflows(G)
+    if with_draw :
+        plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
+        flows.plot_flows_queues_cumulativeflows_timestepping(G,timesteps)
 
     print( '################ end test 18 ###############')
 
@@ -580,7 +591,8 @@ def test18():
 
 #test13()
 #test14()
-test15()
+#test15()
 #test16()
 #test17()
-#test18()
+
+test18()

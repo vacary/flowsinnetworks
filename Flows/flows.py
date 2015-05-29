@@ -1181,8 +1181,8 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
     err = 1e+24
     k=1
     while (err >= param.tol_thin_flow and k < param.nmax):
-        print( '#################################################################################')
-        print( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
+        print_debug( '#################################################################################')
+        print_debug( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
 
         biold=dict(bi)
         compute_thin_flow_without_resetting(G_anchored,source,bi,param=param)
@@ -1202,17 +1202,17 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
                 bi[n] = bi[n] -  G_anchored[source][e[1]][e[2]]['thin_flow']
 
         # test enumeration
-        tol_enumeration = 10e-6
-        P=[]
-        I=[]
-        for e in  set.difference (set(G_anchored.edges(keys=True)), set(E1.edges(keys=True)) ):
-            if G_anchored[e[0]][e[1]][e[2]]['thin_flow'] >= tol_enumeration :
-                P.append(e)
-                if (G_anchored.node[e[0]]['label_thin_flow'] <= G_anchored[e[0]][e[1]][e[2]]['thin_flow']/G_anchored[e[0]][e[1]][e[2]]['capacity'] ):
-                    I.append(e)
+        #tol_enumeration = 10e-6
+        #P=[]
+        #I=[]
+        #for e in  set.difference (set(G_anchored.edges(keys=True)), set(E1.edges(keys=True)) ):
+        #    if G_anchored[e[0]][e[1]][e[2]]['thin_flow'] >= tol_enumeration :
+        #        P.append(e)
+        #        if (G_anchored.node[e[0]]['label_thin_flow'] <= G_anchored[e[0]][e[1]][e[2]]['thin_flow']/G_anchored[e[0]][e[1]][e[2]]['capacity'] ):
+        #            I.append(e)
 
-        print("P=",P)
-        print("I=",I)
+        # print("P=",P)
+        #print("I=",I)
         err = 0.0
         #print_debug( "biold = ", biold)
         #print_debug( "bi = ", bi)
@@ -1247,7 +1247,7 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
         b['s0']=None
 
 
-    print('################ end compute_thin_flow ###############')
+    print_debug('################ end compute_thin_flow ###############')
 
 
 
@@ -1634,7 +1634,7 @@ def compute_dynamic_equilibrium_timestepping(G, source, h, t0, N, flow_function,
     while (i<N):
         print('#################################################################################')
         print("  Start integration step i = ",i,"<",N ,"on the interval  [", t_i , ",", t_i + h , "]" )
-        print(' ' )
+        #print(' ' )
 
         # Compute the current_shortest_path_graph based on label in G
         E,Estar,E_comp=current_shortest_path_graph(G)
@@ -1654,9 +1654,9 @@ def compute_dynamic_equilibrium_timestepping(G, source, h, t0, N, flow_function,
         else:
             compute_thin_flow(E,'s',u,Estar,d, param)
 
-        display_graph(E)
+        #display_graph(E)
 
-        assert_thin_flow(E,'s',u,Estar,d,param)
+        #assert_thin_flow(E,'s',u,Estar,d,param)
 
         # set the thin flow  and associated labels (label_thin_flow) for the whole graph G
         for ntail,nbrs in E_comp.adjacency_iter():
@@ -1706,7 +1706,7 @@ def plot_thin_flows_and_labels(G,timeofevent):
         for nhead,eattr in nbrs.items():
             for k,keydata in eattr.items():
                 plt.plot(timeofevent[:],G[ntail][nhead][k]['x_overtime'][:],label=repr((ntail,nhead,k)))
-    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=1, borderaxespad=0.)
 
 
     plt.subplot(412)
@@ -1723,14 +1723,14 @@ def plot_thin_flows_and_labels(G,timeofevent):
                     x_plot_data.append(timeofevent[i+1])
                     y_plot_data.append(G[ntail][nhead][k]['thin_flow_overtime'][i])
                 plt.plot(x_plot_data[:],y_plot_data[:],label=repr((ntail,nhead,k)))
-    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=1, borderaxespad=0.)
 
     plt.subplot(413)
     plt.grid()
     plt.title('label in nodes')
     for ntail,nbrs in G.adjacency_iter():
         plt.plot(timeofevent[:],G.node[ntail]['label_overtime'][:],label=repr(ntail))
-    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=1, borderaxespad=0.)
 
 
     plt.subplot(414)
@@ -1745,7 +1745,7 @@ def plot_thin_flows_and_labels(G,timeofevent):
             x_plot_data.append(timeofevent[i+1])
             y_plot_data.append(G.node[ntail]['label_thin_flow_overtime'][i])
         plt.plot(x_plot_data[:],y_plot_data[:],label=repr(ntail))
-    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=1, borderaxespad=0.)
 
 
 def postprocess_flows_queues_cumulativeflows(G):
@@ -1921,7 +1921,7 @@ def plot_flows_queues_cumulativeflows(G, edge=None, key=None):
                     y_plot_data.append(G_plot[ntail][nhead][k]['f_e_plus_overtime'][i])
                 plt.plot(x_plot_data[:],y_plot_data[:],label=repr((ntail,nhead,k)))
 
-    plt.legend(bbox_to_anchor=(1.0, 1), loc=2, borderaxespad=0.)
+    plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
     plt.xlim([min_x,max_x])
     min_y,max_y=plt.ylim()
     plt.ylim([min_y-0.1,max_y+0.1])
@@ -1943,7 +1943,7 @@ def plot_flows_queues_cumulativeflows(G, edge=None, key=None):
                 plt.plot(x_plot_data[:],y_plot_data[:],label=repr((ntail,nhead,k)))
 
 
-    plt.legend(bbox_to_anchor=(1.0, 1), loc=2, borderaxespad=0.)
+    plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
     plt.xlim([min_x,max_x])
     min_y,max_y=plt.ylim()
     plt.ylim([min_y-0.1,max_y+0.1])
@@ -1955,7 +1955,7 @@ def plot_flows_queues_cumulativeflows(G, edge=None, key=None):
         for nhead,eattr in nbrs.items():
             for k,keydata in eattr.items():
                 plt.plot(G_plot.node[ntail]['label_overtime'][:],G_plot[ntail][nhead][k]['F_e_plus_overtime'][:]   ,label=repr((ntail,nhead,k)))
-    plt.legend(bbox_to_anchor=(1.0, 1), loc=2, borderaxespad=0.)
+    plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
     plt.xlim([min_x,max_x])
     min_y,max_y=plt.ylim()
     plt.ylim([min_y-0.1,max_y+0.1])
@@ -1968,7 +1968,7 @@ def plot_flows_queues_cumulativeflows(G, edge=None, key=None):
             for k,keydata in eattr.items():
                 plt.plot(G_plot.node[nhead]['label_overtime'][:],G_plot[ntail][nhead][k]['F_e_minus_overtime'][:]   ,label=repr((ntail,nhead,k)))
     plt.xlim([min_x,max_x])
-    plt.legend(bbox_to_anchor=(1.0, 1), loc=2, borderaxespad=0.)
+    plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
     plt.xlim([min_x,max_x])
     min_y,max_y=plt.ylim()
     plt.ylim([min_y-0.1,max_y+0.1])
@@ -1981,7 +1981,249 @@ def plot_flows_queues_cumulativeflows(G, edge=None, key=None):
             for k,keydata in eattr.items():
                 plt.plot(G_plot[ntail][nhead][k]['switching_times'][:],G_plot[ntail][nhead][k]['z_e_overtime'][:]   ,label=repr((ntail,nhead,k)))
     plt.xlim([min_x,max_x])
-    plt.legend(bbox_to_anchor=(1.0, 1), loc=2, borderaxespad=0.)
+    plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
     plt.xlim([min_x,max_x])
     min_y,max_y=plt.ylim()
     plt.ylim([min_y-0.1,max_y+0.1])
+
+
+def postprocess_flows_queues_cumulativeflows_timestepping(G,timesteps):
+    debug_var= True
+    # Compute flows f_e_plus, f_e_minus, F_e_plus, F_e_minus,  on the right interval
+    for ntail,nbrs in G.adjacency_iter():
+        #G.node[ntail]['shifted_time'] = []
+        #for i in range(len(G.node[ntail]['label_overtime'])):
+        #    G.node[ntail]['shifted_time'].append( G.node[ntail]['label_overtime'][i])
+        for nhead,eattr in nbrs.items():
+            for k,keydata in eattr.items():
+                G[ntail][nhead][k]['f_e_plus_overtime'] =[]
+                G[ntail][nhead][k]['f_e_minus_overtime'] =[]
+                G[ntail][nhead][k]['F_e_plus_overtime'] =[0.0]
+                G[ntail][nhead][k]['F_e_minus_overtime'] =[0.0]
+                for i in range(len( G[ntail][nhead][k]['thin_flow_overtime'] )):
+                    if (G[ntail][nhead][k]['thin_flow_overtime'][i] !=0):
+                        G[ntail][nhead][k]['f_e_plus_overtime'].append(G[ntail][nhead][k]['thin_flow_overtime'][i]/G.node[ntail]['label_thin_flow_overtime'][i])
+                        G[ntail][nhead][k]['f_e_minus_overtime'].append(G[ntail][nhead][k]['thin_flow_overtime'][i]/G.node[nhead]['label_thin_flow_overtime'][i])
+                    else:
+                        G[ntail][nhead][k]['f_e_plus_overtime'].append(0.0)
+                        G[ntail][nhead][k]['f_e_minus_overtime'].append(0.0)
+                for i in range(len( G.node[ntail]['label_overtime'])-1):
+                    h= G.node[ntail]['label_overtime'][i+1] -  G.node[ntail]['label_overtime'][i]
+                    G[ntail][nhead][k]['F_e_plus_overtime'].append( G[ntail][nhead][k]['f_e_plus_overtime'][i]*h+G[ntail][nhead][k]['F_e_plus_overtime'][i])
+                for i in range(len( G.node[nhead]['label_overtime'])-1):
+                    h= G.node[nhead]['label_overtime'][i+1] -  G.node[nhead]['label_overtime'][i]
+                    G[ntail][nhead][k]['F_e_minus_overtime'].append( G[ntail][nhead][k]['f_e_minus_overtime'][i]*h+G[ntail][nhead][k]['F_e_minus_overtime'][i])
+    # Compute queues  on the right interval
+
+    for ntail,nbrs in G.adjacency_iter():
+        for nhead,eattr in nbrs.items():
+            for k,keydata in eattr.items():
+
+                # Merge the partition of switching times of the F_e_plus and F_e_minus
+                switching_times_set=set.union(set(G.node[ntail]['label_overtime']), set(G.node[nhead]['label_overtime']))
+                print_debug("switching_times_set = ", switching_times_set)
+                switching_times=list(switching_times_set)
+
+                print_debug("compute z_e for edge = ", ntail, nhead)
+                print_debug("switching_times = ", switching_times)
+
+                transit_time= G[ntail][nhead][k]['time']
+
+                # Reduce to switching time to the domain of definition of z_e
+
+
+                switching_times.append(G.node[ntail]['label_overtime'][0])
+                switching_times.append(G.node[ntail]['label_overtime'][-1])
+
+                switching_times.append(G.node[ntail]['label_overtime'][0]-transit_time)
+                switching_times.append(G.node[ntail]['label_overtime'][-1]-transit_time)
+
+                switching_times.sort()
+
+                while (switching_times[-1] > G.node[ntail]['label_overtime'][-1]):
+                    switching_times.pop()
+
+
+                while (switching_times[-1] > G.node[nhead]['label_overtime'][-1]-transit_time):
+                    switching_times.pop()
+
+                switching_times.reverse()
+
+
+                while (switching_times[-1] < G.node[ntail]['label_overtime'][0]):
+                    switching_times.pop()
+
+                while (switching_times[-1] < G.node[nhead]['label_overtime'][0]-transit_time):
+                    switching_times.pop()
+
+                switching_times.reverse()
+                print_debug("switching_times (after) = ", switching_times)
+
+
+
+
+
+                G[ntail][nhead][k]['switching_times'] =  switching_times
+                # perform the computation of z_e at each switching time
+                G[ntail][nhead][k]['z_e_overtime'] =[]
+
+                for i in range(len(switching_times)):
+
+                    time = switching_times[i]
+                    print_debug("  --- switching_times[i] =", switching_times[i])
+
+                    value_F_e_plus=0.0
+                    value_F_e_minus=0.0
+
+
+                    if (G.node[ntail]['label_overtime'][0] == time) :
+                        value_F_e_plus = G[ntail][nhead][k]['F_e_plus_overtime'][0]
+                        print_debug("   F_e_plus(", switching_times[i],")=", value_F_e_plus)
+
+                    for j in range(len( G.node[ntail]['label_overtime'])-1):
+                        if (G.node[ntail]['label_overtime'][j+1] == time) :
+                            value_F_e_plus = G[ntail][nhead][k]['F_e_plus_overtime'][j+1]
+                            print_debug("   F_e_plus(", switching_times[i],")=", value_F_e_plus)
+
+                        print_debug("  interval [a,b]= [",G.node[ntail]['label_overtime'][j], G.node[ntail]['label_overtime'][j+1],"]" )
+                        print_debug("  ",(G.node[ntail]['label_overtime'][j] <= time) and (time <(G.node[ntail]['label_overtime'][j+1] ) ))
+
+                        if ((G.node[ntail]['label_overtime'][j] <= time) and (time < (G.node[ntail]['label_overtime'][j+1]) )):
+                            h = G.node[ntail]['label_overtime'][j+1] - G.node[ntail]['label_overtime'][j]
+                            c = (time - G.node[ntail]['label_overtime'][j]) /h
+                            value_F_e_plus =  G[ntail][nhead][k]['F_e_plus_overtime'][j] + c * (G[ntail][nhead][k]['F_e_plus_overtime'][j+1]- G[ntail][nhead][k]['F_e_plus_overtime'][j])
+                            print_debug("   F_e_plus(", switching_times[i],")=", value_F_e_plus)
+
+                    time = time + transit_time
+
+                    if (G.node[nhead]['label_overtime'][0] == time) :
+                        value_F_e_minus = G[ntail][nhead][k]['F_e_plus_overtime'][0]
+                        print_debug("   F_e_minus(", switching_times[i],")=", value_F_e_minus)
+
+
+                    for j in range(len( G.node[nhead]['label_overtime'])-1):
+                        if (G.node[nhead]['label_overtime'][j+1] == time) :
+                            value_F_e_minus = G[ntail][nhead][k]['F_e_minus_overtime'][j+1]
+                            print_debug("   F_e_minus(", switching_times[i],")=", value_F_e_minus)
+
+                        if ((G.node[nhead]['label_overtime'][j] <= time) and (time < (G.node[nhead]['label_overtime'][j+1]) )):
+                            h = G.node[nhead]['label_overtime'][j+1] - G.node[nhead]['label_overtime'][j]
+                            c = (time - G.node[nhead]['label_overtime'][j]) /h
+                            value_F_e_minus =  G[ntail][nhead][k]['F_e_minus_overtime'][j] + c * (G[ntail][nhead][k]['F_e_minus_overtime'][j+1]- G[ntail][nhead][k]['F_e_minus_overtime'][j])
+                            print_debug("   F_e_minus(", switching_times[i]+transit_time,")=",value_F_e_minus)
+
+
+                    G[ntail][nhead][k]['z_e_overtime'].append(value_F_e_plus-value_F_e_minus)
+
+
+    
+def plot_flows_queues_cumulativeflows_timestepping(G, timesteps, edge=None, key=None):
+
+
+    if edge!=None :
+        if G.is_multigraph():
+            G_plot=nx.MultiDiGraph()
+            G_plot.add_nodes_from(G.nodes(data=True))
+            if key==None :
+                raise RuntimeError('plot_flows_queues_cumulativeflows(G, edge=None, key=None): FAILED key is needed')
+            G_plot.add_edges_from([(edge[0],edge[1],G[edge[0]][edge[1]][key])])
+        else:
+            G_plot=nx.MultiDiGraph()
+            G_plot.add_nodes_from(G.nodes(data=True))
+            G_plot.add_edges_from([(edge[0],edge[1],G[edge[0]][edge[1]])])
+    else:
+        if G.is_multigraph():
+            G_plot = G
+        else:
+            G_plot=nx.MultiDiGraph.copy(G)
+
+
+    min_x=0.0
+    max_x=0.0
+    for ntail,nbrs in G_plot.adjacency_iter():
+        max_x =max([max_x, max(G_plot.node[ntail]['label_overtime'])])
+
+    offset_y =0.2
+
+    plt.subplot(511)
+    plt.grid()
+    plt.title('f_e_plus in edges')
+
+    for ntail,nbrs in G_plot.adjacency_iter():
+        for nhead,eattr in nbrs.items():
+            for k,keydata in eattr.items():
+                x_plot_data = []
+                y_plot_data = []
+                for i in range(len(timesteps)-1):
+                    x_plot_data.append(G_plot.node[ntail]['label_overtime'][i])
+                    y_plot_data.append(G_plot[ntail][nhead][k]['f_e_plus_overtime'][i])
+                    x_plot_data.append(G_plot.node[ntail]['label_overtime'][i+1])
+                    y_plot_data.append(G_plot[ntail][nhead][k]['f_e_plus_overtime'][i])
+
+                print_debug("x_plot_data=",x_plot_data)
+                plt.plot(x_plot_data[:],y_plot_data[:],label=repr((ntail,nhead,k)))
+
+    plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
+    plt.xlim([min_x,max_x])
+    min_y,max_y=plt.ylim()
+    plt.ylim([min_y-offset_y,max_y+offset_y])
+
+    plt.subplot(512)
+    plt.grid()
+    plt.title('f_e_minus in edges')
+
+    for ntail,nbrs in G_plot.adjacency_iter():
+        for nhead,eattr in nbrs.items():
+            for k,keydata in eattr.items():
+                x_plot_data = []
+                y_plot_data = []
+                for i in range(len(timesteps)-1):
+                    x_plot_data.append(G_plot.node[ntail]['label_overtime'][i])
+                    y_plot_data.append(G_plot[ntail][nhead][k]['f_e_minus_overtime'][i])
+                    x_plot_data.append(G_plot.node[ntail]['label_overtime'][i+1])
+                    y_plot_data.append(G_plot[ntail][nhead][k]['f_e_minus_overtime'][i])
+                plt.plot(x_plot_data[:],y_plot_data[:],label=repr((ntail,nhead,k)))
+
+
+    plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
+    plt.xlim([min_x,max_x])
+    min_y,max_y=plt.ylim()
+    plt.ylim([min_y-offset_y,max_y+offset_y])
+
+    plt.subplot(513)
+    plt.grid()
+    plt.title('F_e_plus in edges')
+    for ntail,nbrs in G_plot.adjacency_iter():
+        for nhead,eattr in nbrs.items():
+            for k,keydata in eattr.items():
+                plt.plot(G_plot.node[ntail]['label_overtime'][:],G_plot[ntail][nhead][k]['F_e_plus_overtime'][:]   ,label=repr((ntail,nhead,k)))
+    plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
+    plt.xlim([min_x,max_x])
+    min_y,max_y=plt.ylim()
+    plt.ylim([min_y-offset_y,max_y+offset_y])
+
+    plt.subplot(514)
+    plt.grid()
+    plt.title('F_e_minus in edges')
+    for ntail,nbrs in G_plot.adjacency_iter():
+        for nhead,eattr in nbrs.items():
+            for k,keydata in eattr.items():
+                plt.plot(G_plot.node[nhead]['label_overtime'][:],G_plot[ntail][nhead][k]['F_e_minus_overtime'][:]   ,label=repr((ntail,nhead,k)))
+    plt.xlim([min_x,max_x])
+    plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
+    plt.xlim([min_x,max_x])
+    min_y,max_y=plt.ylim()
+    plt.ylim([min_y-offset_y,max_y+offset_y])
+
+    plt.subplot(515)
+    plt.grid()
+    plt.title('z_e in edges')
+    for ntail,nbrs in G_plot.adjacency_iter():
+        for nhead,eattr in nbrs.items():
+            for k,keydata in eattr.items():
+                plt.plot(G_plot[ntail][nhead][k]['switching_times'][:],G_plot[ntail][nhead][k]['z_e_overtime'][:]   ,label=repr((ntail,nhead,k)))
+    plt.xlim([min_x,max_x])
+    plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
+    plt.xlim([min_x,max_x])
+    min_y,max_y=plt.ylim()
+    plt.ylim([min_y-offset_y,max_y+offset_y])
