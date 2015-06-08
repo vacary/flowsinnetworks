@@ -1,0 +1,130 @@
+
+import sim.Flows.examples as exa
+import lib.errors as e
+
+def check_package(string_name):
+    
+    package = string_name
+    flag = 0
+    
+    try:
+        __import__(package)
+        flag = 0
+        print '[*] '+str(package)
+ 
+        return flag
+    
+    except ImportError:
+        print '[x] '+str(package)+'...not found '
+        flag = 2
+    
+        return flag
+
+def check_package_opt(string_name):
+    
+    package = string_name
+    flag = 0
+    
+    try:
+        __import__(package)
+        flag = 0
+        print '[*] '+str(package)+' (Optional) '
+ 
+        return flag
+    
+    except ImportError:
+        print '[x] '+str(package)+'...not found (Optional)'
+        flag = 2
+    
+        return flag
+
+# packages
+
+print '[FVS] Flow Visualization Software'
+print 'Check function for python modules...'
+
+f1 = check_package('numpy')
+f2 = check_package('vtk')
+f3 = check_package('networkx')
+f4 = check_package('PyQt4')
+f5 = check_package_opt('pygraphviz')
+  
+flag = max(f1,f2,f3,f4)  
+
+# graph call
+
+
+if (flag == 0):
+    
+    ns      =   main.NETWORK_GRAPH
+    msg     =   'Graph loaded...'+str(ns)
+    flag    = 0
+
+
+    # graph 
+    
+    if (ns == 'example1'):
+    
+        G = exa.example1()
+    
+    elif (ns == 'example2'):
+    
+        G = exa.example2()
+    
+    elif (ns == 'example3'):
+        
+        G = exa.example3()
+    
+    elif (ns == 'example4'):
+        
+        G = exa.example4()        
+    
+    elif (ns == 'example5'):
+        
+        G = exa.example5()
+    
+    elif (ns == 'example_KochSkutella2011_Fig3_Fig4'):
+        
+        G = exa.example_KochSkutella2011_Fig3_Fig4()    
+    
+    elif (ns == 'example_simple1'):
+        
+        G = exa.example_simple1()
+    
+    elif (ns == 'example_Fig1_Cominetti'):
+        
+        G = exa.example_Fig1_Cominetti()
+    
+    elif (ns == 'example_Fig1_Cominetti_variant1'):
+        
+        G = exa.example_Fig1_Cominetti_variant1()
+    
+    elif (ns == 'example_Larre'):
+        
+        G = exa.example_Larre()
+        
+    elif (ns == 'example_Larre_bis'):
+        
+        G = exa.example_Larre_bis()
+    
+    elif (ns == 'example_parallelpath'):
+        
+        G = exa.example_parallelpath()    
+    
+    else:
+        
+        G       = e.empty_MultiDiGraph()
+        flag    = 1
+        msg     = '[WARNING] Empty graph'
+        
+        print msg
+
+# messages
+
+if (flag == 0):
+    print 'Loading visualization...'
+    
+
+
+
+
