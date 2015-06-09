@@ -394,8 +394,8 @@ def test15():
     G=examples.example_Larre()
     source = 's'
 
-    timeofevent=[0.0,6.0]
-    inputflow=[4.0, 4.0]
+    timeofevent=[0.0,0.5,1.5,6.0]
+    inputflow=[4.0, 4.0 ,4.0,4.0]
 
 
     param=flows.parameters()
@@ -506,9 +506,6 @@ def test17():
     print( '################ end test 17 ###############')
 
 
-def flow_input_function(t):
-    return 4.0
-    #return abs(math.sin(t))
 
 def flow_input_function_Fig1_Cominetti(t):
     input_flow=0.0
@@ -568,6 +565,57 @@ def test18():
 
     print( '################ end test 18 ###############')
 
+def flow_input_function(t):
+    return 4.0
+    #return abs(math.sin(t))
+
+def test19():
+    print( '################ start test 19 ###############')
+
+    G=examples.example_Larre_bis()
+    G=examples.example_Larre()
+    source = 's'
+
+    # l=decomposition.build_inputflow(decomposition.g,0,3,0.3)
+
+    # timeofevent=l[0]
+    # inputflow=l[1]
+
+    t0=0.0
+    N=400
+    h=0.01
+    
+    param=flows.parameters()
+    param.tol_thin_flow=1e-10
+    param.tol_lp=1e-12
+    param.tol_cut=1e-12
+
+    flows.compute_dynamic_equilibrium_timestepping(G, source, h, t0, N, flow_input_function,param)
+
+    timesteps=[]
+    for i in range(N+1):
+        timesteps.append(t0+i*h)
+    
+    #print("timesteps=",timesteps)
+
+
+    with_draw=True
+    if with_draw :
+        plt.close('all')
+        plt.figure("Thin flows and associated labels", figsize = [8,10])
+        flows.plot_thin_flows_and_labels(G,timesteps)
+
+    flows.postprocess_flows_queues_cumulativeflows_timestepping(G,timesteps)
+    #flows.display_graph(G)
+
+
+    if with_draw :
+        plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
+        flows.plot_flows_queues_cumulativeflows_timestepping(G,timesteps)
+
+    print( '################ end test 19 ###############')
+
+    
 #whatisadjcency_iter()
 
 
@@ -582,17 +630,20 @@ def test18():
 
 # test6()
 # test7()
-# # test8()
+# test8()
 
 # test9()
 # test10()
-#test11()
+# test11()
 # test12()
 
 #test13()
 #test14()
-#test15()
+test15()
 #test16()
 #test17()
 
-test18()
+# Time-stepping examples.
+#test18() #Similar to test13
+
+#test19() #Similar to test15

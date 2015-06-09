@@ -38,7 +38,7 @@ FPS             = 25
 
 ADD_DUMMY_SOURCE_NODE       = 0 # 0 or 1
 PRIORITY_GRAPHVIZ_LAYOUT    = 1 # 0 or 1
-INTERACTOR_STYLE            = 'StyleImage' # 'StyleImage' or 'RubberBand3D'
-#INTERACTOR_STYLE            = 'RubberBand3D'
+#INTERACTOR_STYLE            = 'StyleImage' # 'StyleImage' or 'RubberBand3D'
+INTERACTOR_STYLE            = 'RubberBand3D'
 
 ##############################

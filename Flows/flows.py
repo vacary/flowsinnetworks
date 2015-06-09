@@ -17,7 +17,7 @@ if withScipyOpt:
 if withSwiglpk:
     import swiglpk
 
-#debug_var = True
+debug_var = True
 debug_var = False
 import numpy as np
 machine_epsilon=np.finfo(float).eps*10
@@ -188,7 +188,8 @@ def current_shortest_path_graph(G, label='label'):
         raise RuntimeError("Flows module deals only with nx.MultiDiGraph\n \
         If your graph is not a MultiDiGraph, you can copy it with nx.MultiDiGraph.copy(G) ")
 
-
+    
+            
     #print_debug( E.edges())
     #print_debug((nx.dijkstra_path(G,'s','t')))
     print_debug( "E :")
@@ -1223,9 +1224,9 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
         k =k+1
 
     if (k < param.nmax) :
-        print_debug( "  Fixed point suceeded. number of iterations :", k, 'erreur :', err, '<=', param.tol_thin_flow)
+        print( "  Fixed point suceeded. number of iterations :", k, 'erreur :', err, '<=', param.tol_thin_flow)
     else:
-        print_debug( "  Fixed point number of iterations max reached :", k, 'erreur :', err, '>', param.tol_thin_flow)
+        print( "  Fixed point number of iterations max reached :", k, 'erreur :', err, '>', param.tol_thin_flow)
 
     for e in G.edges(keys=True):
         if e in  E1.edges(keys=True) :
@@ -1520,6 +1521,11 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, timeofevent,
         # Compute the current_shortest_path_graph based on label in G
         E,Estar,E_comp=current_shortest_path_graph(G)
 
+        print ("E.edges()=", E.edges())
+        print ("Estar.edges()=", Estar.edges())
+        print ("E_comp.edges()=", E_comp.edges())
+        
+        
         # set the value of the flow input
         u= {} # dictionary of flows in nodes
         for n in G.nodes():
@@ -1639,6 +1645,43 @@ def compute_dynamic_equilibrium_timestepping(G, source, h, t0, N, flow_function,
         # Compute the current_shortest_path_graph based on label in G
         E,Estar,E_comp=current_shortest_path_graph(G)
 
+        print ("E.edges()=", E.edges())
+        print ("Estar.edges()=", Estar.edges())
+        print ("E_comp.edges()=", E_comp.edges())
+ 
+
+        # check that the current shortest path is valid
+        for v in G.nodes():
+            if (v!= source) :
+                while  (list(nx.all_simple_paths(E, source, v)) == []):
+                    print ("Current shortest path is not complete. no path from source  ",source  ,v)
+                    #try to add a path
+                    max_excess = -1e+24
+                    for e in G.in_edges(v,keys=True) :
+                       excess = G.node[e[0]]['label'] - (G.node[e[1]]['label'] + G[e[0]][e[1]][e[2]]['time'])
+                       if excess >= max_excess :
+                            max_excess =excess
+                            e_max=e
+                    print("add edge =", e_max)
+                    E.add_edge(e_max[0], e_max[1], e_max[2], G[e_max[0]][e_max[1]][e_max[2]])
+                    E_comp.remove_edge(e_max[0], e_max[1], e_max[2])
+                # if 
+                #     E_comp.add_node(v)
+                #     for e in E.out_edges(v,keys=True) :
+                #          E_comp.add_edge(e[0], e[1], e[2], G[e[0]][e[1]][e[2]])
+                #     E.remove_node(v)
+                #     Estar.remove_node(v)
+
+                    
+        # check that the current shortest path is valid (for tiemstepping)
+        #for v in G.nodes():
+            #if (E.in_edges(v) ==[]) :
+                #print ("Current shortest path is not complete. no edges entering "  ,v)
+                #for 
+                
+                #raise RuntimeError("")            
+                
+        
         # set the value of the flow input
         u= {} # dictionary of flows in nodes
         for n in G.nodes():
@@ -1656,7 +1699,7 @@ def compute_dynamic_equilibrium_timestepping(G, source, h, t0, N, flow_function,
 
         #display_graph(E)
 
-        #assert_thin_flow(E,'s',u,Estar,d,param)
+        assert_thin_flow(E,'s',u,Estar,d,param)
 
         # set the thin flow  and associated labels (label_thin_flow) for the whole graph G
         for ntail,nbrs in E_comp.adjacency_iter():
@@ -2001,12 +2044,15 @@ def postprocess_flows_queues_cumulativeflows_timestepping(G,timesteps):
                 G[ntail][nhead][k]['F_e_plus_overtime'] =[0.0]
                 G[ntail][nhead][k]['F_e_minus_overtime'] =[0.0]
                 for i in range(len( G[ntail][nhead][k]['thin_flow_overtime'] )):
-                    if (G[ntail][nhead][k]['thin_flow_overtime'][i] !=0):
+                    if (G.node[ntail]['label_thin_flow_overtime'][i] !=0):
                         G[ntail][nhead][k]['f_e_plus_overtime'].append(G[ntail][nhead][k]['thin_flow_overtime'][i]/G.node[ntail]['label_thin_flow_overtime'][i])
-                        G[ntail][nhead][k]['f_e_minus_overtime'].append(G[ntail][nhead][k]['thin_flow_overtime'][i]/G.node[nhead]['label_thin_flow_overtime'][i])
                     else:
                         G[ntail][nhead][k]['f_e_plus_overtime'].append(0.0)
+                    if (G.node[nhead]['label_thin_flow_overtime'][i] !=0):
+                        G[ntail][nhead][k]['f_e_minus_overtime'].append(G[ntail][nhead][k]['thin_flow_overtime'][i]/G.node[nhead]['label_thin_flow_overtime'][i])
+                    else:
                         G[ntail][nhead][k]['f_e_minus_overtime'].append(0.0)
+
                 for i in range(len( G.node[ntail]['label_overtime'])-1):
                     h= G.node[ntail]['label_overtime'][i+1] -  G.node[ntail]['label_overtime'][i]
                     G[ntail][nhead][k]['F_e_plus_overtime'].append( G[ntail][nhead][k]['f_e_plus_overtime'][i]*h+G[ntail][nhead][k]['F_e_plus_overtime'][i])
