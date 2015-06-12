@@ -8,11 +8,15 @@
 #
 #
 
-
+import os, sys
 import settings
-import sim.Flows.examples as exa
 import lib.errors as e
 import dev.graphs.test as dev
+
+lib_path = os.path.abspath(os.path.join('..','..'))
+sys.path.append(lib_path)
+
+import Flows.examples as exa
 
 ns                          = settings.NETWORK_GRAPH
 msg                         = 'Graph...'+str(ns)
@@ -69,8 +73,9 @@ f2 = check_package('vtk')
 f3 = check_package('networkx')
 f4 = check_package('PyQt4')
 f5 = check_package_opt('pygraphviz')
+f6 = check_package('matplotlib')
   
-flag = max(f1,f2,f3,f4)  
+flag = max(f1,f2,f3,f4,f6)  
 
 # graph call
 

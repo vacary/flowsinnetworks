@@ -18,7 +18,9 @@ from numpy import *
 # FUNCTIONS
 
 def lambdaPoint(vlambda,p0,vector):
-
+    '''
+    This function returns a point with distance |vlambda|*||vector|| from the point p0
+    '''
     z = array(p0) + vlambda*array(vector)
 
     return z
@@ -108,10 +110,9 @@ def getListOfPointsForArc(p0,p1,angle,numberOfDivisions,plusFactor):
 
 class EdgeElement:
     
-    def __init__(self,nodeStart,nodeEnd,edgeID,edgeKey,numberOfTimeStepsForEdge,globalNumberOfTimeDivisions,time_step,vtkQueue,vtkElement,vtkQBox):
+    def __init__(self,nodeStart,nodeEnd,edgeID,numberOfTimeStepsForEdge,globalNumberOfTimeDivisions,time_step,vtkQueue,vtkElement):
         
         self.ID = edgeID
-        self.key = edgeKey
         self.nodeStart = nodeStart
         self.nodeEnd = nodeEnd
         self.time_step = time_step
@@ -119,7 +120,6 @@ class EdgeElement:
         self.numberOfTimeStepsForEdge = int(numberOfTimeStepsForEdge)
         self.vtkQueue = vtkQueue
         self.vtkElement = vtkElement
-        self.vtkQBox = vtkQBox
 
         self.FlowData = zeros([globalNumberOfTimeDivisions+1,numberOfTimeStepsForEdge+1])
         
@@ -304,7 +304,7 @@ class vtkNodesElementGlyph:
             self.vtkPoints.InsertPoint(G.node[i]['id'],posX,posY,posZ)
             
             if (G.node[i]['type']!='d'):
-                labels.SetValue(c,str(G.node[i]['nlabel']))
+                labels.SetValue(c,str(i))
             else:
                 dummy_id = G.node[i]['id']
                 self.node_flag = 1

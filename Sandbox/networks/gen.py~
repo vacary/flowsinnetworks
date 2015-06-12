@@ -1,0 +1,28 @@
+##
+#
+# Inria Chile - Flows In Networks
+# 
+# Dynamic flow visualization
+#
+# * Data manager
+#
+#
+
+import os, sys
+import settings
+
+lib_path = os.path.abspath(os.path.join('..','..','Flows'))
+sys.path.append(lib_path)
+
+simulation_file_path = os.path.abspath(os.path.join(lib_path,'test.py'))
+
+VDATA_T_MAX       = settings.T_MAX
+VDATA_TIME_STEP   = settings.TIME_STEP
+
+print lib_path
+print simulation_file_path
+
+sys.argv = [simulation_file_path,'VDATA_T_MAX','VDATA_TIME_STEP']
+
+execfile(simulation_file_path)
+

@@ -13,6 +13,18 @@ except:
 
 import networkx as nx
 
+###############################################################
+# About new lines of code for visualization 
+#
+# - added 'pars' variable for selected test functions, for instance 'def test15()'--> 'def test(pars)'
+# - added [] list in calls for selected test functions, for instance 'test15()' --> 'test15([])'
+# - added "try / except" lines in the definition of selected functions
+# - ./vdata/manage.py : file with functions to generate visualization data
+
+import vdata.manage as vdata # (*visualization)
+
+# 
+###############################################################
 
 import matplotlib.pyplot as plt
 plt.ion()
@@ -291,7 +303,7 @@ def test12():
     return G
 
 
-def test13():
+def test13(pars):
     print( '################ start test 13 ###############')
     G=examples.example_Fig1_Cominetti()
     #G=examples.example_Fig1_Cominetti_variant1()
@@ -344,7 +356,18 @@ def test13():
     plt.figure("Flows, Cumulative flows and queues for edge =('r','t'), key =1 ", figsize = [18,14])
     flows.plot_flows_queues_cumulativeflows(G,('r','t'),1)
 
-
+    ###############################
+    # for visualization
+    #
+    try:
+        if (pars[0] == True):
+            vdata.genVData(G,pars[1],pars[2],pars[3])
+    except:
+        #import sys
+        #print(sys.exc_info())
+        print('[ ERROR ] test.py error message')
+    #
+    ###############################
 
 
     print( '################ end test 13 ###############')
@@ -388,7 +411,7 @@ def test14():
 
     print( '################ end test 14 ###############')
 
-def test15():
+def test15(pars):
     print( '################ start test 15 ###############')
 
     G=examples.example_Larre()
@@ -423,6 +446,19 @@ def test15():
     if with_draw :
         plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
         flows.plot_flows_queues_cumulativeflows(G)
+
+    ###############################
+    # for visualization
+    #
+    try:
+        if (pars[0] == True):
+            vdata.genVData(G,pars[1],pars[2],pars[3])
+    except:
+        #import sys
+        #print(sys.exc_info())
+        print('[ ERROR ] test.py error message')
+    #
+    ###############################
 
     print( '################ end test 15 ###############')
 
@@ -637,9 +673,9 @@ def test19():
 # test11()
 # test12()
 
-#test13()
+#test13([])
 #test14()
-test15()
+test15([])
 #test16()
 #test17()
 

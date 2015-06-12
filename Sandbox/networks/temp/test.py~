@@ -1,0 +1,15 @@
+
+import networkx as nx
+
+
+#H = nx.read_gml("example_Larre.gml")
+
+H = nx.read_gml("temp.gml")
+
+for e in sorted(set(H.edges_iter())):
+
+    edge = H.edge[e[0]][e[1]]
+    
+    print e
+    print edge['key']
+    print edge['skey']

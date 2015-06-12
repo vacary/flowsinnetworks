@@ -8,7 +8,7 @@
 
 '''
 
-import sys
+import sys, os
 
 import settings as pars
 import manage as run
@@ -22,7 +22,7 @@ from numpy import *
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from lib.pyQT_GUI import * 
 
-import data.example_Larre.flows as flows # provisional
+import gen
 
 ## About this modules:
 ## fvc.py      : classes and functions for the visualization
@@ -32,7 +32,7 @@ import data.example_Larre.flows as flows # provisional
 ''' Global parameters / variables
 '''
 
-ADD_DUMMY_NODE              = run.ADD_DUMMY_NODE # 0 or 1
+ADD_DUMMY_NODE              = 0#run.ADD_DUMMY_NODE # 0 or 1
 PRIORITY_GRAPHVIZ_LAYOUT    = run.PRIORITY_GRAPHVIZ_LAYOUT # 0 or 1
 INTERACTOR_STYLE            = run.INTERACTOR_STYLE
 SIM_DATA_AVAILABLE          = run.SIM_DATA_AVAILABLE
@@ -95,8 +95,8 @@ class mainWindow(QtGui.QMainWindow):
         msgTxt = '\n'
         
         msgTxt += '  VTK / QT \n\n'
-        msgTxt += '  Visualization Test 22 \n\n'
-        msgTxt += '  Jun 14, 2015 \n\n\n'
+        msgTxt += '  Visualization Test 25 \n\n'
+        msgTxt += '  Jun 10, 2015 \n\n\n'
         msgTxt += '  Interactor Style:\n\n'
         
         if (INTERACTOR_STYLE == 'StyleImage'):
@@ -158,15 +158,71 @@ class mainWindow(QtGui.QMainWindow):
         ''' Network data
         '''
         
+        path = os.path.abspath(os.path.join('temp'))
+        
         # Graph
         
-        self.nxGraph = run.G
+        self.nxGraph = nx.MultiDiGraph()
         
+        if (SIM_DATA_AVAILABLE):
+            SG = nx.read_gml(os.path.join(path,'temp.gml')) # source_graph
+        else:
+            SG = run.G
+        
+        ###############################
+        #
+        # Setting multigraph structure 
+        #
+        
+        aux_s = None
+        
+        c = 0
+        for n in SG.nodes_iter():
+        
+            self.nxGraph.add_node(n)
+            self.nxGraph.node[n]['id'] = c
+            
+            if (SIM_DATA_AVAILABLE):
+
+                self.nxGraph.node[n]['nlabel']  = SG.node[n]['nlabel']
+                if (self.nxGraph.node[n]['nlabel']=='s'):
+                    aux_s = c
+
+            else:
+
+                self.nxGraph.node[n]['nlabel']  = str(n)
+                if (self.nxGraph.node[n]['nlabel']=='s'):
+                    aux_s = n
+            
+            c = c + 1
+            
+        for u,v,data in SG.edges_iter(data=True):
+            
+            if (SIM_DATA_AVAILABLE):
+                edge_key        = data['edge_key']
+                edge_skey       = data['edge_skey']
+            else:
+                edge_key        = 0
+                edge_skey       = 0
+            
+            time        = data['time']
+            capacity    = data['capacity']
+            
+            self.nxGraph.add_edge(u,v, edge_key = edge_key, edge_skey = edge_skey, time = time, capacity = capacity)        
+                
         if (ADD_DUMMY_NODE):
             self.nxGraph.add_node('d') # dummy
-            self.nxGraph.add_edge('d','s',time= 1., capacity=10000., flow=0)
+            self.nxGraph.node['d']['id'] = SG.number_of_nodes() 
+            self.nxGraph.node['d']['nlabel'] = 'd'
+            self.nxGraph.add_edge('d',aux_s,edge_key = SG.number_of_edges(),  edge_skey = 0, time = 1.0, capacity=10000., flow=0)
+         
+        #print self.nxGraph.nodes(data=True)
+        #print self.nxGraph.edges(data=True)
+        #
+        #
+        ###############################
 
-        # Set position, ID and label for each node
+        # Set position for each node
         
         package = 'pygraphviz'
         gviz = False
@@ -207,7 +263,6 @@ class mainWindow(QtGui.QMainWindow):
         for n in self.nxGraph.nodes_iter():
             
             self.nxGraph.add_node(n,id=int(c))
-            self.nxGraph.add_node(n,label= n)
             cx = float(pos[n][0])*(max_xVis/max_x)
             cy = float(pos[n][1])*(max_yVis/max_y)
             
@@ -219,27 +274,7 @@ class mainWindow(QtGui.QMainWindow):
             else:
                 self.nxGraph.add_node(n,type='d')
             c = c + 1
-        
-        # set id for each edge
-        
-
-        idc = 0
-
-        for e in sorted(set(self.nxGraph.edges_iter())):
-            
-            edges = self.nxGraph.edge[e[0]][e[1]]
-            
-            c = 0
-            
-            while (c < len(edges)):
-                
-                edges[c]['id'] = idc
-                idc = idc + 1
-                
-                c = c + 1    
-                    
-        #print self.nxGraph.edges(data=True)
-        
+  
         
     def setVTKElements(self):
 
@@ -289,19 +324,19 @@ class mainWindow(QtGui.QMainWindow):
                     self.renderer.AddActor(queue.vtkActor)
                     self.renderer.AddActor(qbox.vtkActor)    
  
-                    nodeStart                   = self.nxGraph.node[e[0]]['label']
-                    nodeEnd                     = self.nxGraph.node[e[1]]['label']
-                    edgeID                      = edges[0]['id']
+                    nodeStart                   = self.nxGraph.node[e[0]]['nlabel']
+                    nodeEnd                     = self.nxGraph.node[e[1]]['nlabel']
+                    edgeID                      = edges[0]['edge_key']#['id']
+                    edgeKey                     = edges[0]['edge_skey']#['key']
                     globalNumberOfTimeDivisions = self.globalNumberOfTimeSteps
                     numberOfTimeStepsForEdge    = numberOfTimeDivisions
                     time_step                   = self.time_step
                     vtkQueue                    = queue
                     vtkElement                  = el
                     
-                    edgeElement = vis.EdgeElement(nodeStart,nodeEnd,edgeID,numberOfTimeStepsForEdge,globalNumberOfTimeDivisions,time_step,vtkQueue,vtkElement)
+                    edgeElement = vis.EdgeElement(nodeStart,nodeEnd,edgeID,edgeKey,numberOfTimeStepsForEdge,globalNumberOfTimeDivisions,time_step,vtkQueue,vtkElement,qbox)
                     
                     self.edgesElements.append(edgeElement)
- 
  
                     '''
                     # STATIC
@@ -326,8 +361,7 @@ class mainWindow(QtGui.QMainWindow):
                     p1 = self.nxGraph.node[e[1]]['pos']
                     
                     numberOfTimeDivisions = int(floor(edges[0]['time']/self.time_step))
-                    
-                    
+                                       
                     # DYNAMIC
                     
                     plusFactor = (-1)**(c+1)
@@ -364,19 +398,19 @@ class mainWindow(QtGui.QMainWindow):
                     self.renderer.AddActor(queue.vtkActor)
                     self.renderer.AddActor(qbox.vtkActor)    
                     
-                    nodeStart                   = self.nxGraph.node[e[0]]['label']
-                    nodeEnd                     = self.nxGraph.node[e[1]]['label']
-                    edgeID                      = edges[0]['id']
+                    nodeStart                   = self.nxGraph.node[e[0]]['nlabel']
+                    nodeEnd                     = self.nxGraph.node[e[1]]['nlabel']
+                    edgeID                      = edges[c]['edge_key']#['id']
+                    edgeKey                     = edges[c]['edge_skey']#['key']
                     globalNumberOfTimeDivisions = self.globalNumberOfTimeSteps
                     numberOfTimeStepsForEdge    = numberOfTimeDivisions
                     time_step                   = self.time_step
                     vtkQueue                    = queue
                     vtkElement                  = el
                     
-                    edgeElement = vis.EdgeElement(nodeStart,nodeEnd,edgeID,numberOfTimeStepsForEdge,globalNumberOfTimeDivisions,time_step,vtkQueue,vtkElement)
+                    edgeElement = vis.EdgeElement(nodeStart,nodeEnd,edgeID,edgeKey,numberOfTimeStepsForEdge,globalNumberOfTimeDivisions,time_step,vtkQueue,vtkElement,qbox)
                     
                     self.edgesElements.append(edgeElement)
-                    
                     
                     '''
                     # STATIC  
@@ -417,72 +451,44 @@ class mainWindow(QtGui.QMainWindow):
     
     def getSimulationData(self):
         
-        # Provisional [ Work in progress... ]
         
-        f = file('./data/example_Larre/e1.dat','rb')
-        self.e1QData = load(f)
-        f.close()
+        fm = file('./data/'+run.ns+'_f_e_minus.dat','rb')
+        q = file('./data/'+run.ns+'_z_e.dat','rb')
         
-        f = file('./data/example_Larre/e2.dat','rb')
-        self.e2QData = load(f)
-        f.close()
-  
-        f = file('./data/example_Larre/e3.dat','rb')
-        self.e3QData = load(f)
-        f.close()
-  
-        f = file('./data/example_Larre/e4.dat','rb')
-        self.e4QData = load(f)
-        f.close()
-          
-        f = file('./data/example_Larre/e5.dat','rb')
-        self.e5QData = load(f)
-        f.close()
+        self.arrayOf_f_e_minus = load(fm)
+        self.arrayOfQueues = load(q)
         
+        fm.close()
+        q.close()
+        
+
         for j in xrange(len(self.edgesElements)):
-            
-            nStart = self.edgesElements[j].nodeStart
-            nEnd = self.edgesElements[j].nodeEnd
-            
-            label = 'e'
-            
-            if (nStart == 's' and nEnd == 'v1'):
-                label = 'e1'
-            if (nStart == 'v1' and nEnd == 't'):
-                label = 'e2'
-            if (nStart == 's' and nEnd == 'v2'):
-                label = 'e3'
-            if (nStart == 'v2' and nEnd == 't'):
-                label = 'e4'
-            if (nStart == 'v1' and nEnd == 'v2'):
-                label = 'e5'
-            if (nStart == 'd'):
-                label = 'e6'            
+             
+            edge_key = self.edgesElements[j].ID
 
-            if label == 'e6':
-                
-                # dummy
-                
-                for k in xrange(self.edgesElements[j].globalNumberOfTimeDivisions+1):
-                    for i in xrange(self.edgesElements[j].numberOfTimeStepsForEdge+1):
+            if (self.edgesElements[j].nodeStart != 'd'):
 
-                        self.edgesElements[j].FlowData[k][i] = flows.u0(k*self.time_step)                
-
-
-            else:
-                
                 # outflow
- 
+  
                 for k in xrange(self.edgesElements[j].globalNumberOfTimeDivisions+1):
                     for i in xrange(self.edgesElements[j].numberOfTimeStepsForEdge+1):
-                     
+                      
                         if (i==0):
-
-                            self.edgesElements[j].FlowData[k][i] = flows.feMinus(label,k*self.time_step)
-                                 
+ 
+                            self.edgesElements[j].FlowData[k][i] = self.arrayOf_f_e_minus[k,edge_key]
+                                  
                         else:
                             if (i <= self.edgesElements[j].numberOfTimeStepsForEdge):
                                 self.edgesElements[j].FlowData[k][i] = self.edgesElements[j].FlowData[k-1][i-1]    
+ 
+#             else:
+#            [ Work in progress... ]
+#                 # dummy
+#                  
+#                 for k in xrange(self.edgesElements[j].globalNumberOfTimeDivisions+1):
+#                     for i in xrange(self.edgesElements[j].numberOfTimeStepsForEdge+1):
+#  
+#                         self.edgesElements[j].FlowData[k][i] = flows.u0(k*self.time_step)                
 
 
                 
@@ -492,7 +498,7 @@ class mainWindow(QtGui.QMainWindow):
         ''' Scene update method
         '''
 
-	# Changes in the scene only if simulation data is available
+    # Changes in the scene only if simulation data is available
 
         
         if (SIM_DATA_AVAILABLE == True):
@@ -503,37 +509,35 @@ class mainWindow(QtGui.QMainWindow):
      
                     # EDGES
                
-                    flowValue = self.edgesElements[j].getData(id_t,i)
+                    mflowValue = self.edgesElements[j].getData(id_t,i)
+                    flowValue = max(mflowValue, 0)
                      
-                    if (flowValue > 0):
+                    if (mflowValue > 0):
                         self.edgesElements[j].vtkElement.setColorById(i,[0,0,int(205 + 50*flowValue/4.0)]) # mod blue
                         self.edgesElements[j].vtkElement.setWidthById(i,flowValue)
-                    else:
+                    elif (mflowValue == 0):
                         self.edgesElements[j].vtkElement.setColorById(i,[50,50,50])
+                        self.edgesElements[j].vtkElement.setWidthById(i,0.01)
+                    else:
+                        self.edgesElements[j].vtkElement.setColorById(i,[10,10,10])
                         self.edgesElements[j].vtkElement.setWidthById(i,0.01)
        
                     if (self.edgesElements[j].nodeStart != 'd'):
           
                         # QUEUES
           
-                        qValue = 0.0
+                        edge_key = self.edgesElements[j].ID
           
-                        nStart  = self.edgesElements[j].nodeStart
-                        nEnd    = self.edgesElements[j].nodeEnd
-          
-                        if (nStart == 's' and nEnd == 'v1'):
-                            qValue = self.e1QData[id_t][1]
-                        if (nStart == 'v1' and nEnd == 't'):
-                            qValue = self.e2QData[id_t][1]
-                        if (nStart == 's' and nEnd == 'v2'):
-                            qValue = self.e3QData[id_t][1]
-                        if (nStart == 'v2' and nEnd == 't'):
-                            qValue = self.e4QData[id_t][1]
-                        if (nStart == 'v1' and nEnd == 'v2'):
-                            qValue = self.e5QData[id_t][1]
+                        mqValue = self.arrayOfQueues[id_t][edge_key]
+                        qValue = max(mqValue, 0.0001)
                            
-                        self.edgesElements[j].vtkQueue.setEndPointFromValue(2*max(qValue,0.0001))
-                        self.edgesElements[j].vtkQueue.vtkActor.GetProperty().SetColor(0,qValue/3.0,0)
+                        if (mqValue >= 0):
+                            self.edgesElements[j].vtkQBox.vtkActor.GetProperty().SetColor(0.5,0.5,0.5)
+                            self.edgesElements[j].vtkQueue.vtkActor.GetProperty().SetColor(0,1.0,0)
+                            self.edgesElements[j].vtkQueue.setEndPointFromValue(2*max(qValue,0.0001))
+                        else:
+                            self.edgesElements[j].vtkQBox.vtkActor.GetProperty().SetColor(0.1,0.1,0.1)
+                            self.edgesElements[j].vtkQueue.vtkActor.GetProperty().SetColor(0.1,0.1,0.1)
                          
        
                 self.edgesElements[j].vtkElement.vtkPolyData.Modified()
@@ -583,11 +587,18 @@ class mainWindow(QtGui.QMainWindow):
 if __name__ == "__main__":
     
     if (run.flag == 0):
+        
         print 'Loading GUI...'
+        
+        print 'Running data file generator...'
+        
+        SIM_DATA_AVAILABLE = gen.data_generator()
+        
         app = QtGui.QApplication(sys.argv)
         ex = mainWindow()
         ex.show()
         sys.exit(app.exec_())
+        
     else:
         if (run.flag == 1):
             print '[Error] Error in main.py file. Graph not found.'
