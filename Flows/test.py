@@ -16,14 +16,12 @@ import networkx as nx
 ###############################################################
 # About new lines of code for visualization 
 #
-# - added 'pars' variable for selected test functions, for instance 'def test15()'--> 'def test(pars)'
+# - added 'pars' variable for selected test functions, for instance 'def test15()'--> 'def test15(pars)'
 # - added [] list in calls for selected test functions, for instance 'test15()' --> 'test15([])'
 # - added "try / except" lines in the definition of selected functions
 # - ./vdata/manage.py : file with functions to generate visualization data
 
-import vdata.manage as vdata # (*visualization)
-
-# 
+import vdata.manage as vdata # (for visualization)
 ###############################################################
 
 import matplotlib.pyplot as plt
@@ -365,7 +363,7 @@ def test13(pars):
     except:
         #import sys
         #print(sys.exc_info())
-        print('[ ERROR ] test.py error message')
+        print('[ MSG ] test.py')
     #
     ###############################
 
@@ -456,7 +454,7 @@ def test15(pars):
     except:
         #import sys
         #print(sys.exc_info())
-        print('[ ERROR ] test.py error message')
+        print('[ MSG ] test.py')
     #
     ###############################
 

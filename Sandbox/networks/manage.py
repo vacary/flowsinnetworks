@@ -26,6 +26,7 @@ ADD_DUMMY_NODE              = settings.ADD_DUMMY_SOURCE_NODE # 0 or 1
 PRIORITY_GRAPHVIZ_LAYOUT    = settings.PRIORITY_GRAPHVIZ_LAYOUT # 0 or 1
 INTERACTOR_STYLE            = settings.INTERACTOR_STYLE
 SIM_DATA_AVAILABLE          = False
+MAP_DATA_AVAILABLE          = False
 
 def check_package(string_name):
     
@@ -136,6 +137,10 @@ if (flag == 0):
     elif (ns == 'custom_graph'):
         
         G = dev.custom_graph()
+        
+    elif (ns == 'example_map_Tobalaba'):
+        
+        MAP_DATA_AVAILABLE = True
     
     else:
         

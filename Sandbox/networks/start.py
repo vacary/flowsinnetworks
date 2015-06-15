@@ -32,10 +32,11 @@ import gen
 ''' Global parameters / variables
 '''
 
-ADD_DUMMY_NODE              = 0#run.ADD_DUMMY_NODE # 0 or 1
+ADD_DUMMY_NODE              = 0 #run.ADD_DUMMY_NODE # 0 or 1  (disabled option)
 PRIORITY_GRAPHVIZ_LAYOUT    = run.PRIORITY_GRAPHVIZ_LAYOUT # 0 or 1
 INTERACTOR_STYLE            = run.INTERACTOR_STYLE
 SIM_DATA_AVAILABLE          = run.SIM_DATA_AVAILABLE
+MAP_DATA_AVAILABLE          = run.MAP_DATA_AVAILABLE
 
 class mainWindow(QtGui.QMainWindow):
 
@@ -95,8 +96,8 @@ class mainWindow(QtGui.QMainWindow):
         msgTxt = '\n'
         
         msgTxt += '  VTK / QT \n\n'
-        msgTxt += '  Visualization Test 25 \n\n'
-        msgTxt += '  Jun 10, 2015 \n\n\n'
+        msgTxt += '  Visualization Test 26 \n\n'
+        msgTxt += '  Jun 15, 2015 \n\n\n'
         msgTxt += '  Interactor Style:\n\n'
         
         if (INTERACTOR_STYLE == 'StyleImage'):
@@ -116,13 +117,15 @@ class mainWindow(QtGui.QMainWindow):
             msgTxt += '  Shift + Right mouse - Zoom \n'
             msgTxt += '  Middle mouse - Pan \n'
             msgTxt += '  Scroll wheel - Zoom \n'
-
         
         self.msgTxt = msgTxt
     
     def setVTKWidget(self):
         
         ''' VTKWidget Components
+        
+            * Main functions to set the visualization scene 
+        
         '''
         
         # Widget and GUI
@@ -137,20 +140,163 @@ class mainWindow(QtGui.QMainWindow):
         self.renderWindowInteractor = self.vtkWidget.GetRenderWindow().GetInteractor()
                 
         # Call the methods with VTK sources, mappers and actors needed to create the scene
-        self.setNetworkData()
-        self.setVTKElements()
         
-        if (SIM_DATA_AVAILABLE == True):
-            self.getSimulationData()
+        ''' Important!  CHOOSING SIMULATION OR MAP DATA SCENE
+            [ Work in progress ]
+        '''
+        
+        if (MAP_DATA_AVAILABLE == True):
+        
+            self.setVTKMapElements()
+        
+        else:
+            
+            self.setNetworkData()
+            self.setVTKElements()
+            
+            if (SIM_DATA_AVAILABLE == True):
+                self.getSimulationData()
+        
+        
+        
         
         # Show the scene and initialize the interactor
+        self.camera = self.renderer.GetActiveCamera()
+        
+        if (MAP_DATA_AVAILABLE == True):
+            coords = [-70.60630360192991, -33.41934159072677, 0.016528925619834704]
+            x = coords[0]
+            y = coords[1]
+            z = coords[2]
+            self.camera.SetPosition(x,y,z)
+            self.camera.SetFocalPoint(x,y,0.0)
+                
+        else:    
+            self.renderer.ResetCamera()
+        
         self.show()
-        self.renderer.ResetCamera()
+        
         if (INTERACTOR_STYLE == 'StyleImage'):
             self.renderWindowInteractor.SetInteractorStyle(vtk.vtkInteractorStyleImage())
         else:
             self.renderWindowInteractor.SetInteractorStyle(vtk.vtkInteractorStyleRubberBand3D())
+        
         self.renderWindowInteractor.Initialize()
+
+    
+    def setVTKMapElements(self):
+        
+        # waterway
+        for k in xrange(1,13):
+            
+            f = file('./data/maps/tobalaba_test/waterway/'+str(k)+'.dat','rb')
+            data = load(f)
+            f.close()
+            
+            if (data[0][0] == data[-1][0] and data[0][1] == data[-1][1]):
+                element = vis.vtkLines(data,[0,0,0.5],4,0.0)
+            else:
+                element = vis.vtkLines(data,[0,0,0.5],1,0.0)
+            self.renderer.AddActor(element.vtkActor)
+
+        # landuse
+        for k in xrange(1,36):
+            
+            f = file('./data/maps/tobalaba_test/landuse/'+str(k)+'.dat','rb')
+            data = load(f)
+            f.close()
+            element = vis.vtkLines(data,[0.0,0.1,0.0],2,0.0)
+            self.renderer.AddActor(element.vtkActor)
+
+        # building
+        for k in xrange(1,184):
+            
+            f = file('./data/maps/tobalaba_test/building/'+str(k)+'.dat','rb')
+            data = load(f)
+            f.close()
+            element = vis.vtkLines(data,[0.15,0.15,0.15],0.1,0.0)
+            self.renderer.AddActor(element.vtkActor)
+
+        # railway
+        
+        f = file('./data/maps/tobalaba_test/railway/'+str(2)+'.dat','rb')
+        data = load(f)
+        f.close()
+        element = vis.vtkLines(data,[0,0,0.15],9,0.0)
+        self.renderer.AddActor(element.vtkActor)        
+        
+        f = file('./data/maps/tobalaba_test/railway/'+str(1)+'.dat','rb')
+        data = load(f)
+        f.close()
+        element = vis.vtkLines(data,[0.15,0,0],9,0.0)
+        self.renderer.AddActor(element.vtkActor)
+        
+        # highway
+        for k in xrange(1,174):
+            
+            f = file('./data/maps/tobalaba_test/highway/'+str(k)+'.dat','rb')
+            data = load(f)
+            f.close()
+            element = vis.vtkLines(data,[0.15,0.15,0.15],2,0.0)
+            self.renderer.AddActor(element.vtkActor)
+        
+        for k in xrange(1,60):
+            
+            f = file('./data/maps/tobalaba_test/highway_primary/'+str(k)+'.dat','rb')
+            data = load(f)
+            f.close()
+            color = 0.25
+            #element = vis.vtkTubes(data,[color,color,color],0.5/100000.0,0.00015)
+            element = vis.vtkLines(data,[color,color,color],2.5,0.0)
+            #self.renderer.AddActor(element.vtkActor)
+            
+            color = 0.175
+            for i in xrange(len(data)-1):
+                p = [data[i,0],data[i,1]]
+                q = [data[i+1,0],data[i+1,1]]
+                element = vis.vtkRibbonLine(p,q,[color,color,color],0.000018,0.0)
+                self.renderer.AddActor(element.vtkActor)
+
+
+        # coords
+        
+        label = 'Inria Chile'
+        coords = [-70.600237,-33.418167]
+        vtkLabel = vis.label2D(coords[0],coords[1],0.0,label,'l','b')
+        self.renderer.AddActor(vtkLabel.actor)
+        self.renderer.AddActor2D(vtkLabel.actor2D)
+        
+        label = 'Tobalaba (M)'
+        coords = [-70.6014905,-33.4181976]
+        vtkLabel = vis.label2D(coords[0],coords[1],0.0,label,'r','b')
+        self.renderer.AddActor(vtkLabel.actor)
+        self.renderer.AddActor2D(vtkLabel.actor2D)
+
+        label = 'Los Leones (M)'
+        coords = [-70.608600,-33.422146]
+        vtkLabel = vis.label2D(coords[0],coords[1],0.0,label,'r','b')
+        self.renderer.AddActor(vtkLabel.actor)
+        self.renderer.AddActor2D(vtkLabel.actor2D)
+
+
+        # TEXT ELEMENTS
+
+        annotation1 = vtk.vtkCornerAnnotation() 
+        annotation1.SetText(2,self.msgTxt)
+        annotation1.SetMaximumFontSize(14)
+        annotation1.GetTextProperty().SetColor(0.75,0.75,0.75)
+        self.renderer.AddViewProp(annotation1)
+        
+        data_msg = ''
+        if (SIM_DATA_AVAILABLE == False):
+            data_msg = '\n  * Comment: No simulation data \n'
+        
+        msg = ['  NETWORK \n\n','  '+str(run.ns)+'\n\n'+data_msg]     
+        annotation2 = vtk.vtkCornerAnnotation() 
+        annotation2.SetText(0,''.join(msg))
+        annotation2.SetMaximumFontSize(14)
+        self.renderer.AddViewProp(annotation2)
+
 
     
     def setNetworkData(self):
@@ -490,8 +636,6 @@ class mainWindow(QtGui.QMainWindow):
 #  
 #                         self.edgesElements[j].FlowData[k][i] = flows.u0(k*self.time_step)                
 
-
-                
             
     def updateVisualization(self,id_t):
 
@@ -500,6 +644,9 @@ class mainWindow(QtGui.QMainWindow):
 
     # Changes in the scene only if simulation data is available
 
+        if (MAP_DATA_AVAILABLE == True):
+            
+            print self.camera.GetPosition()
         
         if (SIM_DATA_AVAILABLE == True):
          
@@ -601,9 +748,9 @@ if __name__ == "__main__":
         
     else:
         if (run.flag == 1):
-            print '[Error] Error in main.py file. Graph not found.'
+            print '[ MSG ] Error in main.py file. Graph not found.'
         if (run.flag == 2):
-            print '[Error] Python module / package not found '
+            print '[ MSG ] Python module / package not found '
         
     
     

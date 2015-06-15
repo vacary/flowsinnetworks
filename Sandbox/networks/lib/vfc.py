@@ -129,6 +129,301 @@ class EdgeElement:
 
 ''' STATIC ELEMENTS
 '''
+    
+class label2D:
+    
+    def __init__(self,x,y,z,label,text_h,text_v):
+        
+        self.point  = vtk.vtkPoints()
+        self.vert   = vtk.vtkCellArray()
+        self.mapper = vtk.vtkPolyDataMapper()
+        self.actor  = vtk.vtkActor()
+        self.actor2D = vtk.vtkActor2D()
+    
+        self._initialize(x,y,z,label,text_h,text_v)
+    
+    def _initialize(self,x,y,z,strLabel,text_h,text_v):
+    
+        id_point    = self.point.InsertNextPoint(x,y,z)
+        
+        label = vtk.vtkStringArray()
+        label.SetNumberOfValues(1)
+        label.SetName("label")
+        
+        self.vert.InsertNextCell(1)
+        self.vert.InsertCellPoint(id_point)
+        label.SetValue(0,strLabel)
+        
+        pointData  = vtk.vtkPolyData()        
+        pointData.SetPoints(self.point)          
+        pointData.SetVerts(self.vert)         
+        
+        pointData.GetPointData().AddArray(label)            
+         
+        if (vtk.VTK_MAJOR_VERSION <= 5):
+            self.mapper.SetInput(pointData)
+        else:
+            self.mapper.SetInputData(pointData)
+        
+        self.actor.SetMapper(self.mapper)     
+        self.actor.GetProperty().SetPointSize(2.5)          
+        self.actor.GetProperty().SetColor(1,0,0)          
+                
+        labelMapper = vtk.vtkLabeledDataMapper()
+        labelMapper.SetInputData(pointData)
+        labelMapper.SetLabelModeToLabelFieldData()
+        tprop = labelMapper.GetLabelTextProperty()
+        tprop.SetFontSize(11)
+        tprop.SetBold(1)
+        tprop.SetItalic(0)
+        tprop.SetShadow(0)
+        
+        
+        if (text_h == 'c'):
+            tprop.SetJustificationToCentered()
+        if (text_h == 'l'):
+            tprop.SetJustificationToLeft()
+        if (text_h == 'r'):
+            tprop.SetJustificationToRight()
+            
+        if (text_v == 'u'):
+            tprop.SetVerticalJustificationToTop()
+        if (text_v == 'b'):
+            tprop.SetVerticalJustificationToBottom()
+        if (text_v == 'c'):
+            tprop.SetVerticalJustificationToCentered()            
+            
+        self.actor2D.SetMapper(labelMapper)
+        
+
+    
+class vtkLines:
+    
+    def __init__(self,arrayOfPoints,colorRGB, linewidth ,zpos):
+        
+        self.vtkPoints      = vtk.vtkPoints()
+        self.vtkLines       = vtk.vtkCellArray()
+        self.vtkPolyData    = vtk.vtkPolyData()
+        self.vtkMapper      = vtk.vtkPolyDataMapper()
+        self.vtkActor       = vtk.vtkActor()
+        
+        self._initialize(arrayOfPoints,colorRGB,linewidth,zpos)
+        
+    def _initialize(self,data,color,width,zpos):
+        
+        N = len(data[:,0])
+        
+        for i in xrange(N):
+            self.vtkPoints.InsertNextPoint(data[i,0],data[i,1], zpos)
+        
+        for i in range(0,self.vtkPoints.GetNumberOfPoints()-1): # create lines
+            line = vtk.vtkLine()
+            line.GetPointIds().SetId(0,i)
+            line.GetPointIds().SetId(1,i+1)
+            self.vtkLines.InsertNextCell(line)
+         
+        self.vtkPolyData = vtk.vtkPolyData()                   # polydata object
+        self.vtkPolyData.SetPoints(self.vtkPoints)                     # set geometry
+        self.vtkPolyData.SetLines(self.vtkLines)                       # set topology  
+        
+        if (vtk.VTK_MAJOR_VERSION <= 5):                # check VTK version
+            self.vtkMapper.SetInput(self.vtkPolyData)
+        else:
+            self.vtkMapper.SetInputData(self.vtkPolyData)
+        
+        self.vtkActor.SetMapper(self.vtkMapper)
+        self.vtkActor.GetProperty().SetLineWidth(5)
+        self.vtkActor.GetProperty().SetColor(color[0],color[1],color[2])
+        self.vtkActor.GetProperty().SetLineWidth(width)        
+        
+class vtkRibbons:
+    
+    def __init__(self,arrayOfPoints,colorRGB, linewidth ,zpos):
+        
+        self.vtkPoints      = vtk.vtkPoints()
+        self.vtkLines       = vtk.vtkCellArray()
+        self.vtkPolyData    = vtk.vtkPolyData()
+        self.vtkFilter      = vtk.vtkRibbonFilter()
+        self.vtkMapper      = vtk.vtkPolyDataMapper()
+        self.vtkActor       = vtk.vtkActor()
+        
+        self._initialize(arrayOfPoints,colorRGB,linewidth,zpos)
+        
+    def _initialize(self,data,color,width,zpos):
+        
+        N = len(data[:,0])
+        
+        for i in xrange(N):
+            self.vtkPoints.InsertNextPoint(data[i,0],data[i,1], zpos)
+        
+        for i in range(0,self.vtkPoints.GetNumberOfPoints()-1): # create lines
+            line = vtk.vtkLine()
+            line.GetPointIds().SetId(0,i)
+            line.GetPointIds().SetId(1,i+1)
+            self.vtkLines.InsertNextCell(line)
+         
+        self.vtkPolyData = vtk.vtkPolyData()                   # polydata object
+        self.vtkPolyData.SetPoints(self.vtkPoints)                     # set geometry
+        self.vtkPolyData.SetLines(self.vtkLines)                       # set topology  
+        
+        if (vtk.VTK_MAJOR_VERSION <= 5):   
+            self.vtkFilter.SetInput(self.vtkPolyData)
+        else:
+            self.vtkFilter.SetInputData(self.vtkPolyData)
+        
+        self.vtkFilter.SetWidth(0.000025)
+        self.vtkFilter.SetAngle(90)
+ 
+        # mapper
+ 
+        self.vtkMapper.SetInputConnection(self.vtkFilter.GetOutputPort())
+        
+        # actor
+        
+        self.vtkActor.SetMapper(self.vtkMapper)
+        self.vtkActor.GetProperty().SetColor(0.5,0.5,0.5)
+        self.vtkActor.GetProperty().SetSpecularColor(1,1,1)
+        self.vtkActor.GetProperty().SetSpecular(0.75)
+        self.vtkActor.GetProperty().SetAmbient(0.75)
+        self.vtkActor.GetProperty().SetDiffuse(0.5)
+
+class vtkRibbonLine:
+    
+    def __init__(self,p0,p1,RGBcolor,width,zpos):
+
+        self.flag               = 0
+
+        self.vtkPoints          = vtk.vtkPoints() 
+        self.vtkLines           = vtk.vtkCellArray()
+        self.vtkPolyData        = vtk.vtkPolyData()
+        self.vtkFilter          = vtk.vtkRibbonFilter()
+        self.vtkMapper          = vtk.vtkPolyDataMapper()
+        self.vtkActor           = vtk.vtkActor()
+        
+        self._initialize(p0,p1,RGBcolor,width,zpos)
+        
+    def _initialize(self,p0,p1,color,width,z):
+        
+        # geometry and topology
+        
+        d = array(p1) - array(p0)
+
+        u = d/linalg.norm(d)
+        
+        v = zeros(3)
+        
+        if (abs(u[0])> 0):
+        
+            v[0] = -u[1]/u[0]
+            v[1] = 1.0
+            v[2] = 0
+        
+        
+        else:
+            
+            v[0] = 1.0
+            v[1] = 0
+            v[2] = 0
+        
+        w = v/linalg.norm(v)
+
+        deltaLambda = 1.0
+
+        for i in xrange(2):
+
+            vlambda = i*deltaLambda
+            p = lambdaPoint(vlambda,p0,d)
+            point = [p[0],p[1],z]
+            self.vtkPoints.InsertNextPoint(point)
+
+        if (p0[0]==p1[0]):
+            self.flag = 1
+        
+        for i in xrange(0,self.vtkPoints.GetNumberOfPoints()-1): 
+            line = vtk.vtkLine()
+            line.GetPointIds().SetId(0,i)
+            line.GetPointIds().SetId(1,i+1)
+            self.vtkLines.InsertNextCell(line)
+
+        # polydata
+        
+        self.vtkPolyData.SetPoints(self.vtkPoints)
+        self.vtkPolyData.SetLines(self.vtkLines)
+
+        # filter
+
+        if (vtk.VTK_MAJOR_VERSION <= 5):   
+            self.vtkFilter.SetInput(self.vtkPolyData)
+        else:
+            self.vtkFilter.SetInputData(self.vtkPolyData)
+
+        self.vtkFilter.UseDefaultNormalOn()
+        self.vtkFilter.SetWidth(width/2.0)
+ 
+        # mapper
+ 
+        self.vtkMapper.SetInputConnection(self.vtkFilter.GetOutputPort())
+        
+        # actor
+        
+        self.vtkActor.SetMapper(self.vtkMapper)
+        self.vtkActor.GetProperty().SetColor(color[0],color[1],color[2])
+        self.vtkActor.GetProperty().SetSpecularColor(color[0],color[1],color[2])
+        self.vtkActor.GetProperty().SetSpecular(0.75)
+        self.vtkActor.GetProperty().SetAmbient(0.75)
+        self.vtkActor.GetProperty().SetDiffuse(0.5)
+
+class vtkTubes:
+    
+    def __init__(self,arrayOfPoints,colorRGB, linewidth ,zpos):
+        
+        self.vtkPoints      = vtk.vtkPoints()
+        self.vtkLines       = vtk.vtkCellArray()
+        self.vtkPolyData    = vtk.vtkPolyData()
+        self.vtkFilter      = vtk.vtkTubeFilter()
+        self.vtkMapper      = vtk.vtkPolyDataMapper()
+        self.vtkActor       = vtk.vtkActor()
+        
+        self._initialize(arrayOfPoints,colorRGB,linewidth,zpos)
+        
+    def _initialize(self,data,color,width,zpos):
+        
+        N = len(data[:,0])
+        
+        for i in xrange(N):
+            self.vtkPoints.InsertNextPoint(data[i,0],data[i,1], zpos)
+        
+        for i in range(0,self.vtkPoints.GetNumberOfPoints()-1): # create lines
+            line = vtk.vtkLine()
+            line.GetPointIds().SetId(0,i)
+            line.GetPointIds().SetId(1,i+1)
+            self.vtkLines.InsertNextCell(line)
+         
+        self.vtkPolyData = vtk.vtkPolyData()                   # polydata object
+        self.vtkPolyData.SetPoints(self.vtkPoints)                     # set geometry
+        self.vtkPolyData.SetLines(self.vtkLines)                       # set topology  
+        
+        if (vtk.VTK_MAJOR_VERSION <= 5):   
+            self.vtkFilter.SetInput(self.vtkPolyData)
+        else:
+            self.vtkFilter.SetInputData(self.vtkPolyData)
+
+        self.vtkFilter.SetRadius(width)
+        self.vtkFilter.SetNumberOfSides(20)
+        self.vtkFilter.CappingOff()
+ 
+        # mapper
+ 
+        self.vtkMapper.SetInputConnection(self.vtkFilter.GetOutputPort())
+        
+        # actor
+        
+        self.vtkActor.SetMapper(self.vtkMapper)
+        self.vtkActor.GetProperty().SetColor(color[0],color[1],color[2])
+        self.vtkActor.GetProperty().SetSpecularColor(color[0],color[1],color[2])
+        self.vtkActor.GetProperty().SetSpecular(0.75)
+        self.vtkActor.GetProperty().SetAmbient(0.75)
+        self.vtkActor.GetProperty().SetDiffuse(0.5)
 
 class vtkEdgeRibbonLine:
     

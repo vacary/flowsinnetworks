@@ -42,12 +42,12 @@ def data_generator():
         else:
             
             state = False
-            print '[ Error ] No data available for selected graph'     
+            print '[ MSG ] No data available for selected graph ( gen.py )'     
 
     except:
         
         state = False
-        print '[ ERROR ] Problem with data generator'
+        print '[ MSG ] Problem with data generator'
         print sys.exc_info()
 
     return state
