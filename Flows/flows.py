@@ -1203,17 +1203,30 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
                 bi[n] = bi[n] -  G_anchored[source][e[1]][e[2]]['thin_flow']
 
         # test enumeration
-        #tol_enumeration = 10e-6
-        #P=[]
-        #I=[]
-        #for e in  set.difference (set(G_anchored.edges(keys=True)), set(E1.edges(keys=True)) ):
-        #    if G_anchored[e[0]][e[1]][e[2]]['thin_flow'] >= tol_enumeration :
-        #        P.append(e)
-        #        if (G_anchored.node[e[0]]['label_thin_flow'] <= G_anchored[e[0]][e[1]][e[2]]['thin_flow']/G_anchored[e[0]][e[1]][e[2]]['capacity'] ):
-        #            I.append(e)
+        tol_enumeration = 10e-6
+        P=[]
+        T=[]
+        for e in G.edges(keys=True):
+            if e in  E1.edges(keys=True) :
+                G[e[0]][e[1]][e[2]]['thin_flow']=G_anchored[source][e[1]][e[2]]['thin_flow']
+            else:
+                G[e[0]][e[1]][e[2]]['thin_flow']=G_anchored[e[0]][e[1]][e[2]]['thin_flow']
 
-        # print("P=",P)
-        #print("I=",I)
+        for n in  G_anchored.nodes():
+            G.node[n]['label_thin_flow'] =  G_anchored.node[n]['label_thin_flow']
+
+        for e in G.edges(keys=True):
+            if G[e[0]][e[1]][e[2]]['thin_flow'] >= tol_enumeration :
+                P.append(e)
+        for e in E1.edges(keys=True):
+            T.append(e)
+        for e in  set.difference (set(G.edges(keys=True)), set(E1.edges(keys=True)) ):
+            if (G.node[e[0]]['label_thin_flow'] <= G[e[0]][e[1]][e[2]]['thin_flow']/G_anchored[e[0]][e[1]][e[2]]['capacity'] ):
+                T.append(e)
+
+
+        print("P=",P)
+        print("T=",T)
         err = 0.0
         #print_debug( "biold = ", biold)
         #print_debug( "bi = ", bi)
