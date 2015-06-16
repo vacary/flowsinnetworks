@@ -1818,12 +1818,16 @@ def postprocess_flows_queues_cumulativeflows(G):
                 G[ntail][nhead][k]['F_e_plus_overtime'] =[0.0]
                 G[ntail][nhead][k]['F_e_minus_overtime'] =[0.0]
                 for i in range(len( G[ntail][nhead][k]['thin_flow_overtime'] )):
-                    if (G[ntail][nhead][k]['thin_flow_overtime'][i] !=0):
+                    if (G.node[ntail]['label_thin_flow_overtime'][i] >= machine_epsilon):
                         G[ntail][nhead][k]['f_e_plus_overtime'].append(G[ntail][nhead][k]['thin_flow_overtime'][i]/G.node[ntail]['label_thin_flow_overtime'][i])
-                        G[ntail][nhead][k]['f_e_minus_overtime'].append(G[ntail][nhead][k]['thin_flow_overtime'][i]/G.node[nhead]['label_thin_flow_overtime'][i])
                     else:
                         G[ntail][nhead][k]['f_e_plus_overtime'].append(0.0)
+
+                    if (G.node[nhead]['label_thin_flow_overtime'][i] >= machine_epsilon):
+                        G[ntail][nhead][k]['f_e_minus_overtime'].append(G[ntail][nhead][k]['thin_flow_overtime'][i]/G.node[nhead]['label_thin_flow_overtime'][i])
+                    else:
                         G[ntail][nhead][k]['f_e_minus_overtime'].append(0.0)
+                        
                 for i in range(len( G.node[ntail]['label_overtime'])-1):
                     h= G.node[ntail]['label_overtime'][i+1] -  G.node[ntail]['label_overtime'][i]
                     G[ntail][nhead][k]['F_e_plus_overtime'].append( G[ntail][nhead][k]['f_e_plus_overtime'][i]*h+G[ntail][nhead][k]['F_e_plus_overtime'][i])
