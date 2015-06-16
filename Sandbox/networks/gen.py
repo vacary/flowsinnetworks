@@ -38,6 +38,10 @@ def data_generator():
         elif (ns == 'example_Larre'):
             
             t.test15(vpars)
+            
+        elif (ns == 'example_doubleparallelpath'):
+            
+            t.test21(vpars)
         
         else:
             

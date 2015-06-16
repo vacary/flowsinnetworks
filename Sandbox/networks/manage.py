@@ -137,7 +137,12 @@ if (flag == 0):
     elif (ns == 'custom_graph'):
         
         G = dev.custom_graph()
+
+
+    elif (ns == 'example_doubleparallelpath'):
         
+        G = exa.example_doubleparallelpath()    
+
     elif (ns == 'example_map_Tobalaba'):
         
         MAP_DATA_AVAILABLE = True

@@ -27,8 +27,9 @@
 #graph = 'example_Larre_bis'
 #graph = 'example_parallelpath'
 #graph = 'custom_graph'
+graph  = 'example_doubleparallelpath' 
 
-graph = 'example_map_Tobalaba' # (map data available - work in progress)
+#graph = 'example_map_Tobalaba' # (map data available - work in progress)
 
 
 ##############################

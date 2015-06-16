@@ -648,6 +648,57 @@ def test19():
         flows.plot_flows_queues_cumulativeflows_timestepping(G,timesteps)
 
     print( '################ end test 19 ###############')
+    
+def test21(pars):
+    print( '################ start test 21 ###############')
+
+    G=examples.example_doubleparallelpath()
+    source = 's'
+
+    timeofevent=[0.0,20.0]
+    inputflow=[3.5, 3.5 ]
+
+
+    param=flows.parameters()
+    param.tol_thin_flow=1e-10
+    param.tol_lp=1e-12
+    param.tol_cut=1e-12
+
+
+
+    flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, timeofevent, inputflow,param)
+    print("timeofevent=",timeofevent)
+    print("inputflow=",inputflow)
+
+    with_draw=True
+    if with_draw :
+        plt.close('all')
+        plt.figure("Thin flows and associated labels", figsize = [8,10])
+        flows.plot_thin_flows_and_labels(G,timeofevent)
+
+
+    flows.postprocess_flows_queues_cumulativeflows(G)
+    flows.display_graph(G)
+
+
+    if with_draw :
+        plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
+        flows.plot_flows_queues_cumulativeflows(G)
+
+    ###############################
+    # for visualization
+    #
+    try:
+        if (pars[0] == True):
+            vdata.genVData(G,pars[1],pars[2],pars[3])
+    except:
+        #import sys
+        #print(sys.exc_info())
+        print('[ MSG ] test.py')
+    #
+    ###############################
+
+    print( '################ end test 21 ###############')
 
     
 #whatisadjcency_iter()
@@ -673,7 +724,7 @@ def test19():
 
 #test13([])
 #test14()
-test15([])
+#test15([])
 #test16()
 #test17()
 
@@ -681,3 +732,5 @@ test15([])
 #test18() #Similar to test13
 
 #test19() #Similar to test15
+
+test21([])
