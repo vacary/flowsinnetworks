@@ -23,7 +23,7 @@ def getFlowValue(theta,x_data,y_data):
         stop = 0
         while ( i < len(x_data)-1 and stop == 0 ):
     
-            if (x_data[i] <= theta and theta <= x_data[i+1]):
+            if (x_data[i] <= theta and theta < x_data[i+1]):
                 
                 p1 = [x_data[i],y_data[i]]
                 p2 = [x_data[i+1],y_data[i+1]]
@@ -34,6 +34,9 @@ def getFlowValue(theta,x_data,y_data):
         
         if (p2[0] != p1[0]):
             z = ((p2[1]-p1[1])/(p2[0]-p1[0]))*(theta - p1[0]) + p1[1]
+            
+            
+            
         else:
             z = max(p1[1],p2[1])
         
@@ -120,12 +123,15 @@ def getArrayOfValuesOvertime(required_value,xArray,vArray,time_step,N,G):
             #print([xArray[i],vArray[i]])
             #print([xArray[i+1],vArray[i]])
 
+        plt.subplot(511)
+
         for i in xrange(N+1):
             theta = i*time_step
             ans[i,0] = theta
             ans[i,1] = getFlowValue(theta,x_data,y_data)
+            plt.plot([theta,theta],[0,ans[i,1]],'r')
         
-        plt.subplot(512)
+        plt.subplot(511)
         plt.plot(x_data,y_data,'bo')
         plt.plot(ans[:,0],ans[:,1],'rx')
         
@@ -194,27 +200,33 @@ def genDataFromMultiGraphStructure(G,time_step,Tmax,graphName):
                 vze             = getArrayOfValuesOvertime(required_value,xArray,vArray,time_step,N,G)
 
                 arrayOfQueues[:,edge_key] = vze[:,1]
-                 
-                # F MINUS VALUES OVERTIME
-                 
-                required_value  = 'f_e_minus_overtime'
-                xArray          = G.node[e[1]]['label_overtime']
-                vArray          = edges[c]['f_e_minus_overtime'] 
-                N               = globalNumberOfTimeSteps
-                vfem            = getArrayOfValuesOvertime(required_value,xArray,vArray,time_step,N,G)
-    
-                arrayOf_f_e_minus[:,edge_key] = vfem[:,1]    
-
-                # F PLUS VALUES OVERTIME
-                 
+                
+                # f PLUS VALUES OVERTIME
+                  
                 required_value  = 'f_e_plus_overtime'
                 xArray          = G.node[e[0]]['label_overtime']
                 vArray          = edges[c]['f_e_plus_overtime'] 
                 N               = globalNumberOfTimeSteps
                 vfep            = getArrayOfValuesOvertime(required_value,xArray,vArray,time_step,N,G)
-
+                
                 arrayOf_f_e_plus[:,edge_key] = vfep[:,1]    
-
+                
+                if (e[0] == 's' and e[1] == 'r'):
+                    print xArray
+                    print arrayOf_f_e_plus
+                
+                # f MINUS VALUES OVERTIME
+                
+                for t in xrange(len(arrayOf_f_e_plus[:,edge_key])):
+                
+                    fe_minus_value = 0.0
+                    
+                    if (arrayOfQueues[t,edge_key] > 1E-10):
+                        fe_minus_value = edges[c]['capacity']
+                    else:
+                        fe_minus_value = min(arrayOf_f_e_plus[t,edge_key],edges[c]['capacity'])
+                    
+                    arrayOf_f_e_minus[t,edge_key] = fe_minus_value
 
             #
             ###    
@@ -222,12 +234,9 @@ def genDataFromMultiGraphStructure(G,time_step,Tmax,graphName):
             c           = c + 1
             edge_key    = edge_key + 1  # update edge key counter
     
-
+     
     save(fm,arrayOf_f_e_minus)
     fm.close()
-    
-    save(fp,arrayOf_f_e_plus)
-    fp.close()
     
     save(q,arrayOfQueues)
     q.close()
@@ -255,11 +264,13 @@ def genVData(G,time_step,Tmax,graphName):
     
     # node data
     
+   
     for n in G.nodes_iter():
 
         G.node[n]['label_thin_flow_overtime'] = str(G.node[n]['label_thin_flow_overtime'])
-        G.node[n]['label_overtime'] = str(G.node[n]['label_thin_flow_overtime'])
+        G.node[n]['label_overtime'] = str(G.node[n]['label_overtime'])
         G.node[n]['nlabel'] = str(n)
+   
 
     # edges data
 
@@ -270,6 +281,7 @@ def genVData(G,time_step,Tmax,graphName):
         c = 0
         
         while (c < len(edges)):  
+                    
                         
             # graph data modifications for file output
             edges[c]['x_overtime']              = str(edges[c]['x_overtime'])
@@ -280,9 +292,11 @@ def genVData(G,time_step,Tmax,graphName):
             edges[c]['f_e_plus_overtime']       = str(edges[c]['f_e_plus_overtime'])
             edges[c]['f_e_minus_overtime']      = str(edges[c]['f_e_minus_overtime'])
             edges[c]['z_e_overtime']            = str(edges[c]['z_e_overtime'])                
-    
+
             c = c + 1
 
+
+    
     # Save file with the graph data
 
     nx.write_gml(G,os.path.join(data_path,graphName+".gml"))

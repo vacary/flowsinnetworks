@@ -309,7 +309,7 @@ def test13(pars):
 
     source = 's'
     #Original values
-    timeofevent=[0.0,1.0,2.0,10.0]
+    timeofevent=[0.0,1.0,2.0,20.0]
     inputflow=[2.0,0.0,1.0]
 
     # timeofevent=[0.0,1.0,2.0,6.0,10.0]
@@ -415,7 +415,7 @@ def test15(pars):
     G=examples.example_Larre()
     source = 's'
 
-    timeofevent=[0.0,0.5,1.5,6.0]
+    timeofevent=[0.0,0.5,1.5,20.0]
     inputflow=[4.0, 4.0 ,4.0,4.0]
 
 

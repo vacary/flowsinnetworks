@@ -23,11 +23,11 @@
 #graph = 'example_simple1'
 #graph = 'example_Fig1_Cominetti' # (visualization demo available)
 #graph = 'example_Fig1_Cominetti_variant1'
-#graph = 'example_Larre' # (visualization demo available)
+graph = 'example_Larre' # (visualization demo available)
 #graph = 'example_Larre_bis'
 #graph = 'example_parallelpath'
 #graph = 'custom_graph'
-graph  = 'example_doubleparallelpath' 
+#graph  = 'example_doubleparallelpath' 
 
 #graph = 'example_map_Tobalaba' # (map data available - work in progress)
 
@@ -35,13 +35,13 @@ graph  = 'example_doubleparallelpath'
 ##############################
 
 NETWORK_GRAPH   = graph
-T_MAX           = 25.0
+T_MAX           = 15.0
 TIME_STEP       = 0.1
-FPS             = 25
+FPS             = 24
 
 ADD_DUMMY_SOURCE_NODE       = 0 # 0 or 1 [ on evaluation / for now, no changes if ADD_DUMMY_SOURCE_NODE = 1 ] 
 PRIORITY_GRAPHVIZ_LAYOUT    = 1 # 0 or 1
-INTERACTOR_STYLE            = 'StyleImage' # 'StyleImage' or 'RubberBand3D'
-#INTERACTOR_STYLE            = 'RubberBand3D'
+#INTERACTOR_STYLE            = 'StyleImage' # 'StyleImage' or 'RubberBand3D'
+INTERACTOR_STYLE            = 'RubberBand3D'
 
 ##############################

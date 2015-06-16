@@ -48,7 +48,7 @@ class mainWindow(QtGui.QMainWindow):
         # parameters
         
         self.Tmax                       = pars.T_MAX
-        self.time_step                  = max(pars.TIME_STEP,0.1)
+        self.time_step                  = max(pars.TIME_STEP,1E-10)
         self.globalNumberOfTimeSteps    = int(floor(self.Tmax/self.time_step))
 
         self.fps                        = max(pars.FPS,20)
@@ -676,12 +676,12 @@ class mainWindow(QtGui.QMainWindow):
                         edge_key = self.edgesElements[j].ID
           
                         mqValue = self.arrayOfQueues[id_t][edge_key]
-                        qValue = max(mqValue, 0.0001)
+                        qValue = max(mqValue, 0.00001)
                            
-                        if (mqValue >= 0):
+                        if (mqValue != -1):
                             self.edgesElements[j].vtkQBox.vtkActor.GetProperty().SetColor(0.5,0.5,0.5)
                             self.edgesElements[j].vtkQueue.vtkActor.GetProperty().SetColor(0,1.0,0)
-                            self.edgesElements[j].vtkQueue.setEndPointFromValue(2*max(qValue,0.0001))
+                            self.edgesElements[j].vtkQueue.setEndPointFromValue(2*max(qValue,0.00001))
                         else:
                             self.edgesElements[j].vtkQBox.vtkActor.GetProperty().SetColor(0.1,0.1,0.1)
                             self.edgesElements[j].vtkQueue.vtkActor.GetProperty().SetColor(0.1,0.1,0.1)

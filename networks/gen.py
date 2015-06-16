@@ -17,7 +17,7 @@ def data_generator():
     
     try:
     
-        lib_path = os.path.abspath(os.path.join('..','..'))
+        lib_path = os.path.abspath(os.path.join('..'))
         sys.path.append(lib_path)
         
         import Flows.test as t

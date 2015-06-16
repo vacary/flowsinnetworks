@@ -13,7 +13,7 @@ import settings
 import lib.errors as e
 import dev.graphs.test as dev
 
-lib_path = os.path.abspath(os.path.join('..','..'))
+lib_path = os.path.abspath(os.path.join('..'))
 sys.path.append(lib_path)
 
 import Flows.examples as exa
