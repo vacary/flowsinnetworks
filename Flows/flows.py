@@ -32,14 +32,6 @@ class parameters:
     def __init__(self):
         pass
 
-
-
-
-
-
-
-
-
 def print_debug(*args, **kwargs):
     """My custom print() function."""
     # Adding new arguments to the print function signature
@@ -106,7 +98,7 @@ def display_graph(G, print_function = print):
         for ntail,nbrs in G.adjacency_iter():
             for nhead,eattr in nbrs.items():
                 for k,keydata in eattr.items():
-                    print_function('  edge : ','(\''+ntail+'\'', ",", '\''+nhead+'\')',  ", key =",k,",", drepr(keydata) )
+                    print_function('  edge : ','(\''+str(ntail)+'\'', ",", '\''+str(nhead)+'\')',  ", key =",k,",", drepr(keydata) )
     else :
         for e in G.edges():
             print_function (" edge :", e, G[e[0]][e[1]])
@@ -191,7 +183,7 @@ def current_shortest_path_graph(G, label='label'):
     
             
     #print_debug( E.edges())
-    #print_debug((nx.dijkstra_path(G,'s','t')))
+    #print_debug((nx.dijkstra_path(G,source,sink)))
     print_debug( "E :")
     display_graph(E,print_debug)
     print_debug( "E_comp :")
@@ -487,7 +479,7 @@ def sparsest_cut_withSwiglpk(G,b,source,tol) :
     x_edge={}
     for e in G.edges(keys=True):
         i=i+1
-        name = 'x_' + str(e[0])+str(e[1])+'_'+str(e[2])
+        name = 'x_' + str(e[0])+'_'+str(e[1])+'_'+str(e[2])
         # if (e[0]==source and e[1]=='s'):
         #     x_init=i
         x_edge[e]=i
@@ -517,7 +509,7 @@ def sparsest_cut_withSwiglpk(G,b,source,tol) :
 
     for n in G.nodes():
         i=i+1
-        name = 'balance_' + n
+        name = 'balance_' + str(n)
         swiglpk.glp_set_row_name(lp, i, name);
         swiglpk.glp_set_row_bnds(lp, i, swiglpk.GLP_FX,b[n] ,b[n]);
         for ee in G.out_edges(n,keys=True):
@@ -543,7 +535,7 @@ def sparsest_cut_withSwiglpk(G,b,source,tol) :
 
     #print_debug'nz =', nz)
 
-    print_debug([ (ia[i], ja[i], ar[i]) for i in  range(nz) ] )
+    print_debug([ (ia[i], ja[i], ar[i]) for i in  range(1,nz) ] )
     swiglpk.glp_load_matrix(lp, nz, ia, ja, ar);
 
 
@@ -859,7 +851,7 @@ def sparsest_cut(G,b,source,tol=1e-12,tol_cut=1e-12) :
 
 
 
-def maxflow_mincut_by_lp(G) :
+def maxflow_mincut_by_lp(G,source,sink) :
 
 
 
@@ -887,9 +879,9 @@ def maxflow_mincut_by_lp(G) :
 
 
     for n in G.nodes():
-        if (n == 's'):
+        if (n == source):
             prob += pulp.lpSum([x[ee]   for ee in G.out_edges(n)]) -  pulp.lpSum([x[ee]   for ee in G.in_edges(n)]) == vf
-        elif (n == 't'):
+        elif (n == sink):
             prob += pulp.lpSum([x[ee]   for ee in G.out_edges(n)]) -  pulp.lpSum([x[ee]   for ee in G.in_edges(n)]) == -vf
         else :
             prob += pulp.lpSum([x[ee]   for ee in G.out_edges(n)]) -  pulp.lpSum([x[ee]   for ee in G.in_edges(n)]) == 0
@@ -921,7 +913,7 @@ def maxflow_mincut_by_lp(G) :
 
     dual_prob += pulp.lpSum([gamma[ee]*G[ee[0]][ee[1]]['capacity'] for ee in G.edges()])
 
-    dual_prob += -pi['s'] + pi['t'] >=1
+    dual_prob += -pi[source] + pi[sink] >=1
 
     for e in G.edges():
         dual_prob += gamma[e]  >= 0
@@ -1042,6 +1034,7 @@ def compute_thin_flow_without_resetting(G,source,b, demand=None, param=None):
         for e in set.intersection(set(Gi.in_edges(cut,keys=True)),set(Gi.out_edges(comp_cut,keys=True))) :
             print_debug( 'e in intersection1=',e  )
             bi[e[1]] = bi[e[1]] + Gi[e[0]][e[1]][e[2]]['flow']
+            G[e[0]][e[1]][e[2]]['thin_flow'] = Gi[e[0]][e[1]][e[2]]['flow']
 
         for e in Gi.in_edges(comp_cut,keys=True):
             G[e[0]][e[1]][e[2]]['thin_flow'] = Gi[e[0]][e[1]][e[2]]['flow']
@@ -1056,6 +1049,7 @@ def compute_thin_flow_without_resetting(G,source,b, demand=None, param=None):
         # nx.draw(Gi,pos=Gpos,node_color='#A0CBE2', with_labels=True, with_edge_labels=True)
         # plt.draw()
         # plt.show()
+        #raw_input()
         continue_while = (bi[source] > param.tol_lp and k < nmax)
         #continue_while = (cut!=[source] and k < nmax and cut!=[])
 
@@ -1203,30 +1197,29 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
                 bi[n] = bi[n] -  G_anchored[source][e[1]][e[2]]['thin_flow']
 
         # test enumeration
-        tol_enumeration = 10e-6
-        P=[]
-        T=[]
-        for e in G.edges(keys=True):
-            if e in  E1.edges(keys=True) :
-                G[e[0]][e[1]][e[2]]['thin_flow']=G_anchored[source][e[1]][e[2]]['thin_flow']
-            else:
-                G[e[0]][e[1]][e[2]]['thin_flow']=G_anchored[e[0]][e[1]][e[2]]['thin_flow']
+        # tol_enumeration = 10e-6
+        # P=[]
+        # T=[]
+        # for e in G.edges(keys=True):
+        #     if e in  E1.edges(keys=True) :
+        #         G[e[0]][e[1]][e[2]]['thin_flow']=G_anchored[source][e[1]][e[2]]['thin_flow']
+        #     else:
+        #         G[e[0]][e[1]][e[2]]['thin_flow']=G_anchored[e[0]][e[1]][e[2]]['thin_flow']
 
-        for n in  G_anchored.nodes():
-            G.node[n]['label_thin_flow'] =  G_anchored.node[n]['label_thin_flow']
+        # for n in  G_anchored.nodes():
+        #     G.node[n]['label_thin_flow'] =  G_anchored.node[n]['label_thin_flow']
 
-        for e in G.edges(keys=True):
-            if G[e[0]][e[1]][e[2]]['thin_flow'] >= tol_enumeration :
-                P.append(e)
-        for e in E1.edges(keys=True):
-            T.append(e)
-        for e in  set.difference (set(G.edges(keys=True)), set(E1.edges(keys=True)) ):
-            if (G.node[e[0]]['label_thin_flow'] <= G[e[0]][e[1]][e[2]]['thin_flow']/G_anchored[e[0]][e[1]][e[2]]['capacity'] ):
-                T.append(e)
+        # for e in G.edges(keys=True):
+        #     if G[e[0]][e[1]][e[2]]['thin_flow'] >= tol_enumeration :
+        #         P.append(e)
+        # for e in E1.edges(keys=True):
+        #     T.append(e)
+        # for e in  set.difference (set(G.edges(keys=True)), set(E1.edges(keys=True)) ):
+        #     if (G.node[e[0]]['label_thin_flow'] <= G[e[0]][e[1]][e[2]]['thin_flow']/G_anchored[e[0]][e[1]][e[2]]['capacity'] ):
+        #         T.append(e)
 
-
-        print("P=",P)
-        print("T=",T)
+        # print("P=",P)
+        # print("T=",T)
         err = 0.0
         #print_debug( "biold = ", biold)
         #print_debug( "bi = ", bi)
@@ -1494,7 +1487,7 @@ def feasible_time_extension(G,E,E_star,E_comp):
 
 
 
-def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, timeofevent, inputflow, param=None):
+def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow, param=None):
 
     if param==None:
         param = parameters()
@@ -1503,7 +1496,7 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, timeofevent,
     # The disjkstra algorithm for shortest path seems to be adapted for multigraph
     # it seems that it uses the mimimal weight over the common edges between to nodes
     # a post-processing is then needed to know the edge that is really in the shortest path.
-    length,path=nx.single_source_dijkstra(G,'s', weight='time')
+    length,path=nx.single_source_dijkstra(G, source, weight='time')
 
     N = len(timeofevent)-1  # initial number of events
 
@@ -1543,19 +1536,19 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, timeofevent,
         u= {} # dictionary of flows in nodes
         for n in G.nodes():
             u[n] =0.0
-        u['s'] = inputflow[i]
-        u['t'] = - inputflow[i]
+        u[source] = inputflow[i]
+        u[sink] = - inputflow[i]
         d= inputflow[i]
 
         # Compute thin flow and associated labels (label_thin_flow) on E
         if (d == 0.0) :
-            compute_thin_flow_ofzerosize(E,'s',u,Estar)
+            compute_thin_flow_ofzerosize(E,source,u,Estar)
         else:
-            compute_thin_flow(E,'s',u,Estar,d, param)
+            compute_thin_flow(E,source,u,Estar,d, param)
 
         display_graph(E)
 
-        assert_thin_flow(E,'s',u,Estar,d,param)
+        assert_thin_flow(E,source,u,Estar,d,param)
 
         # set the thin flow  and associated labels (label_thin_flow) for the whole graph G
         for ntail,nbrs in E_comp.adjacency_iter():
@@ -1621,7 +1614,7 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, timeofevent,
         print( '#################################################################################\n')
 
 
-def compute_dynamic_equilibrium_timestepping(G, source, h, t0, N, flow_function, param=None):
+def compute_dynamic_equilibrium_timestepping(G, source, sink, h, t0, N, flow_function, param=None):
 
     if param==None:
         param = parameters()
@@ -1629,7 +1622,7 @@ def compute_dynamic_equilibrium_timestepping(G, source, h, t0, N, flow_function,
     # The disjkstra algorithm for shortest path seems to be adapted for multigraph
     # it seems that it uses the mimimal weight over the common edges between to nodes
     # a post-processing is then needed to know the edge that is really in the shortest path.
-    length,path=nx.single_source_dijkstra(G,'s', weight='time')
+    length,path=nx.single_source_dijkstra(G,source, weight='time')
 
     
     # compute the initial labels and flows.
@@ -1700,19 +1693,19 @@ def compute_dynamic_equilibrium_timestepping(G, source, h, t0, N, flow_function,
         for n in G.nodes():
             u[n] =0.0
         u_i = flow_function(t_i)
-        u['s'] = u_i
-        u['t'] = - u_i
+        u[source] = u_i
+        u[sink] = - u_i
         d = u_i
 
         # Compute thin flow and associated labels (label_thin_flow) on E
         if (abs (u_i) < machine_epsilon  ) :
-            compute_thin_flow_ofzerosize(E,'s',u,Estar)
+            compute_thin_flow_ofzerosize(E,source,u,Estar)
         else:
-            compute_thin_flow(E,'s',u,Estar,d, param)
+            compute_thin_flow(E,source,u,Estar,d, param)
 
         #display_graph(E)
 
-        assert_thin_flow(E,'s',u,Estar,d,param)
+        assert_thin_flow(E,source,u,Estar,d,param)
 
         # set the thin flow  and associated labels (label_thin_flow) for the whole graph G
         for ntail,nbrs in E_comp.adjacency_iter():
@@ -2290,3 +2283,152 @@ def plot_flows_queues_cumulativeflows_timestepping(G, timesteps, edge=None, key=
     plt.xlim([min_x,max_x])
     min_y,max_y=plt.ylim()
     plt.ylim([min_y-offset_y,max_y+offset_y])
+
+
+def f_e_minus(G, e, time):
+    ntail = e[0]
+    nhead = e[1]
+    key = e[2]
+    if time < G.node[nhead]['label_overtime'][0]:
+        return 0.0
+    for j in range(len( G.node[nhead]['label_overtime'])-1):
+        if ((G.node[nhead]['label_overtime'][j] <= time) and (time <= (G.node[nhead]['label_overtime'][j+1]) )):
+            return G[ntail][nhead][key]['f_e_minus_overtime'][j]
+    print("Warning: time ='",time, "is out of range of definition of f_e_minus")
+    return -1.0
+
+def f_e_plus(G, e, time):
+    ntail = e[0]
+    nhead = e[1]
+    key = e[2]
+    if time < G.node[ntail]['label_overtime'][0]:
+        return 0.0
+    for j in range(len( G.node[ntail]['label_overtime'])-1):
+        if ((G.node[ntail]['label_overtime'][j] <= time) and (time <= (G.node[ntail]['label_overtime'][j+1]))):
+            return G[ntail][nhead][key]['f_e_plus_overtime'][j]
+    print("Warning: time =",time, "is out of range of definition of f_e_plus")
+
+    return 1e+24
+
+
+
+def postprocess_extravalues(G, source, sink):
+    debug_var= True
+
+    simpleG = nx.DiGraph()
+    simpleG.add_nodes_from(G.nodes())
+    for e in G.edges(keys=True):
+        if e[2] ==0 :
+            simpleG.add_edge(e[0],e[1], capacity=G[e[0]][e[1]][e[2]]['capacity'])
+        else :
+            simpleG[e[0]][e[1]]['capacity'] = simpleG[e[0]][e[1]]['capacity'] + G[e[0]][e[1]][e[2]]['capacity']
+
+
+    cut_value, partition = nx.minimum_cut(simpleG, source, sink)
+    X, Xbar = partition
+    print(cut_value, partition)
+    G.name= dict([])
+
+    G.name['X']= X
+    G.name['Xbar']= Xbar
+
+
+    edges_cut =set.intersection(set(G.out_edges(X,keys=True)),set(G.in_edges(Xbar,keys=True)))
+    G.name['edges_cut']= edges_cut
+
+    print (edges_cut)
+
+    switch_time_f_e_minus=[]
+    Tmax_minus=1e+24
+    for e  in edges_cut:
+        Tmax_minus=min(Tmax_minus,max(G.node[e[1]]['label_overtime']))
+
+    for e  in edges_cut:
+        for titi in G.node[e[1]]['label_overtime']:
+            if (titi <= Tmax_minus):
+                switch_time_f_e_minus.append(titi)
+    switch_time_f_e_minus.sort()
+    print(switch_time_f_e_minus)
+
+    G.name['switching_times_f_Xbar_minus']= switch_time_f_e_minus
+
+
+
+    Tmax_plus=1e+24
+    for e  in edges_cut:
+        Tmax_plus=min(Tmax_plus,max(G.node[e[0]]['label_overtime']))
+
+    switch_time_f_e_plus=[]
+    for e  in edges_cut:
+        for titi in G.node[e[0]]['label_overtime']:
+            if (titi <= Tmax_plus):
+                switch_time_f_e_plus.append(titi)
+    switch_time_f_e_plus.sort()
+    print("switch_time_f_e_plus",switch_time_f_e_plus)
+    G.name['switching_times_f_Xbar_plus']= switch_time_f_e_plus
+
+
+    f_Xbar_minus = []
+    for t in switch_time_f_e_minus:
+        flow =0.0
+        for e  in edges_cut:
+            flow = flow + f_e_minus(G, e, t)
+        f_Xbar_minus.append(flow)
+    print(f_Xbar_minus)
+
+    G.name['f_Xbar_minus'] = f_Xbar_minus
+
+    f_Xbar_plus = []
+    for t in switch_time_f_e_plus:
+        flow =0.0
+        for e  in edges_cut:
+            flow = flow + f_e_plus(G, e, t)
+        f_Xbar_plus.append(flow)
+    print(f_Xbar_plus)
+
+    G.name['f_Xbar_plus'] = f_Xbar_plus
+
+
+def plot_extravalues(G):
+
+    print(drepr(G.name))
+
+    min_x=0.0
+    max_x=0.0
+    for ntail,nbrs in G.adjacency_iter():
+        max_x =max([max_x, max(G.node[ntail]['label_overtime'])])
+
+
+    plt.subplot(511)
+    plt.grid()
+    plt.title('f_Xbar_minus')
+    x_plot_data = []
+    y_plot_data = []
+    for i in range(len(G.name['switching_times_f_Xbar_minus'])-1):
+        x_plot_data.append(G.name['switching_times_f_Xbar_minus'][i])
+        y_plot_data.append(G.name['f_Xbar_minus'][i+1])
+        x_plot_data.append(G.name['switching_times_f_Xbar_minus'][i+1])
+        y_plot_data.append(G.name['f_Xbar_minus'][i+1])
+    plt.plot(x_plot_data[:],y_plot_data[:])
+
+    plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
+    plt.xlim([min_x,max_x])
+    min_y,max_y=plt.ylim()
+    plt.ylim([-0.1,max_y+0.1])
+
+    plt.subplot(512)
+    plt.grid()
+    plt.title('f_Xbar_plus')
+    x_plot_data = []
+    y_plot_data = []
+    for i in range(len(G.name['switching_times_f_Xbar_plus'])-1):
+        x_plot_data.append(G.name['switching_times_f_Xbar_plus'][i])
+        y_plot_data.append(G.name['f_Xbar_plus'][i+1])
+        x_plot_data.append(G.name['switching_times_f_Xbar_plus'][i+1])
+        y_plot_data.append(G.name['f_Xbar_plus'][i+1])
+    plt.plot(x_plot_data[:],y_plot_data[:])
+
+    plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
+    plt.xlim([min_x,max_x])
+    min_y,max_y=plt.ylim()
+    plt.ylim([-0.1,max_y+0.1])

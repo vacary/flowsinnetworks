@@ -206,9 +206,10 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_compute_dynamic_equilibrium_for_pwconstant_inputflow(self):
         G=examples.example_Fig1_Cominetti()
         source = 's'
+        sink= 't'
         timeofevent=[0.0,1.0,2.0,10.0]
         inputflow=[2.0,0.0,1.0]
-        flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, timeofevent, inputflow)
+        flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow)
 
         # check current values
         self.assertEqual(G.node['s']['label_thin_flow'], 1.0)
@@ -238,7 +239,7 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_compute_dynamic_equilibrium_for_pwconstant_inputflow2(self):
         G=examples.example_KochSkutella2011_Fig3_Fig4()
         source = 's'
-
+        sink ='t'
         timeofevent=[0.0,20.0]
         inputflow=[3.0,3.0,3.0]
 
@@ -249,7 +250,7 @@ class TestSequenceFunctions(unittest.TestCase):
         param.tol_cut=1e-12
 
 
-        flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, timeofevent, inputflow,param=param)
+        flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow,param=param)
 
         tol =  param.tol_thin_flow*10
 
@@ -278,7 +279,7 @@ class TestSequenceFunctions(unittest.TestCase):
         
         G=examples.example_Larre()
         source = 's'
-        
+        sink ='t'
         timeofevent=[0.0,6.0]
         inputflow=[4.0, 4.0]
         
@@ -291,7 +292,7 @@ class TestSequenceFunctions(unittest.TestCase):
         tol =  param.tol_thin_flow*10
 
 
-        flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, timeofevent, inputflow,param)
+        flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow,param)
 
         print("******************************************************************",abs(G.node['v1']['label']- 16.0))
         self.assertTrue(abs(G.node['s']['label_thin_flow']- 1.0) <= tol )

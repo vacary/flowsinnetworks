@@ -169,6 +169,27 @@ def example_Larre_bis():
     G.add_edge('v2','t',time= 1., capacity=1., flow =0)
     return G
 
+def example_bridge_one():
+    G=nx.MultiDiGraph()
+    #G.add_nodes_from("svwt")
+    G.add_node('s')
+    G.add_node('v1')
+    G.add_node('u')
+    G.add_node('v2')
+    G.add_node('t')
+
+    G.node['s']['label'] = 0
+    G.node['v1']['label'] = 0
+    G.node['v2']['label'] = 0
+    G.node['t']['label'] = 0
+    G.add_edge('s','v1',time= 1., capacity=3., flow =0)
+    G.add_edge('s','v2',time= 3., capacity=4., flow =0)
+    G.add_edge('v1','u',time= 0.5, capacity=2., flow =0)
+    G.add_edge('u','v2',time= 0.5, capacity=2., flow =0)
+    G.add_edge('v1','t',time= 14/3.0, capacity=3., flow =0)
+    G.add_edge('v2','t',time= 1., capacity=1., flow =0)
+    return G
+
 
 def example_parallelpath():
     G=nx.MultiDiGraph()
@@ -187,19 +208,22 @@ def example_parallelpath():
 def example_doubleparallelpath():
     G=nx.MultiDiGraph()
     G.add_nodes_from("srt")
+
+
+
     
     G.node['s']['label'] = 0
     G.node['r']['label'] = 0
     G.node['t']['label'] = 0
-    G.add_edge('s','r',time= 1./2.0, capacity=1., flow =0)
-    G.add_edge('s','r',time= 1., capacity=1., flow =0)
-    G.add_edge('s','r',time= 3./2.0, capacity=1., flow =0)
-    G.add_edge('s','r',time= 2., capacity=1., flow =0)
-    G.add_edge('s','r',time= 5./2.0, capacity=1., flow =0)
-    G.add_edge('s','r',time= 3., capacity=1., flow =0)
+    G.add_edge('s','r',time= 1./2.0, capacity=0.5, flow =0)
+    G.add_edge('s','r',time= 1., capacity=0.6, flow =0)
+    G.add_edge('s','r',time= 3./2.0, capacity=0.7, flow =0)
+    G.add_edge('s','r',time= 2., capacity=0.8, flow =0)
+    G.add_edge('s','r',time= 5./2.0, capacity=0.9, flow =0)
+    G.add_edge('s','r',time= 3., capacity=1.0, flow =0)
     
-    G.add_edge('r','t',time= 1., capacity=1., flow =0)
-    G.add_edge('r','t',time= 2., capacity=1., flow =0)
+    G.add_edge('r','t',time= 1., capacity=0.8, flow =0)
+    G.add_edge('r','t',time= 2., capacity=0.9, flow =0)
     G.add_edge('r','t',time= 3., capacity=1., flow =0)
-    G.add_edge('r','t',time= 4., capacity=1., flow =0)
+    G.add_edge('r','t',time= 4., capacity=1.1, flow =0)
     return G
