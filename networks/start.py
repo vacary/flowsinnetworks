@@ -520,14 +520,14 @@ class mainWindow(QtGui.QMainWindow):
                     
                     if (nArcPoints % 2 == 1):
                         
-                        p0      = el.vtkPoints.GetPoint(int(0.5*(nArcPoints-1)))
-                        rPos    = array(p0)
+                        box_position    = el.vtkPoints.GetPoint(int(0.5*(nArcPoints-1)))
+                        rPos            = array(box_position)
                     
                     else:
                         
-                        p0      = el.vtkPoints.GetPoint(int(0.5*nArcPoints - 1))
-                        p1      = el.vtkPoints.GetPoint(int(0.5*nArcPoints))
-                        rPos    = 0.5*(array(p0)+array(p1))                        
+                        box_position_0  = el.vtkPoints.GetPoint(int(0.5*nArcPoints - 1))
+                        box_position_1  = el.vtkPoints.GetPoint(int(0.5*nArcPoints))
+                        rPos            = 0.5*(array(box_position_0)+array(box_position_1))                        
                     
                     qHeight     = 6
                     qDistance   = 1.75*(-1*plusFactor)
