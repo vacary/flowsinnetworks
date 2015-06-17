@@ -5,7 +5,7 @@ Flow in networks - Visualization
 
 Maximiliano Olivares <maximiliano.olivares@inria.cl>
 
-Last update : June 10, 2015
+Last update : June 17, 2015
 
 ------------------------------------------------------------------
 
@@ -37,7 +37,7 @@ to be executed:
 The user can edit the file "settings.py" to set the following elements for
 the visualization:
 
-- Network graph	: name of a graph defined, for instance, in ./sim/examples.py
+- Network graph	: name of a graph defined, for instance, in flowsinnetworks/Flows/examples.py
 - Tmax			: time horizon for the visualization
 - time_step		: visualization time step
 - FPS			: frames per second 

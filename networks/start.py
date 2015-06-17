@@ -506,7 +506,7 @@ class mainWindow(QtGui.QMainWindow):
                     p0 = self.nxGraph.node[e[0]]['pos']
                     p1 = self.nxGraph.node[e[1]]['pos']
                     
-                    numberOfTimeDivisions = int(floor(edges[0]['time']/self.time_step))
+                    numberOfTimeDivisions = int(floor(edges[c]['time']/self.time_step))
                                        
                     # DYNAMIC
                     
@@ -520,11 +520,14 @@ class mainWindow(QtGui.QMainWindow):
                     
                     if (nArcPoints % 2 == 1):
                         
-                        rPos = el.vtkPoints.GetPoint(int(0.5*(nArcPoints-1)))
+                        p0      = el.vtkPoints.GetPoint(int(0.5*(nArcPoints-1)))
+                        rPos    = array(p0)
                     
                     else:
                         
-                        rPos = 0.5*(el.vtkPoints.GetPoint(int(0.5*nArcPoints - 1))+el.vtkPoints.GetPoint(int(0.5*nArcPoints)))                           
+                        p0      = el.vtkPoints.GetPoint(int(0.5*nArcPoints - 1))
+                        p1      = el.vtkPoints.GetPoint(int(0.5*nArcPoints))
+                        rPos    = 0.5*(array(p0)+array(p1))                        
                     
                     qHeight     = 6
                     qDistance   = 1.75*(-1*plusFactor)

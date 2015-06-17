@@ -256,51 +256,35 @@ def genVData(G,time_step,Tmax,graphName):
     
     # Add graph edges keys and create data files for visualization
     
-    G = genDataFromMultiGraphStructure(G,time_step,Tmax,graphName)
+    G  = genDataFromMultiGraphStructure(G,time_step,Tmax,graphName)
 
-    
     ''' Modifications in graph data according to the required file output format
     '''
-    
+
+    SG = nx.MultiDiGraph()
+
     # node data
     
-   
-    for n in G.nodes_iter():
-
-        G.node[n]['label_thin_flow_overtime'] = str(G.node[n]['label_thin_flow_overtime'])
-        G.node[n]['label_overtime'] = str(G.node[n]['label_overtime'])
-        G.node[n]['nlabel'] = str(n)
-   
-
-    # edges data
-
-    for e in sorted(set(G.edges_iter())):
-
-        edges = G.edge[e[0]][e[1]]
-    
-        c = 0
+    for n in G.nodes_iter():    
+        SG.add_node(n)
+        SG.node[n]['label_thin_flow_overtime'] = str(G.node[n]['label_thin_flow_overtime'])
+        SG.node[n]['label_overtime'] = str(G.node[n]['label_overtime'])
+        SG.node[n]['nlabel'] = str(n)        
         
-        while (c < len(edges)):  
-                    
-                        
-            # graph data modifications for file output
-            edges[c]['x_overtime']              = str(edges[c]['x_overtime'])
-            edges[c]['thin_flow_overtime']      = str(edges[c]['thin_flow_overtime'])
-            edges[c]['switching_times']         = str(edges[c]['switching_times'])
-            edges[c]['F_e_minus_overtime']      = str(edges[c]['F_e_minus_overtime'])
-            edges[c]['F_e_plus_overtime']       = str(edges[c]['F_e_plus_overtime'])
-            edges[c]['f_e_plus_overtime']       = str(edges[c]['f_e_plus_overtime'])
-            edges[c]['f_e_minus_overtime']      = str(edges[c]['f_e_minus_overtime'])
-            edges[c]['z_e_overtime']            = str(edges[c]['z_e_overtime'])                
-
-            c = c + 1
-
-
-    
+    for u,v,data in G.edges_iter(data=True):
+        
+        edge_key        = data['edge_key']
+        edge_skey       = data['edge_skey']
+        
+        time        = data['time']
+        capacity    = data['capacity']
+        
+        SG.add_edge(u,v, edge_key = edge_key, edge_skey = edge_skey, time = time, capacity = capacity)  
+        
     # Save file with the graph data
 
-    nx.write_gml(G,os.path.join(data_path,graphName+".gml"))
-    nx.write_gml(G,os.path.join(temp_path,"temp.gml"))
+    nx.write_gml(SG,os.path.join(data_path,graphName+".gml"))
+    nx.write_gml(SG,os.path.join(temp_path,"temp.gml"))
     plt.savefig(os.path.join(temp_path,'test.png'))
     
     #print('[ graph file available ]' )
