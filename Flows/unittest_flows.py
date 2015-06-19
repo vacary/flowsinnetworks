@@ -53,8 +53,8 @@ class TestSequenceFunctions(unittest.TestCase):
         congestion,cut,comp_cut = flows.sparsest_cut(G,b,'s')
         print  congestion,cut,comp_cut
         self.assertEqual(congestion, 3.0)
-        self.assertEqual(cut, ['s','w','v'])
-        self.assertEqual(comp_cut, ['t'])
+        self.assertEqual(cut, set(['s','w','v']))
+        self.assertEqual(comp_cut, set(['t']))
 
     def test_sparsest_cut1(self):
         G=examples.example_simple1()
@@ -74,8 +74,8 @@ class TestSequenceFunctions(unittest.TestCase):
         congestion,cut,comp_cut = flows.sparsest_cut(G,b,'s0')
         print  congestion,cut,comp_cut
         self.assertEqual(congestion, 1.0)
-        self.assertEqual(cut, ['s0'])
-        self.assertEqual(comp_cut, ['s','t','v'])
+        self.assertEqual(cut, set(['s0']))
+        self.assertEqual(comp_cut, set(['s','t','v']))
 
 
     def test_current_shortest_path_graph(self):

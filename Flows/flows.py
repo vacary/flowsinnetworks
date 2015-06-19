@@ -17,10 +17,28 @@ if withScipyOpt:
 if withSwiglpk:
     import swiglpk
 
-debug_var = True
-debug_var = False
+
+    
+debug_print = True
+#debug_print = False
+
+debug_check = True
+debug_check = False
+
+
 import numpy as np
+
 machine_epsilon=np.finfo(float).eps*10
+import os
+import shutil
+swiglpk_f_counter = 0 # counter for filename
+flowstmpdir_directory = ".tmp"
+if not os.path.exists(flowstmpdir_directory):
+    os.makedirs(flowstmpdir_directory)
+else:
+    #os.removedirs(swiglpk_directory)
+    shutil.rmtree(flowstmpdir_directory, ignore_errors=True)
+    os.makedirs(flowstmpdir_directory)
 
 class parameters:
 
@@ -39,7 +57,7 @@ def print_debug(*args, **kwargs):
     # Instead consider testing if custom argument keywords
     # are present in kwargs
 
-    if debug_var:
+    if debug_print:
         #__builtin__.print('My overridden print() function!')
         return __builtin__.print(*args, **kwargs)
 
@@ -435,7 +453,7 @@ def sparsest_cut_withScipyOpt(G,b,source) :
 
 def sparsest_cut_withSwiglpk(G,b,source,tol) :
 
-    if (debug_var==False):
+    if (debug_print==False):
         #swiglpk.glp_msg_lev(swiglpk.GLP_MSG_OFF)
         #swiglpk.glp_smcp.msg_lev =0
         swiglpk.glp_term_out(swiglpk.GLP_OFF)
@@ -472,7 +490,7 @@ def sparsest_cut_withSwiglpk(G,b,source,tol) :
     nnz=nnz+1
     #nnz=nnz+1
 
-    print_debug('nnz=',nnz)
+    #print_debug('nnz=',nnz)
     ia = swiglpk.intArray(nnz); ja = swiglpk.intArray(nnz); ar = swiglpk.doubleArray(nnz);
 
     i=1
@@ -487,7 +505,7 @@ def sparsest_cut_withSwiglpk(G,b,source,tol) :
         swiglpk.glp_set_col_bnds(lp, i, swiglpk.GLP_LO, 0.0, 0.0);
         swiglpk.glp_set_obj_coef(lp, i, 0.0);
 
-    print_debug("x_edge:", drepr(x_edge))
+    #print_debug("x_edge:", drepr(x_edge))
 
 
     swiglpk.glp_add_rows(lp,nrow);
@@ -495,15 +513,15 @@ def sparsest_cut_withSwiglpk(G,b,source,tol) :
     nz=0
     for e in G.edges(keys=True):
        i=i+1
-       name = 'capacity_' + str(e[0])+str(e[1])+'_'+str(e[2])
+       name = 'capacity_' + str(e[0])+'_'+str(e[1])+'_'+str(e[2])+'_'+str(i)
        swiglpk.glp_set_row_name(lp, i, name);
        swiglpk.glp_set_row_bnds(lp, i, swiglpk.GLP_UP, 0.0, 0.0);
        nz=nz+1
-       print_debug("ia[",nz,"] = ",i,"; ja[",nz,"] = ",1 ,"; ar[",nz,"] =", -G[e[0]][e[1]][e[2]]['capacity'])
+       #print_debug("ia[",nz,"] = ",i,"; ja[",nz,"] = ",1 ,"; ar[",nz,"] =", -G[e[0]][e[1]][e[2]]['capacity'])
 
        ia[nz] = i; ja[nz] = 1; ar[nz] = -G[e[0]][e[1]][e[2]]['capacity']; # a[i,1] = -G[e[0]][e[1]][e[2]]['capacity']
        nz=nz+1
-       print_debug("ia[",nz,"] = ",i,"; ja[",nz,"] = ",i+1 ,"; ar[",nz,"] = -1.0")
+       #print_debug("ia[",nz,"] = ",i,"; ja[",nz,"] = ",i+1 ,"; ar[",nz,"] = -1.0")
        ia[nz] = i; ja[nz] = i+1; ar[nz] = 1.0; # a[i,i+1] = 1.0
 
 
@@ -514,12 +532,12 @@ def sparsest_cut_withSwiglpk(G,b,source,tol) :
         swiglpk.glp_set_row_bnds(lp, i, swiglpk.GLP_FX,b[n] ,b[n]);
         for ee in G.out_edges(n,keys=True):
             nz=nz+1
-            print_debug("ia[",nz,"] = ",i,"; ja[",nz,"] = x_edge[",ee,"] = ", x_edge[ee] ,"; ar[",nz,"] = 1.0")
+            #print_debug("ia[",nz,"] = ",i,"; ja[",nz,"] = x_edge[",ee,"] = ", x_edge[ee] ,"; ar[",nz,"] = 1.0")
             ia[nz] = i; ja[nz] = x_edge[ee]; ar[nz] = 1.0
         for ee in G.in_edges(n,keys=True):
 
             nz=nz+1
-            print_debug("ia[",nz,"] = ",i,"; ja[",nz,"] = x_edge[",ee,"] = ", x_edge[ee] ,"; ar[",nz,"] = -1.0")
+            #print_debug("ia[",nz,"] = ",i,"; ja[",nz,"] = x_edge[",ee,"] = ", x_edge[ee] ,"; ar[",nz,"] = -1.0")
             ia[nz] = i; ja[nz] = x_edge[ee]; ar[nz] = -1.0; # a[i,i+1] = -1.0
 
     # i=i+1
@@ -528,37 +546,70 @@ def sparsest_cut_withSwiglpk(G,b,source,tol) :
     # nz=nz+1
     # ia[nz] = i; ja[nz] = x_init; ar[nz] = 1.0; # a[i,i+1] = 1.0
 
-
-
     #for i in range(1,nz+1)    :
     #    print_debug( ia[i], ja[i], ar[i])
-
     #print_debug'nz =', nz)
+    #print_debug([ (ia[i], ja[i], ar[i]) for i in  range(1,nz) ] )
 
-    print_debug([ (ia[i], ja[i], ar[i]) for i in  range(1,nz) ] )
     swiglpk.glp_load_matrix(lp, nz, ia, ja, ar);
 
+    global swiglpk_f_counter
+    swiglpk_f_counter +=1
+    if (swiglpk_f_counter >= 0):
+        s_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.lp'
+        print("s_filename", s_filename)
+        swiglpk.glp_write_lp(lp, None, s_filename);
 
-    swiglpk.glp_write_lp(lp, None, 'sparsest_glpk.lp');
 
+    if (swiglpk_f_counter < -1) : # >= 185):
+               
+        fig = plt.figure()
+        #nx.draw_graphviz(G)
+        
+        nx.draw_graphviz(G,node_color='#A0CBE2', with_labels=True, with_edge_labels=True)
+        #nx.draw_networkx_edge_labels(G,pos=nx.spring_layout(G))
+
+        fig_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.png'
+        plt.savefig(fig_filename)
+        plt.close(fig)
+        gml_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.gml'
+        GG = nx.MultiDiGraph()
+        GG.add_nodes_from(G.nodes())
+        GG.add_edges_from(G.edges())
+        for e in G.edges(keys=True):
+            GG[e[0]][e[1]][e[2]]['capacity']=  G[e[0]][e[1]][e[2]]['capacity']
+        nx.write_gml(GG,gml_filename)
+ 
+        b_numpy= np.zeros(len(b))
+        i=0
+        for n in G.nodes():
+            b_numpy[i]= b[n]
+            i=i+1
+        b_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'_b.npy'
+        np.save(b_filename,b_numpy)
     parm = swiglpk.glp_smcp()
     swiglpk.glp_init_smcp(parm)
     parm.tol_bnd=tol
 
+    
     print_debug("parm.tol_bnd = ", parm.tol_bnd )
 
 
     swiglpk.glp_simplex(lp, parm);
 
+    STATUS = swiglpk.glp_get_status(lp);
+    if STATUS != swiglpk.GLP_OPT:
+        raise RuntimeError("GLPK simplex failed !!!! \n")
+    
     congestion = swiglpk.glp_get_obj_val(lp)
     i=1
     flow={}
     for e in G.edges(keys=True):
         i=i+1
-        name = 'x_' + str(e[0])+str(e[1])+'_'+str(e[2])
+        name = 'x_' + str(e[0])+'_'+str(e[1])+'_'+str(e[2])
         flow[e] = swiglpk.glp_get_col_prim(lp, i)
         print_debug(name, '=', flow[e])
-
+        
     # for j  in range(1,ncol+1)  :
     #     col_name = swiglpk.glp_get_col_name(lp,j)
     #     col_stat = swiglpk.glp_get_col_stat(lp,j)
@@ -603,12 +654,29 @@ def sparsest_cut_withSwiglpk(G,b,source,tol) :
     #    print_debug'swiglpk.glp_get_row_dual(lp, ',j,')= ',swiglpk.glp_get_row_dual(lp, j) )
 
     swiglpk.glp_delete_prob(lp);
+
+
+    if debug_check:
+        for n in G.nodes():
+            balance = b[n]
+            for ee in G.out_edges(n,keys=True):
+                balance = balance-flow[ee]
+            for ee in G.in_edges(n,keys=True):
+                balance =balance+flow[ee]
+            assert(abs(balance)<tol)
+        for e in G.edges(keys=True):
+            assert(flow[e] - congestion*G[e[0]][e[1]][e[2]]['capacity'] <= tol)
+        
+
+
+
+    
     return congestion,flow
 
 
 def sparsest_cut_withSwiglpk_dual(G,b,source,tol) :
 
-    if (debug_var==False):
+    if (debug_print==False):
         #swiglpk.glp_msg_lev(swiglpk.GLP_MSG_OFF)
         #swiglpk.glp_smcp.msg_lev =0
         swiglpk.glp_term_out(swiglpk.GLP_OFF)
@@ -779,13 +847,67 @@ def sparsest_cut_withSwiglpk_dual(G,b,source,tol) :
     return congestion
 
 
+def congestion_of_cut(G,b,cut):
+    congestion_num=0.0
+    congestion_denom=0.0
+    comp_cut = set.difference(set(G.nodes()),cut)
+    for n in cut:
+        congestion_num += b[n]
+    out_edges =  set.intersection(set(G.out_edges(cut,keys=True)),set(G.in_edges(comp_cut,keys=True)))
+    if len(out_edges) ==0 :
+        return 0.0
+    for e in out_edges:
+        congestion_denom += G[e[0]][e[1]][e[2]]['capacity']
+        congestion  =  congestion_num /congestion_denom
+    return congestion
+
+from itertools import chain, combinations
+
+def powerset(iterable):
+  xs = list(iterable)
+  # note we return an iterator rather than a list
+  return chain.from_iterable( combinations(xs,n) for n in range(len(xs)+1) )
+
+
+def sparsest_cut_by_enumeration(G,b,source):        
+    nodes_set = set(G.nodes())
+    print(nodes_set)
+    list_of_cutsets =[]
+
+    for subset in powerset(nodes_set):
+        #    print(subset)
+        if source in subset:
+                #if len(subset) >= 2 :
+                #    if not sink in subset:
+                #        list_of_cutsets.append(subset)
+                #else:
+            list_of_cutsets.append(set(subset))
+    #print (list_of_cutsets)
+    max_congestion = 0.0
+
+    for cut in list_of_cutsets:
+        congestion = congestion_of_cut(G,b,cut)
+        if (congestion >= max_congestion ):
+            max_congestion=congestion
+
+    cut_max=nodes_set
+    for cut in list_of_cutsets:
+        congestion = congestion_of_cut(G,b,cut)
+        if (abs(congestion - max_congestion) <= machine_epsilon ):
+            if (len(cut) <= len(cut_max)):
+                cut_max=cut
+                
+
+    comp_cut_max=set.difference(nodes_set,cut_max)
+            
+    #print("max_congestion =",max_congestion, "for cut =", cut_max , "and comp_cut", comp_cut_max )
+    
+    return max_congestion, cut_max, comp_cut_max
+    
 def sparsest_cut(G,b,source,tol=1e-12,tol_cut=1e-12) :
-
     congestion=0.0
-    cut =[]
-    comp_cut=[]
-
-
+    cut = set()
+    comp_cut = set()
 
     # particular case that raises issue in LP solve.
     if G.number_of_edges() ==1 :
@@ -797,19 +919,18 @@ def sparsest_cut(G,b,source,tol=1e-12,tol_cut=1e-12) :
             print('Warning.  sparsest_cut(G,b,source).  One edge graph with sum(b) >tol')
         if (b[source] <=0 ):
             print('Warning.  sparsest_cut(G,b,source).  One edge graph with b[source] <= 0')
-        cut = [source]
-        comp_cut.append(e[1])
+        cut.add(source)
+        comp_cut.add(e[1])
         congestion= b[source]/G[e[0]][e[1]][0]['capacity']
         return congestion, cut, comp_cut
     elif G.number_of_edges() ==0:
          print('Warning.  sparsest_cut(G,b,source). No edge graph !')
          if G.number_of_nodes() ==1 :
-             cut = [source]
+             cut.add(source)
              return congestion, cut, comp_cut
          elif  G.number_of_nodes() ==0 :
              print('Warning.  sparsest_cut(G,b,source). No node graph !')
              return congestion, cut, comp_cut
-
 
 
     if withPulp :
@@ -822,9 +943,8 @@ def sparsest_cut(G,b,source,tol=1e-12,tol_cut=1e-12) :
         congestion, flow = sparsest_cut_withSwiglpk(G,b,source,tol)
         #congestion = sparsest_cut_withSwiglpk_dual(G,b,source,tol)
 
-    #print_debug('congestion=', congestion)
+    print_debug('congestion=', congestion)
     #print_debug('flow=', flow)
-
 
     # affect the flow
     for e in G.edges(keys=True):
@@ -834,17 +954,87 @@ def sparsest_cut(G,b,source,tol=1e-12,tol_cut=1e-12) :
     congestion_labels(G,source)
 
     #congestion_labels_pathmethod(G,source)
-
+    # GG=nx.MultiGraph(G)
     for n in G.nodes():
-        #print_debug( "comparaison = ", G.node[n]['congestion_label'] - congestion )
+        print_debug( "comparaison = ", G.node[n]['congestion_label'] - congestion )
         if (abs(G.node[n]['congestion_label'] - congestion) >= 10 *tol_cut and abs(G.node[n]['congestion_label'] - congestion) <= 1000 *tol_cut  ):
             print('Warning: COMPARISON IS DIFFICULT')
         if G.node[n]['congestion_label'] < congestion - tol_cut  :
-            #print_debug(  'G.node[n][\'congestion_label\']', G.node[n]['congestion_label'])
-            cut.append(n)
+            print_debug(  'G.node[n][\'congestion_label\']', G.node[n]['congestion_label'])
+            cut.add(n)
         else:
-            comp_cut.append(n)
+            comp_cut.add(n)
+            
+    while (abs(congestion_of_cut(G,b,cut)-congestion)>=tol_cut):
+        
+        print("set in intersection", set.intersection(set(G.in_edges(cut,keys=True)),set(G.out_edges(comp_cut,keys=True))) )
+        for e in set.intersection(set(G.in_edges(cut,keys=True)),set(G.out_edges(comp_cut,keys=True))) :
+            if (abs(G[e[0]][e[1]][e[2]]['flow']) >= 1e-10):
+                print( 'e from comp_cut to cut',e, "with flow =", G[e[0]][e[1]][e[2]]['flow']  )
+                cut.add(e[0])
+                comp_cut.remove(e[0])
+                break
+        print("set in intersection", set.intersection(set(G.out_edges(cut,keys=True)),set(G.in_edges(comp_cut,keys=True))) )        
+        for e in set.intersection(set(G.out_edges(cut,keys=True)),set(G.in_edges(comp_cut,keys=True))) :
+            if (abs(G[e[0]][e[1]][e[2]]['flow']-congestion*G[e[0]][e[1]][e[2]]['capacity']  ) >= 1e-10):
+                print( 'e from cut to comp_cut',e, "with flow =", G[e[0]][e[1]][e[2]]['flow']  )
+                cut.add(e[1])
+                comp_cut.remove(e[1])
+                break
+        print("while loop -- congestion =",congestion_of_cut(G,b,cut), "for cut =", cut, "and comp_cut", comp_cut)
 
+            
+            
+        
+    # sur_comp_cut=[]
+    # sur_cut =[]
+    # for n in G.nodes():
+    #     print_debug( "comparaison = ", G.node[n]['congestion_label'] - congestion )
+    #     if (abs(G.node[n]['congestion_label'] - congestion) >= 10 *tol_cut and abs(G.node[n]['congestion_label'] - congestion) <= 1000 *tol_cut  ):
+    #         print('Warning: COMPARISON IS DIFFICULT')
+    #     if G.node[n]['congestion_label'] < congestion - tol_cut  :
+    #         print_debug(  'G.node[n][\'congestion_label\']', G.node[n]['congestion_label'])
+    #         sur_cut.append(n)
+    #     else:
+    #         sur_comp_cut.append(n)
+    # print("sur_cut", sur_cut)
+    # print("sur_comp_cut", sur_comp_cut)
+            
+    # cutting_edges=set()
+    # for e in set.intersection(set(G.out_edges(sur_cut,keys=True)),set(G.in_edges(sur_comp_cut,keys=True))) :
+    #     print ("criteria=",congestion* G[e[0]][e[1]][e[2]]['capacity'] - G[e[0]][e[1]][e[2]]['flow'])
+    #     if (abs(congestion* G[e[0]][e[1]][e[2]]['capacity'] - G[e[0]][e[1]][e[2]]['flow']) <= tol_cut ):
+    #         cutting_edges.add(e)
+    # print("cutting_edges", cutting_edges)
+    
+    # for e in set.intersection(set(G.out_edges(sur_comp_cut,keys=True)),set(G.in_edges(sur_cut,keys=True))) :
+    #     print("G[e[0]][e[1]][e[2]]['flow']",G[e[0]][e[1]][e[2]]['flow'], e)
+    #     if (abs(G[e[0]][e[1]][e[2]]['flow']) <= tol_cut ):
+    #         cutting_edges.add(e)
+    # print("cutting_edges", cutting_edges)
+    # print(G.edges())
+      
+    # GG=nx.MultiGraph(G)
+    # for e in  cutting_edges:
+    #     GG.remove_edge(*e)
+        
+    # cut= nx.node_connected_component(GG,source)
+
+    # comp_cut = list(set.difference(set(GG.nodes()),set(cut)))
+    # print(cut)
+    # print(comp_cut)
+    # print(sorted(nx.connected_components(GG), key = len, reverse=True)  )
+                
+    if debug_check :
+        congestion_check  =  congestion_of_cut(G,b,cut)
+        #print_debug("congestion_check", congestion_check)
+        assert(abs(congestion_check-congestion)<=tol_cut)
+        #congestion_enum, cut_enum, comp_cut_enum = sparsest_cut_by_enumeration(G,b,source)
+        #assert(abs(congestion_enum-congestion)<=tol_cut)
+        #assert(cut_enum==cut)
+        #assert(comp_cut_enum==comp_cut)
+            
+            
     print_debug("congestion=", congestion, "sparsest_cut = ", cut, "complementary set = ", comp_cut)
 
     return  congestion,cut, comp_cut
@@ -1005,21 +1195,35 @@ def compute_thin_flow_without_resetting(G,source,b, demand=None, param=None):
     # else :   # we compute a thin flow with a vanishing source label
         # the demand is considered to be infinity
         # and the source node label is equal to zero
-    display_graph(G,print_debug)
+    #display_graph(G,print_debug)
 
     Gi=nx.MultiDiGraph.copy(G)
     bi=dict(b)
     k=1
 
-
+    print_debug("b =", b)
     continue_while=True
     nmax=Gi.number_of_nodes()
 
+    #for e in G.edges(keys=True):
+    #    G[e[0]][e[1]][e[2]]['thin_flow']=1e+48
 
     while continue_while:
         print_debug( "iteration number :", k)
-
+        for n in Gi.nodes() :
+            if abs(bi[n]) <= machine_epsilon :
+                bi[n]=0.0
         print_debug( 'bi (restricted)=', [[n, bi[n]] for n in Gi.nodes()]     )
+        sumb = 0
+        i_positive=0
+        if debug_check :
+            for n in Gi.nodes() :
+                if bi[n] >= machine_epsilon :
+                    i_positive += 1
+                sumb = sumb + bi[n]
+            assert(abs (sumb) < machine_epsilon*10)
+            assert(i_positive == 1)
+                
         congestion,cut,comp_cut = sparsest_cut(Gi,bi,source,param.tol_lp,param.tol_cut)
         #display_graph(Gi)
         print_debug( 'congestion,cut, comp_cut=',congestion,",",cut,",", comp_cut)
@@ -1027,17 +1231,25 @@ def compute_thin_flow_without_resetting(G,source,b, demand=None, param=None):
         # assign bflow
         # print_debug( 'Gi.out_edges(cut)=',Gi.out_edges(cut))
 
+        # edges from cut to comp_cut
         for e in set.intersection(set(Gi.out_edges(cut,keys=True)),set(Gi.in_edges(comp_cut,keys=True))) :
-            print_debug( 'e in intersection0=',e  )
+            print_debug( 'e from cut to comp_cut=',e, "with flow",Gi[e[0]][e[1]][e[2]]['flow']   )
             bi[e[0]] = bi[e[0]] - Gi[e[0]][e[1]][e[2]]['flow']
 
+        # edges from comp_cut to cut
         for e in set.intersection(set(Gi.in_edges(cut,keys=True)),set(Gi.out_edges(comp_cut,keys=True))) :
-            print_debug( 'e in intersection1=',e  )
+            print_debug( 'e from comp_cut to cut',e, "with flow =",Gi[e[0]][e[1]][e[2]]['flow']  )
+            if (abs(Gi[e[0]][e[1]][e[2]]['flow']) >= machine_epsilon):
+                print('ERROR: e from comp_cut to cut',e, 'with positive flow = ',Gi[e[0]][e[1]][e[2]]['flow'])
+                raise RuntimeError("Error in computation Sparsest cut \n")
             bi[e[1]] = bi[e[1]] + Gi[e[0]][e[1]][e[2]]['flow']
             G[e[0]][e[1]][e[2]]['thin_flow'] = Gi[e[0]][e[1]][e[2]]['flow']
 
         for e in Gi.in_edges(comp_cut,keys=True):
             G[e[0]][e[1]][e[2]]['thin_flow'] = Gi[e[0]][e[1]][e[2]]['flow']
+
+        #for e in Gi.edges(comp_cut,keys=True):
+        #    G[e[0]][e[1]][e[2]]['thin_flow'] = Gi[e[0]][e[1]][e[2]]['flow']
 
         for n in comp_cut:
             G.node[n]['label_thin_flow']=congestion
@@ -1160,18 +1372,21 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
     for e in E1.edges(keys=True):
         print_debug( "e in E1", e)
         G_anchored.remove_edge(e[0],e[1],e[2])
-        G_anchored.add_edge(source,e[1],e[2], flow = 0,capacity=G[e[0]][e[1]][e[2]]['capacity'])
+        keys_anchored=0
+        for e_anchored in  G_anchored.edges(source, keys=True):
+            if e_anchored[1] == e[1]:
+                keys_anchored =+ 1
+        G_anchored.add_edge(source,e[1],keys_anchored, flow = 0,capacity=G[e[0]][e[1]][e[2]]['capacity'])
+        G[e[0]][e[1]][e[2]]['anchored_edge']=(source,e[1],keys_anchored)
 
 
-    print_debug("G_anchored")
-    print_debug("b =", b)
-    display_graph(G_anchored,print_debug)
+    #print_debug("G_anchored")
+    #print_debug("b =", b)
+    #display_graph(G_anchored,print_debug)
 
 
     # Fixed point method
     bi=dict(b)
-
-
 
     err = 1e+24
     k=1
@@ -1189,12 +1404,14 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
         #E1_edges_with_right_keys = set( [(e[0],e[1],E1[e[0]][e[1]][e[2]]['key']) for e in E1.edges(keys=True)])
 
         for e in E1.edges(keys=True):
-            bi[source]= bi[source] + G_anchored[source][e[1]][e[2]]['thin_flow']
+            a_e = G[e[0]][e[1]][e[2]]['anchored_edge']
+            bi[source]= bi[source] + G_anchored[a_e[0]][a_e[1]][a_e[2]]['thin_flow']
 
         for n in G.nodes():
             for e in set.intersection(set(G.out_edges(n,keys=True)), set(E1.edges(keys=True))) :
-                #print_debug('e in intersection(set(G.out_edges(n)), set(E1.edges()))', e   )
-                bi[n] = bi[n] -  G_anchored[source][e[1]][e[2]]['thin_flow']
+                print_debug('e in intersection(set(G.out_edges(n)), set(E1.edges()))', e   )
+                a_e = G[e[0]][e[1]][e[2]]['anchored_edge']
+                bi[n] = bi[n] -  G_anchored[a_e[0]][a_e[1]][a_e[2]]['thin_flow']
 
         # test enumeration
         # tol_enumeration = 10e-6
@@ -1236,15 +1453,30 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
 
     for e in G.edges(keys=True):
         if e in  E1.edges(keys=True) :
-            G[e[0]][e[1]][e[2]]['thin_flow']=G_anchored[source][e[1]][e[2]]['thin_flow']
+            a_e = G[e[0]][e[1]][e[2]]['anchored_edge']
+            G[e[0]][e[1]][e[2]]['thin_flow']=G_anchored[a_e[0]][a_e[1]][a_e[2]]['thin_flow']
         else:
             G[e[0]][e[1]][e[2]]['thin_flow']=G_anchored[e[0]][e[1]][e[2]]['thin_flow']
 
     for n in  G_anchored.nodes():
         G.node[n]['label_thin_flow'] =  G_anchored.node[n]['label_thin_flow']
 
-    print_debug('G:')
-    display_graph(G,print_debug)
+
+    # if debug_check :
+    #     b_check=dict(bi)
+    #     for e in E1.edges(keys=True):
+    #         b_check[source]= b_check[source] - G_anchored[source][e[1]][e[2]]['thin_flow']
+
+    #     for n in G.nodes():
+    #         for e in set.intersection(set(G.out_edges(n,keys=True)), set(E1.edges(keys=True))) :
+    #             print_debug('e in intersection(set(G.out_edges(n)), set(E1.edges()))', e   )
+    #             b_check[n] = b_check[n] +  G_anchored[source][e[1]][e[2]]['thin_flow']
+
+    #     for n in G.nodes():
+    #         assert(abs(b_check[n]-b[n]) <= param.tol_thin_flow)
+        
+    #print_debug('G:')
+    #display_graph(G,print_debug)
 
 
     if demand!=None :
@@ -1315,17 +1547,30 @@ def compute_thin_flow_ofzerosize(G, source, b, E1):
 
 
 def assert_thin_flow(G,source,b,E1,d,param):
-
+    
     if param==None:
         param = parameters()
 
-    tol = param.tol_thin_flow
-
+    tol = param.tol_thin_flow*10
+    
+    balance = 0.0
+    for n in G.nodes():
+        balance += b[n]
+    assert(abs(balance) <= tol)
+    
+    for n in G.nodes():
+        balance=b[n]
+        for e in G.out_edges(n,keys=True):
+            balance = balance - G[e[0]][e[1]][e[2]]['thin_flow']
+        for e in G.in_edges(n,keys=True):
+            balance = balance + G[e[0]][e[1]][e[2]]['thin_flow']
+        assert(abs(balance) <= tol), ("node balance =", balance )
+        
     if (d==0.0):
         assert(abs((G.node[source]['label_thin_flow']- 1.0)) <= tol)
     else:
         assert(abs((G.node[source]['label_thin_flow']- b[source]/d)) <= tol)
-
+        
     for e in E1.edges(keys=True):
         assert(abs((G.node[e[1]]['label_thin_flow']- G[e[0]][e[1]][e[2]]['thin_flow']/G[e[0]][e[1]][e[2]]['capacity']) <= tol))
 
@@ -1345,7 +1590,19 @@ def assert_thin_flow_without_resetting(G,source,b,d=None, param=None):
         param = parameters()
 
     tol = param.tol_thin_flow
+    balance = 0.0
+    for n in G.nodes():
+        balance += b[n]
+    assert(abs(balance) <= tol)
 
+    
+    for n in G.nodes():
+        balance=b[n]
+        for e in G.out_edges(n,keys=True):
+            balance = balance - G[e[0]][e[1]][e[2]]['thin_flow']
+        for e in G.in_edges(n,keys=True):
+            balance = balance + G[e[0]][e[1]][e[2]]['thin_flow']
+        assert(abs(balance) <= tol), "node" 
 
 
     if (d==None):
@@ -1493,6 +1750,18 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeof
         param = parameters()
 
 
+
+    if G.in_edges(source) != []:
+        print_debug("Warning incoming edges in source:")
+        print_debug("G.in_edges(source) =",G.in_edges(source))
+        for e in G.in_edges(source,keys=True):
+            G.remove_edge(*e)
+        print_debug("G.in_edges(source) =",G.in_edges(source))
+        print_debug("G.out_edges(source) =",G.out_edges(source))
+        print_debug("G.is_multigraph",G.is_multigraph())
+        print_debug("G.is_directed",G.is_directed)
+        #raw_input()
+
     # The disjkstra algorithm for shortest path seems to be adapted for multigraph
     # it seems that it uses the mimimal weight over the common edges between to nodes
     # a post-processing is then needed to know the edge that is really in the shortest path.
@@ -1546,7 +1815,7 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeof
         else:
             compute_thin_flow(E,source,u,Estar,d, param)
 
-        display_graph(E)
+        #display_graph(E)
 
         assert_thin_flow(E,source,u,Estar,d,param)
 
@@ -1570,8 +1839,8 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeof
 
 
 
-        print_debug( "G (after setting the thin flow) :")
-        display_graph(G,print_debug)
+        #print_debug( "G (after setting the thin flow) :")
+        #display_graph(G,print_debug)
 
         # compute the length of the time--step (alpha).
         alpha = feasible_time_extension(G,E,Estar,E_comp)
@@ -1605,14 +1874,14 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeof
                     G[ntail][nhead][k]['x']=G[ntail][nhead][k]['x'] + G[ntail][nhead][k]['thin_flow']*h
                     G[ntail][nhead][k]['x_overtime'].append(G[ntail][nhead][k]['x'])
 
-        print_debug( "G :")
-        display_graph(G,print_debug)
+        #print_debug( "G :")
+        #display_graph(G,print_debug)
 
         i=i+1
 
         print( "  End integration i = ",i-1, "with time--step h=", h," on the interval [", timeofevent[i-1] , ",", timeofevent[i] , "]")
         print( '#################################################################################\n')
-
+        #raw_input()
 
 def compute_dynamic_equilibrium_timestepping(G, source, sink, h, t0, N, flow_function, param=None):
 
@@ -1798,7 +2067,7 @@ def plot_thin_flows_and_labels(G,timeofevent):
 
 
 def postprocess_flows_queues_cumulativeflows(G):
-    debug_var= True
+    debug_print= True
     # Compute flows f_e_plus, f_e_minus, F_e_plus, F_e_minus,  on the right interval
     for ntail,nbrs in G.adjacency_iter():
         #G.node[ntail]['shifted_time'] = []
@@ -1929,7 +2198,7 @@ def postprocess_flows_queues_cumulativeflows(G):
 
 
                     G[ntail][nhead][k]['z_e_overtime'].append(value_F_e_plus-value_F_e_minus)
-    debug_var= False
+    debug_print= False
 
 def plot_flows_queues_cumulativeflows(G, edge=None, key=None):
 
@@ -2041,7 +2310,7 @@ def plot_flows_queues_cumulativeflows(G, edge=None, key=None):
 
 
 def postprocess_flows_queues_cumulativeflows_timestepping(G,timesteps):
-    debug_var= True
+    debug_print= True
     # Compute flows f_e_plus, f_e_minus, F_e_plus, F_e_minus,  on the right interval
     for ntail,nbrs in G.adjacency_iter():
         #G.node[ntail]['shifted_time'] = []
@@ -2313,7 +2582,6 @@ def f_e_plus(G, e, time):
 
 
 def postprocess_extravalues(G, source, sink):
-    debug_var= True
 
     simpleG = nx.DiGraph()
     simpleG.add_nodes_from(G.nodes())

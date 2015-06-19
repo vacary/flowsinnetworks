@@ -94,7 +94,7 @@ def test4():
     with_draw=False
     if with_draw :
         Gpos=nx.pydot_layout(G)
-        nx.draw(G,pos=Gpos,node_color='#A0CBE2', with_labels=True, with_edge_labels=True)
+        nx.draw_graphviz(G,pos=Gpos,node_color='#A0CBE2', with_labels=True, with_edge_labels=True)
         #nx.draw_graphviz(G,node_color='#A0CBE2', with_labels=True, with_edge_labels=True)
         #labels=nx.draw_networkx_labels(G,pos=nx.pydot_layout(G))
 
@@ -770,25 +770,33 @@ def test22(pars):
 def test23(pars):
     print( '################ start test 23 ###############')
 
+    #G=nx.read_gml('./graphs/G1_gen.gml') #ok
 
-    G=nx.read_gml('./graphs/G2_gen.gml')
+    #G=nx.read_gml('./graphs/G2_gen.gml')  #ok
+
+    G=nx.read_gml('./graphs/G3_gen.gml')  
+
+    #G=nx.read_gml('./graphs/G5_gen.gml') # ok
+    
+    #G=nx.read_gml('G_gen.gml')
     G=nx.MultiDiGraph(G)
-    source = 0
-    sink = 19
+    source = G.nodes()[0]
+    sink = G.nodes()[-1]
 
     #l = list( nx.simple_paths.all_simple_paths(G,0,17))
     #print(l)
     #raw_input()
 
-    timeofevent=[0.0,10.0]
+    timeofevent=[0.0,1.5]
     inputflow=[8.0]
 
 
     param=flows.parameters()
-    param.tol_thin_flow=1e-10
-    param.tol_lp=1e-12
+    param.tol_thin_flow=1e-08
+    param.tol_lp=1e-14
     param.tol_cut=1e-12
-
+    
+    param.nmax =500
 
 
     flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow,param)
@@ -855,7 +863,7 @@ def test23(pars):
 
 #test13([])
 #test14()
-test15([])
+#test15([])
 #test16()
 #test17()
 
@@ -867,4 +875,4 @@ test15([])
 #test21([])
 #test22([])
 
-#test23([])
+test23([])
