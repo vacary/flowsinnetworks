@@ -774,26 +774,41 @@ def test23(pars):
 
     #G=nx.read_gml('./graphs/G2_gen.gml')  #ok
 
-    G=nx.read_gml('./graphs/G3_gen.gml')  
 
     #G=nx.read_gml('./graphs/G5_gen.gml') # ok
+
+    #G=nx.read_gml('./graphs/G6_gen.gml') # ok
     
-    #G=nx.read_gml('G_gen.gml')
+    #G=nx.read_gml('./graphs/G8_gen.gml')  ok
+
+    #G=nx.read_gml('./graphs/G7_gen.gml')  # bug  e=in_edges[0] IndexError: list index out of range. fixed in current_shortest_path graph
+
+    G=nx.read_gml('./graphs/G3_gen.gml')  #bug first  e=in_edges[0] IndexError:  and now alpha  ==0
+
+    #G=nx.read_gml('./graphs/Galpha_gen.gml')  #minimal test that produced alpha =0.0
+
+    #G=nx.read_gml('./graphs/Gmedium_gen.gml')
+
+    #nx.write_gml(G,'G_gen.gml')
+    G=nx.read_gml('G_gen.gml')
     G=nx.MultiDiGraph(G)
     source = G.nodes()[0]
     sink = G.nodes()[-1]
 
+    
+    len(list(nx.connected_components(nx.MultiGraph(G))))==1
+    
     #l = list( nx.simple_paths.all_simple_paths(G,0,17))
     #print(l)
     #raw_input()
 
-    timeofevent=[0.0,1.5]
-    inputflow=[8.0]
+    timeofevent=[0.0,10.0]
+    inputflow=[3.25]
 
 
     param=flows.parameters()
-    param.tol_thin_flow=1e-08
-    param.tol_lp=1e-14
+    param.tol_thin_flow=1e-10
+    param.tol_lp=1e-12
     param.tol_cut=1e-12
     
     param.nmax =500

@@ -80,7 +80,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_current_shortest_path_graph(self):
         G=examples.example2()
-        E,Estar,E_comp=flows.current_shortest_path_graph(G)
+        E,Estar,E_comp=flows.current_shortest_path_graph(G,'s','t')
 
 
         self.assertEqual(set(E.edges()),set( [('s','v'),('s','w'), ('w','t'), ('v','t'), ('v','w')]))

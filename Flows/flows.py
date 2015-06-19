@@ -19,10 +19,10 @@ if withSwiglpk:
 
 
     
-debug_print = True
-#debug_print = False
+#debug_print = True
+debug_print = False
 
-debug_check = True
+#debug_check = True
 debug_check = False
 
 
@@ -121,7 +121,7 @@ def display_graph(G, print_function = print):
         for e in G.edges():
             print_function (" edge :", e, G[e[0]][e[1]])
 
-def current_shortest_path_graph(G, label='label'):
+def current_shortest_path_graph(G, source, sink, label='label'):
     """
 
     Compute the current shortest path graph and the set of resetting edges
@@ -185,10 +185,11 @@ def current_shortest_path_graph(G, label='label'):
                     excess = G.node[nhead][label] - (G.node[ntail][label] + keydata['time'])
                     print_debug('excess =', excess)
                     
-                    if excess >= -machine_epsilon:
+                    if excess >= -machine_epsilon*10:
                         print_debug('add edge (',ntail,nhead,k,') in E')
                         E.add_edge(ntail, nhead, k, keydata)
-                        if excess > machine_epsilon:
+                        if excess > machine_epsilon*1000:
+                            print_debug('add edge (',ntail,nhead,k,') in Estar')
                             E_star.add_edge(ntail, nhead, k , keydata)
                     else:
                         print_debug('add edge (',ntail,nhead,k,') in E_comp')
@@ -198,19 +199,26 @@ def current_shortest_path_graph(G, label='label'):
         raise RuntimeError("Flows module deals only with nx.MultiDiGraph\n \
         If your graph is not a MultiDiGraph, you can copy it with nx.MultiDiGraph.copy(G) ")
 
-    
+    if debug_check:
+        for n in E.nodes():
+            if n!=source :
+                print_debug("list(nx.all_simple_paths(E, source=source, target=n))", list(nx.all_simple_paths(E, source=source, target=n)))
+                if list(nx.all_simple_paths(E, source=source, target=n))==[]:
+                    raise RuntimeError("current shortest path is not complete")
+            
             
     #print_debug( E.edges())
     #print_debug((nx.dijkstra_path(G,source,sink)))
-    print_debug( "E :")
-    display_graph(E,print_debug)
-    print_debug( "E_comp :")
-    display_graph(E_comp,print_debug)
-    print_debug( "E_star :")
-    display_graph(E_star,print_debug)
+    # print_debug( "E :")
+    # display_graph(E,print_debug)
+    # print_debug( "E_comp :")
+    # display_graph(E_comp,print_debug)
+    # print_debug( "E_star :")
+    # display_graph(E_star,print_debug)
 
     print_debug( '################ end current_shortest_path_graph ###############')
-
+    if debug_check:
+        assert(len(list(nx.connected_components(nx.MultiGraph(E))))==1)
     return E,E_star,E_comp
 
 def congestion_labels_pathmethod(G,source, flow='flow'):
@@ -552,41 +560,45 @@ def sparsest_cut_withSwiglpk(G,b,source,tol) :
     #print_debug([ (ia[i], ja[i], ar[i]) for i in  range(1,nz) ] )
 
     swiglpk.glp_load_matrix(lp, nz, ia, ja, ar);
+    if debug_check:
+        global swiglpk_f_counter
+        swiglpk_f_counter +=1
+        if (swiglpk_f_counter >= 0):
+            s_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.lp'
+            print("s_filename", s_filename)
+            swiglpk.glp_write_lp(lp, None, s_filename);
 
-    global swiglpk_f_counter
-    swiglpk_f_counter +=1
-    if (swiglpk_f_counter >= 0):
-        s_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.lp'
-        print("s_filename", s_filename)
-        swiglpk.glp_write_lp(lp, None, s_filename);
+
+        if (swiglpk_f_counter < -1) : # >= 185):
+
+            fig = plt.figure()
+            #nx.draw_graphviz(G)
+
+            nx.draw_graphviz(G,node_color='#A0CBE2', with_labels=True, with_edge_labels=True)
+            #nx.draw_networkx_edge_labels(G,pos=nx.spring_layout(G))
+
+            fig_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.png'
+            plt.savefig(fig_filename)
+            plt.close(fig)
+            gml_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.gml'
+            GG = nx.MultiDiGraph()
+            GG.add_nodes_from(G.nodes())
+            GG.add_edges_from(G.edges())
+            for e in G.edges(keys=True):
+                GG[e[0]][e[1]][e[2]]['capacity']=  G[e[0]][e[1]][e[2]]['capacity']
+            nx.write_gml(GG,gml_filename)
+
+            b_numpy= np.zeros(len(b))
+            i=0
+            for n in G.nodes():
+                b_numpy[i]= b[n]
+                i=i+1
+            b_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'_b.npy'
+            np.save(b_filename,b_numpy)
 
 
-    if (swiglpk_f_counter < -1) : # >= 185):
-               
-        fig = plt.figure()
-        #nx.draw_graphviz(G)
-        
-        nx.draw_graphviz(G,node_color='#A0CBE2', with_labels=True, with_edge_labels=True)
-        #nx.draw_networkx_edge_labels(G,pos=nx.spring_layout(G))
 
-        fig_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.png'
-        plt.savefig(fig_filename)
-        plt.close(fig)
-        gml_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.gml'
-        GG = nx.MultiDiGraph()
-        GG.add_nodes_from(G.nodes())
-        GG.add_edges_from(G.edges())
-        for e in G.edges(keys=True):
-            GG[e[0]][e[1]][e[2]]['capacity']=  G[e[0]][e[1]][e[2]]['capacity']
-        nx.write_gml(GG,gml_filename)
- 
-        b_numpy= np.zeros(len(b))
-        i=0
-        for n in G.nodes():
-            b_numpy[i]= b[n]
-            i=i+1
-        b_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'_b.npy'
-        np.save(b_filename,b_numpy)
+            
     parm = swiglpk.glp_smcp()
     swiglpk.glp_init_smcp(parm)
     parm.tol_bnd=tol
@@ -967,21 +979,21 @@ def sparsest_cut(G,b,source,tol=1e-12,tol_cut=1e-12) :
             
     while (abs(congestion_of_cut(G,b,cut)-congestion)>=tol_cut):
         
-        print("set in intersection", set.intersection(set(G.in_edges(cut,keys=True)),set(G.out_edges(comp_cut,keys=True))) )
+        print_debug("set in intersection", set.intersection(set(G.in_edges(cut,keys=True)),set(G.out_edges(comp_cut,keys=True))) )
         for e in set.intersection(set(G.in_edges(cut,keys=True)),set(G.out_edges(comp_cut,keys=True))) :
             if (abs(G[e[0]][e[1]][e[2]]['flow']) >= 1e-10):
-                print( 'e from comp_cut to cut',e, "with flow =", G[e[0]][e[1]][e[2]]['flow']  )
+                print_debug( 'e from comp_cut to cut',e, "with flow =", G[e[0]][e[1]][e[2]]['flow']  )
                 cut.add(e[0])
                 comp_cut.remove(e[0])
                 break
-        print("set in intersection", set.intersection(set(G.out_edges(cut,keys=True)),set(G.in_edges(comp_cut,keys=True))) )        
+        print_debug("set in intersection", set.intersection(set(G.out_edges(cut,keys=True)),set(G.in_edges(comp_cut,keys=True))) )        
         for e in set.intersection(set(G.out_edges(cut,keys=True)),set(G.in_edges(comp_cut,keys=True))) :
             if (abs(G[e[0]][e[1]][e[2]]['flow']-congestion*G[e[0]][e[1]][e[2]]['capacity']  ) >= 1e-10):
-                print( 'e from cut to comp_cut',e, "with flow =", G[e[0]][e[1]][e[2]]['flow']  )
+                print_debug( 'e from cut to comp_cut',e, "with flow =", G[e[0]][e[1]][e[2]]['flow']  )
                 cut.add(e[1])
                 comp_cut.remove(e[1])
                 break
-        print("while loop -- congestion =",congestion_of_cut(G,b,cut), "for cut =", cut, "and comp_cut", comp_cut)
+        print_debug("while loop -- congestion =",congestion_of_cut(G,b,cut), "for cut =", cut, "and comp_cut", comp_cut)
 
             
             
@@ -1375,10 +1387,10 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
         keys_anchored=0
         for e_anchored in  G_anchored.edges(source, keys=True):
             if e_anchored[1] == e[1]:
-                keys_anchored =+ 1
+                keys_anchored += 1                
         G_anchored.add_edge(source,e[1],keys_anchored, flow = 0,capacity=G[e[0]][e[1]][e[2]]['capacity'])
         G[e[0]][e[1]][e[2]]['anchored_edge']=(source,e[1],keys_anchored)
-
+        
 
     #print_debug("G_anchored")
     #print_debug("b =", b)
@@ -1388,7 +1400,7 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
     # Fixed point method
     bi=dict(b)
 
-    err = 1e+24
+    err = float('Inf')
     k=1
     while (err >= param.tol_thin_flow and k < param.nmax):
         print_debug( '#################################################################################')
@@ -1551,7 +1563,7 @@ def assert_thin_flow(G,source,b,E1,d,param):
     if param==None:
         param = parameters()
 
-    tol = param.tol_thin_flow*10
+    tol = param.tol_thin_flow*100
     
     balance = 0.0
     for n in G.nodes():
@@ -1657,11 +1669,13 @@ def feasible_time_extension_by_LP(G,E,E_star,E_comp):
     swiglpk.glp_add_rows(lp,nrow);
     i=0
     nz=0
-    for e in E_star.edges():
+    for e in E_star.edges(keys=True):
         i=i+1
-        name = 'E_star_' + e[0]+e[1]
+        name = 'E_star_' + str(e[0])+str(e[1])
         swiglpk.glp_set_row_name(lp, i, name);
-        b = E_star[e[0]][e[1]]['time'] - (E.node[e[1]]['label']- E.node[e[0]]['label'])
+        b = E_star[e[0]][e[1]][e[2]]['time'] - (E.node[e[1]]['label']- E.node[e[0]]['label'])
+        #if (abs(b) <= machine_epsilon*10):
+        #    b=0.0
         print_debug('b=',b)
         swiglpk.glp_set_row_bnds(lp, i, swiglpk.GLP_LO, b, 0.0);
         nz=nz+1
@@ -1669,15 +1683,15 @@ def feasible_time_extension_by_LP(G,E,E_star,E_comp):
         ja[nz] = 1;
         ar[nz] =  E.node[e[1]]['label_thin_flow']-E.node[e[0]]['label_thin_flow'];
 
-    for e in E_comp.edges():
+    for e in E_comp.edges(keys=True):
         i=i+1
 
-        name = 'E_comp_' + e[0]+e[1]
+        name = 'E_comp_' + str(e[0])+str(e[1])
         print_debug('i=',i)
 
         swiglpk.glp_set_row_name(lp, i, name);
-        print_debug('time=',E_comp[e[0]][e[1]]['time'])
-        b = E_comp[e[0]][e[1]]['time'] - (E.node[e[1]]['label']-E.node[e[0]]['label'])
+        print_debug('time=',E_comp[e[0]][e[1]][e[2]]['time'])
+        b = E_comp[e[0]][e[1]][e[2]]['time'] - (E.node[e[1]]['label']-E.node[e[0]]['label'])
         print_debug('b=',b)
         swiglpk.glp_set_row_bnds(lp, i, swiglpk.GLP_UP, 0.0, b);
         nz=nz+1
@@ -1732,6 +1746,8 @@ def feasible_time_extension(G,E,E_star,E_comp):
     for e in E_star.edges(keys=True):
         denominator = E.node[e[1]]['label_thin_flow']-E.node[e[0]]['label_thin_flow']
         numerator = E_star[e[0]][e[1]][e[2]]['time'] - (E.node[e[1]]['label']-E.node[e[0]]['label'])
+        #if (abs(numerator) < machine_epsilon*10):
+        #    numerator = 0.0
         if denominator < 0 :
             alpha = min(alpha,numerator/denominator)
 
@@ -1787,18 +1803,18 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeof
 
 
     display_graph(G,print_debug)
-
+    Nmax=50
     while (i<N):
         print('#################################################################################')
         print("  Start integration step i = ",i,"<",N ,"on the interval  [", timeofevent[i] , ",", timeofevent[i+1] , "]" )
         print(' ' )
 
         # Compute the current_shortest_path_graph based on label in G
-        E,Estar,E_comp=current_shortest_path_graph(G)
+        E,Estar,E_comp=current_shortest_path_graph(G,source,sink)
 
-        print ("E.edges()=", E.edges())
-        print ("Estar.edges()=", Estar.edges())
-        print ("E_comp.edges()=", E_comp.edges())
+        print_debug ("E.edges()=", E.edges())
+        print_debug ("Estar.edges()=", Estar.edges())
+        print_debug ("E_comp.edges()=", E_comp.edges())
         
         
         # set the value of the flow input
@@ -1845,7 +1861,10 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeof
         # compute the length of the time--step (alpha).
         alpha = feasible_time_extension(G,E,Estar,E_comp)
         #alpha = feasible_time_extension_by_LP(G,E,Estar,E_comp)
-
+        print_debug ('   alpha=',alpha,"timeofevent=",timeofevent)
+        if (alpha <= 1e-12):
+            raise RuntimeError("alpha too small")
+        
         # compute new time--step.
         h = t_i # store ti
         if (t_i+alpha >= timeofevent[i+1]):
@@ -1862,8 +1881,8 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeof
             N=N+1
         h = t_i - h
 
-        print ('   alpha=',alpha,"timeofevent=",timeofevent)
-
+       
+        
 
         # integrate x and labels with respect to time.
         for ntail,nbrs in G.adjacency_iter():
@@ -1878,7 +1897,6 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeof
         #display_graph(G,print_debug)
 
         i=i+1
-
         print( "  End integration i = ",i-1, "with time--step h=", h," on the interval [", timeofevent[i-1] , ",", timeofevent[i] , "]")
         print( '#################################################################################\n')
         #raw_input()
@@ -2123,22 +2141,26 @@ def postprocess_flows_queues_cumulativeflows(G):
                 switching_times.append(G.node[ntail]['label_overtime'][-1]-transit_time)
 
                 switching_times.sort()
+                if len(switching_times)>0:
+                    while (switching_times[-1] > G.node[ntail]['label_overtime'][-1]):
+                        switching_times.pop()
+                        if len(switching_times) == 0 : break
 
-                while (switching_times[-1] > G.node[ntail]['label_overtime'][-1]):
-                    switching_times.pop()
-
-
-                while (switching_times[-1] > G.node[nhead]['label_overtime'][-1]-transit_time):
-                    switching_times.pop()
+                if len(switching_times)>0:
+                    while (switching_times[-1] > G.node[nhead]['label_overtime'][-1]-transit_time ):
+                        switching_times.pop()
+                        if len(switching_times) == 0 : break
 
                 switching_times.reverse()
 
-
-                while (switching_times[-1] < G.node[ntail]['label_overtime'][0]):
-                    switching_times.pop()
-
-                while (switching_times[-1] < G.node[nhead]['label_overtime'][0]-transit_time):
-                    switching_times.pop()
+                if len(switching_times)>0:
+                    while (switching_times[-1] < G.node[ntail]['label_overtime'][0] ):
+                        switching_times.pop()
+                        if len(switching_times) == 0 : break
+                if len(switching_times)>0:
+                    while (switching_times[-1] < G.node[nhead]['label_overtime'][0]-transit_time):
+                        switching_times.pop()
+                        if len(switching_times) == 0 : break
 
                 switching_times.reverse()
                 print_debug("switching_times (after) = ", switching_times)
@@ -2596,7 +2618,8 @@ def postprocess_extravalues(G, source, sink):
     X, Xbar = partition
     print(cut_value, partition)
     G.name= dict([])
-
+    G.name['max_flow']= cut_value
+ 
     G.name['X']= X
     G.name['Xbar']= Xbar
 
