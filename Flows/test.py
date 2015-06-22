@@ -558,7 +558,7 @@ def flow_input_function_Fig1_Cominetti(t):
 
 
     
-def test18():
+def test_TS1():
     print( '################ start test 18 ###############')
 
     G=examples.example_Larre_bis()
@@ -609,7 +609,7 @@ def flow_input_function(t):
     return 4.0
     #return abs(math.sin(t))
 
-def test19():
+def test_TS2():
     print( '################ start test 19 ###############')
 
     G=examples.example_Larre_bis()
@@ -783,14 +783,15 @@ def test23(pars):
 
     #G=nx.read_gml('./graphs/G7_gen.gml')  # bug  e=in_edges[0] IndexError: list index out of range. fixed in current_shortest_path graph
 
-    G=nx.read_gml('./graphs/G3_gen.gml')  #bug first  e=in_edges[0] IndexError:  and now alpha  ==0
+    #G=nx.read_gml('./graphs/G3_gen.gml')  #bug first  e=in_edges[0] IndexError:  and now alpha  ==0
 
     #G=nx.read_gml('./graphs/Galpha_gen.gml')  #minimal test that produced alpha =0.0
 
     #G=nx.read_gml('./graphs/Gmedium_gen.gml')
-
+    G=nx.read_gml('./graphs/G_d4_n400_gen.gml')
+    #G=nx.read_gml('./graphs/G_d6_n600_gen.gml')
     #nx.write_gml(G,'G_gen.gml')
-    G=nx.read_gml('G_gen.gml')
+    #G=nx.read_gml('G_gen.gml')
     G=nx.MultiDiGraph(G)
     source = G.nodes()[0]
     sink = G.nodes()[-1]
@@ -802,9 +803,8 @@ def test23(pars):
     #print(l)
     #raw_input()
 
-    timeofevent=[0.0,10.0]
-    inputflow=[3.25]
-
+    timeofevent=[0.0,100.0]
+    inputflow=[5.0]
 
     param=flows.parameters()
     param.tol_thin_flow=1e-10
@@ -882,12 +882,14 @@ def test23(pars):
 #test16()
 #test17()
 
-# Time-stepping examples.
-#test18() #Similar to test13
-
-#test19() #Similar to test15
-
 #test21([])
 #test22([])
+#test23([])
 
-test23([])
+
+# Time-stepping examples.
+#test_TS1() #Similar to test13
+#test_TS2() #Similar to test15
+
+
+

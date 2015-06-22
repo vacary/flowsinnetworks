@@ -27,10 +27,22 @@ debug_check = False
 
 
 import numpy as np
-
 machine_epsilon=np.finfo(float).eps*10
+
+
+import math
+
+
+
+
 import os
 import shutil
+
+
+
+
+
+
 swiglpk_f_counter = 0 # counter for filename
 flowstmpdir_directory = ".tmp"
 if not os.path.exists(flowstmpdir_directory):
@@ -188,7 +200,7 @@ def current_shortest_path_graph(G, source, sink, label='label'):
                     if excess >= -machine_epsilon*10:
                         print_debug('add edge (',ntail,nhead,k,') in E')
                         E.add_edge(ntail, nhead, k, keydata)
-                        if excess > machine_epsilon*1000:
+                        if excess > math.sqrt(machine_epsilon):
                             print_debug('add edge (',ntail,nhead,k,') in Estar')
                             E_star.add_edge(ntail, nhead, k , keydata)
                     else:
@@ -969,7 +981,8 @@ def sparsest_cut(G,b,source,tol=1e-12,tol_cut=1e-12) :
     # GG=nx.MultiGraph(G)
     for n in G.nodes():
         print_debug( "comparaison = ", G.node[n]['congestion_label'] - congestion )
-        if (abs(G.node[n]['congestion_label'] - congestion) >= 10 *tol_cut and abs(G.node[n]['congestion_label'] - congestion) <= 1000 *tol_cut  ):
+        if (abs(G.node[n]['congestion_label'] - congestion) >= 10 *tol_cut\
+            and abs(G.node[n]['congestion_label'] - congestion) <= 1000 *tol_cut  ):
             print('Warning: COMPARISON IS DIFFICULT')
         if G.node[n]['congestion_label'] < congestion - tol_cut  :
             print_debug(  'G.node[n][\'congestion_label\']', G.node[n]['congestion_label'])
@@ -1404,7 +1417,7 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
     k=1
     while (err >= param.tol_thin_flow and k < param.nmax):
         print_debug( '#################################################################################')
-        print_debug( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
+        print( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
 
         biold=dict(bi)
         compute_thin_flow_without_resetting(G_anchored,source,bi,param=param)
@@ -1454,7 +1467,7 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
         #print_debug( "bi = ", bi)
         for n in  G.nodes():
             err = err + abs(bi[n]-biold[n])
-        err= err/G.number_of_nodes()
+        #err= err/G.number_of_nodes()
         #raw_input()
         k =k+1
 
@@ -1563,7 +1576,7 @@ def assert_thin_flow(G,source,b,E1,d,param):
     if param==None:
         param = parameters()
 
-    tol = param.tol_thin_flow*100
+    tol = param.tol_thin_flow*10
     
     balance = 0.0
     for n in G.nodes():
@@ -1808,10 +1821,15 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeof
         print('#################################################################################')
         print("  Start integration step i = ",i,"<",N ,"on the interval  [", timeofevent[i] , ",", timeofevent[i+1] , "]" )
         print(' ' )
-
+        
         # Compute the current_shortest_path_graph based on label in G
         E,Estar,E_comp=current_shortest_path_graph(G,source,sink)
 
+        print('# edges =', len(G.edges()),\
+              '     # edges in E =', len(E.edges()),\
+              '     # edges in Estar=', len(Estar.edges()))
+        print(' ' )
+        
         print_debug ("E.edges()=", E.edges())
         print_debug ("Estar.edges()=", Estar.edges())
         print_debug ("E_comp.edges()=", E_comp.edges())

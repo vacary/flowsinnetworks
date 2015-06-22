@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import random
 import flows
 
-H=nx.random_graphs.random_regular_graph(5,50)
+H=nx.random_graphs.random_regular_graph(6,600)
 l = list( nx.simple_paths.all_simple_paths(H,H.nodes()[0],H.nodes()[-1], cutoff=2))
 
 print(l)

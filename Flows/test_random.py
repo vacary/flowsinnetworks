@@ -1,5 +1,5 @@
 k =0
-while (True and k<100):
+while (True and k<20):
 
     print('############################################################')
     print('#################### Random test',k,'######################')
@@ -11,3 +11,4 @@ while (True and k<100):
     except:
         raw_input()
     k=k+1
+    
