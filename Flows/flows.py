@@ -19,11 +19,11 @@ if withSwiglpk:
 
 
     
-#debug_print = True
-debug_print = False
+debug_print = True
+#debug_print = False
 
-#debug_check = True
-debug_check = False
+debug_check = True
+#debug_check = False
 
 
 import numpy as np
@@ -196,8 +196,9 @@ def current_shortest_path_graph(G, source, sink, label='label'):
                 for k,keydata in eattr.items():
                     excess = G.node[nhead][label] - (G.node[ntail][label] + keydata['time'])
                     print_debug('excess =', excess)
-                    
-                    if excess >= -machine_epsilon*10:
+                    if (excess <= -machine_epsilon*100 and excess >= -math.sqrt(machine_epsilon)):   
+                        print("Warning: curent_shortest_path test: very small negative value of excess")
+                    if excess >= -machine_epsilon*100:                        
                         print_debug('add edge (',ntail,nhead,k,') in E')
                         E.add_edge(ntail, nhead, k, keydata)
                         if excess > math.sqrt(machine_epsilon):
@@ -980,18 +981,19 @@ def sparsest_cut(G,b,source,tol=1e-12,tol_cut=1e-12) :
     #congestion_labels_pathmethod(G,source)
     # GG=nx.MultiGraph(G)
     for n in G.nodes():
-        print_debug( "comparaison = ", G.node[n]['congestion_label'] - congestion )
-        if (abs(G.node[n]['congestion_label'] - congestion) >= 10 *tol_cut\
-            and abs(G.node[n]['congestion_label'] - congestion) <= 1000 *tol_cut  ):
-            print('Warning: COMPARISON IS DIFFICULT')
+        print_debug("comparaison = ", G.node[n]['congestion_label'] - congestion )
         if G.node[n]['congestion_label'] < congestion - tol_cut  :
+            #if (G.node[n]['congestion_label'] >= congestion - math.sqrt(tol_cut)  ):
+            if (G.node[n]['congestion_label'] >= congestion - 100*(tol_cut)  ):
+                print('Warning: sparsest cut comparison is difficult. Values just under the congestion threshold')
             print_debug(  'G.node[n][\'congestion_label\']', G.node[n]['congestion_label'])
             cut.add(n)
         else:
             comp_cut.add(n)
-            
-    while (abs(congestion_of_cut(G,b,cut)-congestion)>=tol_cut):
-        
+
+    nloop=0
+    while (abs(congestion_of_cut(G,b,cut)-congestion)>=tol_cut and nloop< 10*len(G.nodes())):
+        nloop=nloop+1
         print_debug("set in intersection", set.intersection(set(G.in_edges(cut,keys=True)),set(G.out_edges(comp_cut,keys=True))) )
         for e in set.intersection(set(G.in_edges(cut,keys=True)),set(G.out_edges(comp_cut,keys=True))) :
             if (abs(G[e[0]][e[1]][e[2]]['flow']) >= 1e-10):
@@ -1006,7 +1008,7 @@ def sparsest_cut(G,b,source,tol=1e-12,tol_cut=1e-12) :
                 cut.add(e[1])
                 comp_cut.remove(e[1])
                 break
-        print_debug("while loop -- congestion =",congestion_of_cut(G,b,cut), "for cut =", cut, "and comp_cut", comp_cut)
+        print_debug("while loop",nloop," -- congestion=", congestion," congestion of cut =",congestion_of_cut(G,b,cut), "for cut =", cut, "and comp_cut", comp_cut)
 
             
             
@@ -1052,7 +1054,7 @@ def sparsest_cut(G,b,source,tol=1e-12,tol_cut=1e-12) :
                 
     if debug_check :
         congestion_check  =  congestion_of_cut(G,b,cut)
-        #print_debug("congestion_check", congestion_check)
+        print_debug("congestion_check", congestion_check)
         assert(abs(congestion_check-congestion)<=tol_cut)
         #congestion_enum, cut_enum, comp_cut_enum = sparsest_cut_by_enumeration(G,b,source)
         #assert(abs(congestion_enum-congestion)<=tol_cut)
@@ -1825,10 +1827,11 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeof
         # Compute the current_shortest_path_graph based on label in G
         E,Estar,E_comp=current_shortest_path_graph(G,source,sink)
 
-        print('# edges =', len(G.edges()),\
+        print('# nodes =', len(G.nodes()),\
+              '     # edges =', len(G.edges()),\
               '     # edges in E =', len(E.edges()),\
               '     # edges in Estar=', len(Estar.edges()))
-        print(' ' )
+        print(' ')
         
         print_debug ("E.edges()=", E.edges())
         print_debug ("Estar.edges()=", Estar.edges())
@@ -2150,7 +2153,6 @@ def postprocess_flows_queues_cumulativeflows(G):
                 transit_time= G[ntail][nhead][k]['time']
 
                 # Reduce to switching time to the domain of definition of z_e
-
 
                 switching_times.append(G.node[ntail]['label_overtime'][0])
                 switching_times.append(G.node[ntail]['label_overtime'][-1])
@@ -2635,7 +2637,7 @@ def postprocess_extravalues(G, source, sink):
     cut_value, partition = nx.minimum_cut(simpleG, source, sink)
     X, Xbar = partition
     print(cut_value, partition)
-    G.name= dict([])
+
     G.name['max_flow']= cut_value
  
     G.name['X']= X
@@ -2657,8 +2659,7 @@ def postprocess_extravalues(G, source, sink):
             if (titi <= Tmax_minus):
                 switch_time_f_e_minus.append(titi)
     switch_time_f_e_minus.sort()
-    print(switch_time_f_e_minus)
-
+    print("switch_time_f_e_minus",switch_time_f_e_minus)
     G.name['switching_times_f_Xbar_minus']= switch_time_f_e_minus
 
 
@@ -2683,8 +2684,7 @@ def postprocess_extravalues(G, source, sink):
         for e  in edges_cut:
             flow = flow + f_e_minus(G, e, t)
         f_Xbar_minus.append(flow)
-    print(f_Xbar_minus)
-
+    print('f_Xbar_minus =' , f_Xbar_minus)
     G.name['f_Xbar_minus'] = f_Xbar_minus
 
     f_Xbar_plus = []
@@ -2693,10 +2693,20 @@ def postprocess_extravalues(G, source, sink):
         for e  in edges_cut:
             flow = flow + f_e_plus(G, e, t)
         f_Xbar_plus.append(flow)
-    print(f_Xbar_plus)
+    print('f_Xbar_plus =' , f_Xbar_plus)
 
     G.name['f_Xbar_plus'] = f_Xbar_plus
 
+def isF_Xbar_minus_increasing(G,tol):
+    current_value =  G.name['f_Xbar_minus'][0]
+    tk=0
+    for f in G.name['f_Xbar_minus']:
+        tk=tk+1
+        if (f < current_value-tol):
+            return False, tk
+        else:
+            current_value=f
+    return True, tk
 
 def plot_extravalues(G):
 

@@ -25,7 +25,7 @@ import vdata.manage as vdata # (for visualization)
 ###############################################################
 
 import matplotlib.pyplot as plt
-plt.ion()
+
 
 try:
     reload(examples)
@@ -332,6 +332,7 @@ def test13(pars):
     # plot floas and labels
     with_draw=True
     if with_draw :
+        plt.ion()
         plt.close('all')
         plt.figure("Thin flows and associated labels", figsize = [8,10])
         flows.plot_thin_flows_and_labels(G,timeofevent)
@@ -391,6 +392,7 @@ def test14():
 
     with_draw=True
     if with_draw :
+        plt.ion()
         plt.close('all')
         plt.figure("Thin flows and associated labels", figsize = [8,10])
         flows.plot_thin_flows_and_labels(G,timeofevent)
@@ -432,6 +434,7 @@ def test15(pars):
 
     with_draw=True
     if with_draw :
+        plt.ion()
         plt.close('all')
         plt.figure("Thin flows and associated labels", figsize = [8,10])
         flows.plot_thin_flows_and_labels(G,timeofevent)
@@ -490,6 +493,7 @@ def test16():
 
     with_draw=True
     if with_draw :
+        plt.ion()
         plt.close('all')
         plt.figure("Thin flows and associated labels", figsize = [8,10])
         flows.plot_thin_flows_and_labels(G,timeofevent)
@@ -530,6 +534,7 @@ def test17():
 
     with_draw=True
     if with_draw :
+        plt.ion()
         plt.close('all')
         plt.figure("Thin flows and associated labels", figsize = [8,10])
         flows.plot_thin_flows_and_labels(G,timeofevent)
@@ -591,6 +596,7 @@ def test_TS1():
 
     with_draw=True
     if with_draw :
+        plt.ion()
         plt.close('all')
         plt.figure("Thin flows and associated labels", figsize = [8,10])
         flows.plot_thin_flows_and_labels(G,timesteps)
@@ -642,6 +648,7 @@ def test_TS2():
 
     with_draw=True
     if with_draw :
+        plt.ion()
         plt.close('all')
         plt.figure("Thin flows and associated labels", figsize = [8,10])
         flows.plot_thin_flows_and_labels(G,timesteps)
@@ -680,6 +687,7 @@ def test21(pars):
 
     with_draw=True
     if with_draw :
+        plt.ion()
         plt.close('all')
         plt.figure("Thin flows and associated labels", figsize = [8,10])
         flows.plot_thin_flows_and_labels(G,timeofevent)
@@ -735,6 +743,7 @@ def test22(pars):
 
     with_draw=True
     if with_draw :
+        plt.ion()
         plt.close('all')
         plt.figure("Thin flows and associated labels", figsize = [8,10])
         flows.plot_thin_flows_and_labels(G,timeofevent)
@@ -767,7 +776,7 @@ def test22(pars):
 
     print( '################ end test 22 ###############')
 
-def test23(pars):
+def test23(pars,graph_file):
     print( '################ start test 23 ###############')
 
     #G=nx.read_gml('./graphs/G1_gen.gml') #ok
@@ -777,7 +786,7 @@ def test23(pars):
 
     #G=nx.read_gml('./graphs/G5_gen.gml') # ok
 
-    #G=nx.read_gml('./graphs/G6_gen.gml') # ok
+    G=nx.read_gml('./graphs/G6_gen.gml') # ok
     
     #G=nx.read_gml('./graphs/G8_gen.gml')  ok
 
@@ -788,10 +797,10 @@ def test23(pars):
     #G=nx.read_gml('./graphs/Galpha_gen.gml')  #minimal test that produced alpha =0.0
 
     #G=nx.read_gml('./graphs/Gmedium_gen.gml')
-    G=nx.read_gml('./graphs/G_d4_n400_gen.gml')
+    #G=nx.read_gml('./graphs/G_d4_n400_gen.gml')
     #G=nx.read_gml('./graphs/G_d6_n600_gen.gml')
     #nx.write_gml(G,'G_gen.gml')
-    #G=nx.read_gml('G_gen.gml')
+    G=nx.read_gml(graph_file)
     G=nx.MultiDiGraph(G)
     source = G.nodes()[0]
     sink = G.nodes()[-1]
@@ -804,8 +813,10 @@ def test23(pars):
     #raw_input()
 
     timeofevent=[0.0,100.0]
-    inputflow=[5.0]
+    inputflow=[2.0]
 
+    G.name= dict([])
+    
     param=flows.parameters()
     param.tol_thin_flow=1e-10
     param.tol_lp=1e-12
@@ -818,8 +829,10 @@ def test23(pars):
     print("timeofevent=",timeofevent)
     print("inputflow=",inputflow)
 
-    with_draw=True
+    with_draw=False
+    
     if with_draw :
+        plt.ion()
         plt.close('all')
         plt.figure("Thin flows and associated labels", figsize = [8,10])
         flows.plot_thin_flows_and_labels(G,timeofevent)
@@ -833,9 +846,10 @@ def test23(pars):
         plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
         flows.plot_flows_queues_cumulativeflows(G)
 
+    flows.postprocess_extravalues(G, source, sink)
     if with_draw :
         plt.figure("Flows, Extra values", figsize = [8,10])
-        flows.postprocess_extravalues(G, source, sink)
+
         flows.plot_extravalues(G)
 
 
@@ -852,44 +866,55 @@ def test23(pars):
     #
     ###############################
 
-    print( '################ end test 23 ###############')
+
+
+    return  flows.isF_Xbar_minus_increasing(G, param.tol_thin_flow),G
 
     
-#whatisadjcency_iter()
+    print( '################ end test 23 ###############')
 
 
-# test1()
-# test2()
-# test3()
-# test4()
-# test5()
-# test5_pathmethod()
 
-# test6()
-
-# test6()
-# test7()
-# test8()
-
-# test9()
-# test10()
-# test11()
-# test12()
-
-#test13([])
-#test14()
-#test15([])
-#test16()
-#test17()
-
-#test21([])
-#test22([])
-#test23([])
+if __name__ == '__main__':
 
 
-# Time-stepping examples.
-#test_TS1() #Similar to test13
-#test_TS2() #Similar to test15
+    #whatisadjcency_iter()
+
+
+    # test1()
+    # test2()
+    # test3()
+    # test4()
+    # test5()
+    # test5_pathmethod()
+
+    # test6()
+
+    # test6()
+    # test7()
+    # test8()
+
+    # test9()
+    # test10()
+    # test11()
+    # test12()
+
+    #test13([])
+    #test14()
+    #test15([])
+    #test16()
+    #test17()
+
+    #test21([])
+    #test22([])
+
+    #print(test23([],'./graphs/G3_gen.gml'))
+    print(test23([],'./graphs/G_gen_infinite.gml'))
+
+
+    # Time-stepping examples.
+    #test_TS1() #Similar to test13
+    #test_TS2() #Similar to test15
 
 
 
