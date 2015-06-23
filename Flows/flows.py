@@ -19,11 +19,11 @@ if withSwiglpk:
 
 
     
-debug_print = True
-#debug_print = False
+#debug_print = True
+debug_print = False
 
-debug_check = True
-#debug_check = False
+#debug_check = True
+debug_check = False
 
 
 import numpy as np

@@ -15,6 +15,9 @@ def test_random_varyingdn():
         kk=0
         while(kk < 500):
             number_nodes=number_nodes_init+kk/100
+            if degree >= number_nodes :
+                number_nodes_init = number_nodes_init+1
+                number_nodes=number_nodes_init+kk/100
             if (number_nodes * degree) % 2 != 0:
                 gen_graph.generate_graph(degree,number_nodes+1,'G_gen.gml')
             else:
