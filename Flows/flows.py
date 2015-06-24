@@ -996,14 +996,14 @@ def sparsest_cut(G,b,source,tol=1e-12,tol_cut=1e-12) :
         nloop=nloop+1
         print_debug("set in intersection", set.intersection(set(G.in_edges(cut,keys=True)),set(G.out_edges(comp_cut,keys=True))) )
         for e in set.intersection(set(G.in_edges(cut,keys=True)),set(G.out_edges(comp_cut,keys=True))) :
-            if (abs(G[e[0]][e[1]][e[2]]['flow']) >= 1e-10):
+            if (abs(G[e[0]][e[1]][e[2]]['flow']) >= tol_cut):
                 print_debug( 'e from comp_cut to cut',e, "with flow =", G[e[0]][e[1]][e[2]]['flow']  )
                 cut.add(e[0])
                 comp_cut.remove(e[0])
                 break
         print_debug("set in intersection", set.intersection(set(G.out_edges(cut,keys=True)),set(G.in_edges(comp_cut,keys=True))) )        
         for e in set.intersection(set(G.out_edges(cut,keys=True)),set(G.in_edges(comp_cut,keys=True))) :
-            if (abs(G[e[0]][e[1]][e[2]]['flow']-congestion*G[e[0]][e[1]][e[2]]['capacity']  ) >= 1e-10):
+            if (abs(G[e[0]][e[1]][e[2]]['flow']-congestion*G[e[0]][e[1]][e[2]]['capacity']  ) >= tol_cut):
                 print_debug( 'e from cut to comp_cut',e, "with flow =", G[e[0]][e[1]][e[2]]['flow']  )
                 cut.add(e[1])
                 comp_cut.remove(e[1])
@@ -1266,7 +1266,7 @@ def compute_thin_flow_without_resetting(G,source,b, demand=None, param=None):
         # edges from comp_cut to cut
         for e in set.intersection(set(Gi.in_edges(cut,keys=True)),set(Gi.out_edges(comp_cut,keys=True))) :
             print_debug( 'e from comp_cut to cut',e, "with flow =",Gi[e[0]][e[1]][e[2]]['flow']  )
-            if (abs(Gi[e[0]][e[1]][e[2]]['flow']) >= machine_epsilon):
+            if (abs(Gi[e[0]][e[1]][e[2]]['flow']) > param.tol_cut):
                 print('ERROR: e from comp_cut to cut',e, 'with positive flow = ',Gi[e[0]][e[1]][e[2]]['flow'])
                 raise RuntimeError("Error in computation Sparsest cut \n")
             bi[e[1]] = bi[e[1]] + Gi[e[0]][e[1]][e[2]]['flow']
@@ -2637,7 +2637,7 @@ def postprocess_extravalues(G, source, sink):
     cut_value, partition = nx.minimum_cut(simpleG, source, sink)
     X, Xbar = partition
     print(cut_value, partition)
-
+    G.name=dict([])
     G.name['max_flow']= cut_value
  
     G.name['X']= X
@@ -2697,6 +2697,22 @@ def postprocess_extravalues(G, source, sink):
 
     G.name['f_Xbar_plus'] = f_Xbar_plus
 
+    switch_time_f_e_minus_sink=[]
+    for e in G.in_edges(sink,keys=True):
+        for titi in G.node[e[1]]['label_overtime']:
+            switch_time_f_e_minus_sink.append(titi)
+    switch_time_f_e_minus_sink.sort()
+    print("switch_time_f_e_minus_sink",switch_time_f_e_minus_sink)
+    G.name['switching_times_f_sink_minus']= switch_time_f_e_minus_sink
+    f_sink_minus=[]
+    for t in switch_time_f_e_minus_sink:
+        flow =0.0
+        for e  in G.in_edges(sink,keys=True):
+            flow = flow + f_e_minus(G, e, t)
+        f_sink_minus.append(flow)
+        
+    G.name['f_sink_minus']= f_sink_minus
+    
 def isF_Xbar_minus_increasing(G,tol):
     current_value =  G.name['f_Xbar_minus'][0]
     tk=0
@@ -2707,6 +2723,20 @@ def isF_Xbar_minus_increasing(G,tol):
         else:
             current_value=f
     return True, tk
+
+
+def isF_sink_minus_increasing(G,tol):
+    current_value =  G.name['f_sink_minus'][0]
+    tk=0
+    for f in G.name['f_sink_minus']:
+        tk=tk+1
+        if (f < current_value-tol):
+            return False, tk
+        else:
+            current_value=f
+    return True, tk
+
+
 
 def plot_extravalues(G):
 

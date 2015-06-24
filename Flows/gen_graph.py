@@ -6,7 +6,7 @@ import flows
 def generate_graph(d,n,graph_file):
     H=nx.random_graphs.random_regular_graph(d,n)
 
-    #l = list( nx.simple_paths.all_simple_paths(H,H.nodes()[0],H.nodes()[-1], cutoff=2))
+    l = list( nx.simple_paths.all_simple_paths(H,H.nodes()[0],H.nodes()[-1], cutoff=2))
 
     #print(l)
 

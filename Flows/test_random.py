@@ -2,8 +2,8 @@ import gen_graph
 import test
 import sys
 def test_random_varyingdn():
-    degree = 4
-    number_nodes_init=5
+    degree = 6
+    number_nodes_init=7
     k=0
     while (True and k<20):
 
@@ -18,11 +18,12 @@ def test_random_varyingdn():
             if degree >= number_nodes :
                 number_nodes_init = number_nodes_init+1
                 number_nodes=number_nodes_init+kk/100
+            filename = './gen/G_gen'+str(k)+str(kk).zfill(5)+'.gml'
             if (number_nodes * degree) % 2 != 0:
-                gen_graph.generate_graph(degree,number_nodes+1,'G_gen.gml')
+                gen_graph.generate_graph(degree,number_nodes+1,filename)
             else:
-                gen_graph.generate_graph(degree,number_nodes,'G_gen.gml')
-            isincreasing, tk = test.test23([],'G_gen.gml')
+                gen_graph.generate_graph(degree,number_nodes,filename)
+            isincreasing, tk = test.test23([],filename)
             if not isincreasing:
                 print("the flow trough the cut is not increasing")
                 raw_input()
