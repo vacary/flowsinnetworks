@@ -2603,10 +2603,13 @@ def f_e_minus(G, e, time):
     if time < G.node[nhead]['label_overtime'][0]:
         return 0.0
     for j in range(len( G.node[nhead]['label_overtime'])-1):
-        if ((G.node[nhead]['label_overtime'][j] <= time) and (time <= (G.node[nhead]['label_overtime'][j+1]) )):
+        if ((G.node[nhead]['label_overtime'][j] <= time) and (time < (G.node[nhead]['label_overtime'][j+1]) )):
             return G[ntail][nhead][key]['f_e_minus_overtime'][j]
+    if (time == (G.node[nhead]['label_overtime'][j+1])):
+        return G[ntail][nhead][key]['f_e_minus_overtime'][j]
+    
     print("Warning: time ='",time, "is out of range of definition of f_e_minus")
-    return -1.0
+    return
 
 def f_e_plus(G, e, time):
     ntail = e[0]
@@ -2615,11 +2618,13 @@ def f_e_plus(G, e, time):
     if time < G.node[ntail]['label_overtime'][0]:
         return 0.0
     for j in range(len( G.node[ntail]['label_overtime'])-1):
-        if ((G.node[ntail]['label_overtime'][j] <= time) and (time <= (G.node[ntail]['label_overtime'][j+1]))):
+        if ((G.node[ntail]['label_overtime'][j] <= time) and (time < (G.node[ntail]['label_overtime'][j+1]))):
             return G[ntail][nhead][key]['f_e_plus_overtime'][j]
+    if (time == (G.node[ntail]['label_overtime'][j+1])):
+        return G[ntail][nhead][key]['f_e_plus_overtime'][j]
     print("Warning: time =",time, "is out of range of definition of f_e_plus")
 
-    return 1e+24
+    return float('Inf')
 
 
 

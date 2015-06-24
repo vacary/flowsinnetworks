@@ -14,7 +14,7 @@ except:
 import networkx as nx
 
 ###############################################################
-# About new lines of code for visualization 
+# About new lines of code for visualization
 #
 # - added 'pars' variable for selected test functions, for instance 'def test15()'--> 'def test15(pars)'
 # - added [] list in calls for selected test functions, for instance 'test15()' --> 'test15([])'
@@ -32,7 +32,7 @@ try:
 except:
     import examples
 
-import math 
+import math
 
 def test1():
     print( '################ start test1 ###############')
@@ -346,7 +346,7 @@ def test13(pars):
 
     plt.figure("Flows, Cumulative flows and queues for edge =('s','r'), key =0 ", figsize = [18,14])
     flows.plot_flows_queues_cumulativeflows(G,('s','r'),0)
-    
+
     plt.figure("Flows, Cumulative flows and queues for edge =('r','t'), key =0 ", figsize = [18,14])
     flows.plot_flows_queues_cumulativeflows(G,('r','t'),0)
     plt.figure("Flows, Cumulative flows and queues for edge =('r','t'), key =1 ", figsize = [18,14])
@@ -557,12 +557,12 @@ def flow_input_function_Fig1_Cominetti(t):
     if t <= 1 :
         input_flow=2.0
     if t>=2 :
-        input_flow=1.0        
+        input_flow=1.0
     return input_flow
 
 
 
-    
+
 def test_TS1():
     print( '################ start test 18 ###############')
 
@@ -579,7 +579,7 @@ def test_TS1():
     t0=0.0
     N=100
     h=0.1
-    
+
     param=flows.parameters()
     param.tol_thin_flow=1e-10
     param.tol_lp=1e-12
@@ -590,7 +590,7 @@ def test_TS1():
     timesteps=[]
     for i in range(N+1):
         timesteps.append(t0+i*h)
-    
+
     #print("timesteps=",timesteps)
 
 
@@ -631,7 +631,7 @@ def test_TS2():
     t0=0.0
     N=400
     h=0.01
-    
+
     param=flows.parameters()
     param.tol_thin_flow=1e-10
     param.tol_lp=1e-12
@@ -642,7 +642,7 @@ def test_TS2():
     timesteps=[]
     for i in range(N+1):
         timesteps.append(t0+i*h)
-    
+
     #print("timesteps=",timesteps)
 
 
@@ -662,7 +662,7 @@ def test_TS2():
         flows.plot_flows_queues_cumulativeflows_timestepping(G,timesteps)
 
     print( '################ end test 19 ###############')
-    
+
 def test21(pars):
     print( '################ start test 21 ###############')
 
@@ -786,8 +786,8 @@ def test23(pars,graph_file):
 
     #G=nx.read_gml('./graphs/G5_gen.gml') # ok
 
-    G=nx.read_gml('./graphs/G6_gen.gml') # ok
-    
+    #G=nx.read_gml('./graphs/G6_gen.gml') # ok
+
     #G=nx.read_gml('./graphs/G8_gen.gml')  ok
 
     #G=nx.read_gml('./graphs/G7_gen.gml')  # bug  e=in_edges[0] IndexError: list index out of range. fixed in current_shortest_path graph
@@ -800,14 +800,16 @@ def test23(pars,graph_file):
     #G=nx.read_gml('./graphs/G_d4_n400_gen.gml')
     #G=nx.read_gml('./graphs/G_d6_n600_gen.gml')
     #nx.write_gml(G,'G_gen.gml')
+
     G=nx.read_gml(graph_file)
     G=nx.MultiDiGraph(G)
+
     source = G.nodes()[0]
     sink = G.nodes()[-1]
 
-    
+
     len(list(nx.connected_components(nx.MultiGraph(G))))==1
-    
+
     #l = list( nx.simple_paths.all_simple_paths(G,0,17))
     #print(l)
     #raw_input()
@@ -816,12 +818,12 @@ def test23(pars,graph_file):
     inputflow=[2.0]
 
     G.name= dict([])
-    
+
     param=flows.parameters()
     param.tol_thin_flow=1e-10
     param.tol_lp=1e-12
     param.tol_cut=1e-12
-    
+
     param.nmax =500
 
 
@@ -830,7 +832,7 @@ def test23(pars,graph_file):
     print("inputflow=",inputflow)
 
     with_draw=False
-    
+
     if with_draw :
         plt.ion()
         plt.close('all')
@@ -870,7 +872,7 @@ def test23(pars,graph_file):
 
     return  flows.isF_Xbar_minus_increasing(G, param.tol_thin_flow),G
 
-    
+
     print( '################ end test 23 ###############')
 
 
@@ -915,6 +917,3 @@ if __name__ == '__main__':
     # Time-stepping examples.
     #test_TS1() #Similar to test13
     #test_TS2() #Similar to test15
-
-
-
