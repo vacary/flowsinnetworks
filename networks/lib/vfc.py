@@ -15,6 +15,100 @@ import random
 from numpy import *
 
 
+# VISUALIZATION
+
+def get_CustomVTKGraphLine(G,edges,node_0,node_1,time_step,globalNumberOfTimeSteps,width,scale):
+    
+    # Pair of nodes connected by one arc
+    
+    p0 = G.node[node_0]['pos']
+    p1 = G.node[node_1]['pos']
+    
+    numberOfTimeDivisions = int(floor(edges[0]['time']/time_step))
+    
+    # DYNAMIC
+    el = vtkFlowRibbonLine(p0,p1,numberOfTimeDivisions,width)
+    el.vtkFilter.SetWidth(width)
+        
+    rPos        = 0.5*(array(p0)+array(p1))
+    qHeight     = 6/scale
+    qDistance   = 3.25/scale
+    qWidth      = 1.25/scale
+    
+    queue   = vtkQueueRibbonUsingRefPosition(p0,p1,rPos,qHeight,qDistance,qWidth)
+    qbox    = vtkQueueBoxUsingRefPosition(p0,p1,rPos,qHeight,qDistance,qWidth)
+    
+    if (G.node[node_0]['type'] == 'd'):
+        queue.vtkActor.GetProperty().SetOpacity(0)
+        qbox.vtkActor.GetProperty().SetOpacity(0)
+    
+    
+    nodeStart                   = G.node[node_0]['nlabel']
+    nodeEnd                     = G.node[node_1]['nlabel']
+    edgeID                      = edges[0]['edge_key']#['id']
+    edgeKey                     = edges[0]['edge_skey']#['key']
+    globalNumberOfTimeDivisions = globalNumberOfTimeSteps
+    numberOfTimeStepsForEdge    = numberOfTimeDivisions
+    time_step                   = time_step
+    vtkQueue                    = queue
+    vtkElement                  = el    
+
+    edgeElement = EdgeElement(nodeStart,nodeEnd,edgeID,edgeKey,numberOfTimeStepsForEdge,globalNumberOfTimeDivisions,time_step,vtkQueue,vtkElement,qbox)
+    
+    return edgeElement
+
+def get_CustomVTKGraphArc(G,edges,n_edge,node_0,node_1,plusFactor,angleForArc,time_step,globalNumberOfTimeSteps,width,scale):
+
+    # Pair of nodes connected by several arcs
+                
+    p0 = G.node[node_0]['pos']
+    p1 = G.node[node_1]['pos']
+    
+    numberOfTimeDivisions = int(floor(edges[n_edge]['time']/time_step))
+    
+    # DYNAMIC
+    
+    el = vtkFlowRibbonArc(p0,p1,numberOfTimeDivisions,angleForArc,plusFactor)
+    el.vtkFilter.SetWidth(width)
+    
+    nArcPoints = el.vtkPoints.GetNumberOfPoints()
+    
+    if (nArcPoints % 2 == 1):
+        
+        box_position    = el.vtkPoints.GetPoint(int(0.5*(nArcPoints-1)))
+        rPos            = array(box_position)
+    
+    else:
+        
+        box_position_0  = el.vtkPoints.GetPoint(int(0.5*nArcPoints - 1))
+        box_position_1  = el.vtkPoints.GetPoint(int(0.5*nArcPoints))
+        rPos            = 0.5*(array(box_position_0)+array(box_position_1))                        
+    
+    qHeight     = 6
+    qDistance   = 1.75*(-1*plusFactor)
+    qWidth      = 1.25
+    
+    queue   = vtkQueueRibbonUsingRefPosition(p0,p1,rPos,qHeight,qDistance,qWidth)
+    qbox    = vtkQueueBoxUsingRefPosition(p0,p1,rPos,qHeight,qDistance,qWidth)
+    
+    if (G.node[node_0]['type'] == 'd'):
+        queue.vtkActor.GetProperty().SetOpacity(0)
+        qbox.vtkActor.GetProperty().SetOpacity(0)
+        
+    nodeStart                   = G.node[node_0]['nlabel']
+    nodeEnd                     = G.node[node_1]['nlabel']
+    edgeID                      = edges[n_edge]['edge_key']#['id']
+    edgeKey                     = edges[n_edge]['edge_skey']#['key']
+    globalNumberOfTimeDivisions = globalNumberOfTimeSteps
+    numberOfTimeStepsForEdge    = numberOfTimeDivisions
+    time_step                   = time_step
+    vtkQueue                    = queue
+    vtkElement                  = el
+
+    edgeElement = EdgeElement(nodeStart,nodeEnd,edgeID,edgeKey,numberOfTimeStepsForEdge,globalNumberOfTimeDivisions,time_step,vtkQueue,vtkElement,qbox)
+
+    return edgeElement
+
 # FUNCTIONS
 
 def lambdaPoint(vlambda,p0,vector):
@@ -565,7 +659,7 @@ class vtkEdgeRibbonArc:
             
 class vtkNodesElementGlyph:
     
-    def __init__(self,nxGraph,nodeRadius):
+    def __init__(self,nxGraph,nodeRadius,opacity,lbFontSize):
 
         self.colorsArrayName    = "Colors"
         self.widthArrayName     = "Radius"
@@ -579,9 +673,9 @@ class vtkNodesElementGlyph:
         self.vtkActor           = vtk.vtkActor()      
         self.vtkActor2D         = vtk.vtkActor2D()    
 
-        self._initialize(nxGraph,nodeRadius)
+        self._initialize(nxGraph,nodeRadius,opacity,lbFontSize)
 
-    def _initialize(self,G,nodeRadius):
+    def _initialize(self,G,nodeRadius,opacity,lbFontSize):
     
         # geometry and labels
         
@@ -695,6 +789,7 @@ class vtkNodesElementGlyph:
         self.vtkActor.GetProperty().SetSpecular(0.25)
         self.vtkActor.GetProperty().SetAmbient(0.005)
         self.vtkActor.GetProperty().SetDiffuse(0.1)
+        self.vtkActor.GetProperty().SetOpacity(opacity)
         
         # 2D Actor
 
@@ -702,7 +797,7 @@ class vtkNodesElementGlyph:
         labelMapper.SetInputData(self.vtkPolyData)
         labelMapper.SetLabelModeToLabelFieldData()
         tprop = labelMapper.GetLabelTextProperty()
-        tprop.SetFontSize(16)
+        tprop.SetFontSize(lbFontSize)
         tprop.SetBold(1)
         tprop.SetItalic(0)
         tprop.SetShadow(0)
@@ -812,7 +907,7 @@ class vtkText:
         
 class vtkFlowRibbonLine:
 
-    def __init__(self,p0,p1,numberOfTimeDivisions):
+    def __init__(self,p0,p1,numberOfTimeDivisions,width):
 
         self.flag               = 0
 
@@ -826,9 +921,9 @@ class vtkFlowRibbonLine:
         self.colors             = vtk.vtkUnsignedCharArray()
         self.radius             = vtk.vtkDoubleArray()
         
-        self._initialize(p0,p1,numberOfTimeDivisions)
+        self._initialize(p0,p1,numberOfTimeDivisions,width)
         
-    def _initialize(self,p0,p1,numberOfTimeDivisions):
+    def _initialize(self,p0,p1,numberOfTimeDivisions,width):
         
         # geometry and topology
         
@@ -874,26 +969,26 @@ class vtkFlowRibbonLine:
         self.vtkPolyData.GetPointData().SetActiveScalars('Radius')
 
         # filter
-
+ 
         if (vtk.VTK_MAJOR_VERSION <= 5):   
             self.vtkFilter.SetInput(self.vtkPolyData)
         else:
             self.vtkFilter.SetInputData(self.vtkPolyData)
-            
-        if self.flag == 0:
-            self.vtkFilter.SetAngle(90)
-        else:
-            self.vtkFilter.SetAngle(180) 
-        
-        self.vtkFilter.SetWidth(0.5)
+             
+        self.vtkFilter.UseDefaultNormalOn()        
+        self.vtkFilter.SetAngle(180) 
+         
+        self.vtkFilter.SetWidth(width/2.0)
         self.vtkFilter.SetVaryWidth(1)
- 
+  
         # mapper
- 
+  
         self.vtkMapper.SetInputConnection(self.vtkFilter.GetOutputPort())
         self.vtkMapper.ScalarVisibilityOn()
         self.vtkMapper.SetScalarModeToUsePointFieldData()
         self.vtkMapper.SelectColorArray('Colors')
+        
+        #self.vtkMapper.SetInputData(self.vtkPolyData)
         
         # actor
         
@@ -1063,10 +1158,11 @@ class vtkQueueBox:
         q0_plus  = lambdaPoint( widthFactor, q0, +w)
         q1_plus  = lambdaPoint( widthFactor, q1, +w)         
         
-        q1_minus[2] = 0.02
-        q0_minus[2] = 0.02
-        q0_plus[2] = 0.02
-        q1_plus[2] = 0.02
+        z_aux = 1*1E-5
+        q1_minus[2] = z_aux
+        q0_minus[2] = z_aux
+        q0_plus[2] = z_aux
+        q1_plus[2] = z_aux
         
         self.vtkPoints.InsertNextPoint(q1_minus)
         self.vtkPoints.InsertNextPoint(q0_minus)
@@ -1143,10 +1239,11 @@ class vtkQueueBoxUsingRefPosition:
         qhp = qbp - h*u
         qhm = qbm - h*u   
         
-        qbp[2] = 0.02
-        qbm[2] = 0.02
-        qhp[2] = 0.02
-        qhm[2] = 0.02
+        z_aux = 1*1E-5
+        qbp[2] = z_aux
+        qbm[2] = z_aux
+        qhp[2] = z_aux
+        qhm[2] = z_aux
         
         self.vtkPoints.InsertNextPoint(qhm)
         self.vtkPoints.InsertNextPoint(qbm)
@@ -1227,8 +1324,9 @@ class vtkQueueRibbonUsingRefPosition:
         q0 = qm + (h/2.0)*u 
         q1 = qm - (h/2.0)*u 
 
-        q0[2] = 0.01
-        q1[2] = 0.01
+        z_aux = 1*1E-5
+        q0[2] = z_aux
+        q1[2] = z_aux
 
         self.vtkPoints.InsertNextPoint(q0)
         self.vtkPoints.InsertNextPoint(q1)
@@ -1336,8 +1434,9 @@ class vtkQueueRibbonElement:
         q0 = qm + (h/2.0)*u + distanceFactor*w
         q1 = qm - (h/2.0)*u + distanceFactor*w
 
-        q0[2] = 0.01
-        q1[2] = 0.01
+        z_aux = 1*1E-12
+        q0[2] = z_aux
+        q1[2] = z_aux
 
         self.vtkPoints.InsertNextPoint(q0)
         self.vtkPoints.InsertNextPoint(q1)

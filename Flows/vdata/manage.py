@@ -289,3 +289,44 @@ def genVData(G,time_step,Tmax,graphName):
     
     #print('[ graph file available ]' )
     
+def genVData2(G,time_step,Tmax,graphName,data_path):
+
+    # Paths for output files
+
+    data_path = os.path.abspath(os.path.join('data'))
+    
+    # Add graph edges keys and create data files for visualization
+    
+    G  = genDataFromMultiGraphStructure(G,time_step,Tmax,graphName)
+
+    ''' Modifications in graph data according to the required file output format
+    '''
+
+    SG = nx.MultiDiGraph()
+
+    # node data
+    
+    for n in G.nodes_iter():    
+        SG.add_node(n)
+        SG.node[n]['label_thin_flow_overtime'] = str(G.node[n]['label_thin_flow_overtime'])
+        SG.node[n]['label_overtime'] = str(G.node[n]['label_overtime'])
+        SG.node[n]['pos'] = str(G.node[n]['pos'])
+        SG.node[n]['nlabel'] = str(n)        
+        
+    for u,v,data in G.edges_iter(data=True):
+        
+        edge_key        = data['edge_key']
+        edge_skey       = data['edge_skey']
+        
+        time        = data['time']
+        capacity    = data['capacity']
+        
+        SG.add_edge(u,v, edge_key = edge_key, edge_skey = edge_skey, time = time, capacity = capacity)  
+        
+    # Save file with the graph data
+
+    nx.write_gml(SG,os.path.join(data_path,graphName+".gml"))
+
+    return None
+
+    

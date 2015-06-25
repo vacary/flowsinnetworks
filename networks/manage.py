@@ -1,167 +1,125 @@
-##
-#
-# Inria Chile - Flows In Networks
-# 
-# Dynamic flow visualization
-#
-# * Messages and data for start.py file
-#
-#
+'''
 
-import os, sys
-import settings
-import lib.errors as e
-import dev.graphs.test as dev
+VISUALIZATION DATA MANAGER
 
-lib_path = os.path.abspath(os.path.join('..'))
-sys.path.append(lib_path)
+'''
 
-import Flows.examples as exa
+import os, sys, re
+import networkx as nx
+from numpy import *
 
-ns                          = settings.NETWORK_GRAPH
-msg                         = 'Graph...'+str(ns)
-flag                        = 0
-
-ADD_DUMMY_NODE              = settings.ADD_DUMMY_SOURCE_NODE # 0 or 1
-PRIORITY_GRAPHVIZ_LAYOUT    = settings.PRIORITY_GRAPHVIZ_LAYOUT # 0 or 1
-INTERACTOR_STYLE            = settings.INTERACTOR_STYLE
-SIM_DATA_AVAILABLE          = False
-MAP_DATA_AVAILABLE          = False
-
-def check_package(string_name):
+def get_GUI_info(INTERACTOR_STYLE):
     
-    package = string_name
-    flag = 0
+    msgTxt = '  Flows In Networks \n\n'
+    msgTxt += '  Jun 24, 2015 \n\n\n'
+    msgTxt += '  Interactor Style:\n\n'
     
-    try:
-        __import__(package)
-        flag = 0
-        print '[*] '+str(package)
- 
-        return flag
-
-    except ImportError:
-        print '[x] '+str(package)+'...not found '
-        flag = 2
+    if (INTERACTOR_STYLE == 'StyleImage'):
     
-        return flag
-
-def check_package_opt(string_name):
-    
-    package = string_name
-    flag = 0
-    
-    try:
-        __import__(package)
-        flag = 0
-        print '[*] '+str(package)+' (optional) '
- 
-        return flag
-    
-    except ImportError:
-        print '[x] '+str(package)+'...not found (optional)'
-        flag = 2
-    
-        return flag
-
-# packages
-
-print '[FVS] Flow in Networks - Visualization'
-print 'Check function for python modules...'
-
-f1 = check_package('numpy')
-f2 = check_package('vtk')
-f3 = check_package('networkx')
-f4 = check_package('PyQt4')
-f5 = check_package_opt('pygraphviz')
-f6 = check_package('matplotlib')
-  
-flag = max(f1,f2,f3,f4,f6)  
-
-# graph call
-
-if (flag == 0):
-
-
-    # graph 
-    
-    if (ns == 'example1'):
-    
-        G = exa.example1()
-    
-    elif (ns == 'example2'):
-    
-        G = exa.example2()
-    
-    elif (ns == 'example3'):
-        
-        G = exa.example3()
-    
-    elif (ns == 'example4'):
-        
-        G = exa.example4()        
-    
-    elif (ns == 'example5'):
-        
-        G = exa.example5()
-    
-    elif (ns == 'example_KochSkutella2011_Fig3_Fig4'):
-        
-        G = exa.example_KochSkutella2011_Fig3_Fig4()    
-    
-    elif (ns == 'example_simple1'):
-        
-        G = exa.example_simple1()
-    
-    elif (ns == 'example_Fig1_Cominetti'):
-        
-        G = exa.example_Fig1_Cominetti()
-    
-    elif (ns == 'example_Fig1_Cominetti_variant1'):
-        
-        G = exa.example_Fig1_Cominetti_variant1()
-    
-    elif (ns == 'example_Larre'):
-        
-        G = exa.example_Larre()
-        SIM_DATA_AVAILABLE = True
-        
-    elif (ns == 'example_Larre_bis'):
-        
-        G = exa.example_Larre_bis()
-    
-    elif (ns == 'example_parallelpath'):
-        
-        G = exa.example_parallelpath()    
-    
-    elif (ns == 'custom_graph'):
-        
-        G = dev.custom_graph()
-
-
-    elif (ns == 'example_doubleparallelpath'):
-        
-        G = exa.example_doubleparallelpath()    
-
-    elif (ns == 'example_map_Tobalaba'):
-        
-        MAP_DATA_AVAILABLE = True
+        msgTxt += '  [ StyleImage ]\n\n'
+        msgTxt += '  Controls:\n\n'
+        msgTxt += '  Right mouse - Zoom \n'
+        msgTxt += '  Control + Left mouse - Rotation (2D) \n'
+        msgTxt += '  Middle mouse - Pan \n'
+        msgTxt += '  Scroll wheel - Zoom \n'
     
     else:
-        
-        G       = e.empty_MultiDiGraph()
-        flag    = 1
-        msg     = '[WARNING] Empty graph'
-        
-        print msg
 
-# messages
-
-if (flag == 0):
-    print 'Selected graph... '+ns
-    print 'Loading visualization...'
+        msgTxt += '  [ RubberBand3D ]\n\n'
+        msgTxt += '  Controls:\n\n'
+        msgTxt += '  Right mouse - Rotate \n'
+        msgTxt += '  Shift + Right mouse - Zoom \n'
+        msgTxt += '  Middle mouse - Pan \n'
+        msgTxt += '  Scroll wheel - Zoom \n'
     
+    msgTxt = '\n' + msgTxt
+    
+    return msgTxt
 
+def get_graphFromGMLFile(network_name):
+    
+    G = nx.MultiDiGraph()
+    
+    SG = nx.read_gml(os.path.join('.','projects',network_name,'data',str(network_name)+'.gml')) #source graph
+    
+    c = 0
+    
+    for n in SG.nodes_iter():
+        
+        G.add_node(n)
+        G.node[n]['id']     = c
+        G.node[n]['nlabel'] = str(n)
+        str_pos = str(SG.node[n]['pos'])
+        aux = str_pos.translate(None,''.join(['[',']'])).split(',')
+        pos = [float(aux[0]),float(aux[1]),float(aux[2])] 
+        G.node[n]['pos']    = array(pos)
+        G.node[n]['type']   = 'r'
+                
+        c = c + 1
+        
+    for u,v,data in SG.edges_iter(data=True):
+        
+        edge_key        = data['edge_key']
+        edge_skey       = data['edge_skey']
+        
+        time        = data['time']
+        capacity    = data['capacity']
+        
+        G.add_edge(u,v, edge_key = edge_key, edge_skey = edge_skey, time = time, capacity = capacity)
+        
+    return G    
 
+def get_vparameters(network_name):
+    
+    pars_file_path = os.path.join('.','projects',network_name,'network.py')
+    
+    pars_name_list = []
+    pars_value_list = []
+    
+    pars = []
+    
+    f = open(pars_file_path,'r')
+    for line in f:
+        if re.search(r"[A-Z]",line):
+            aux = line.split()
+            if (len(aux) == 3 and len(aux[0]) > 1):
+                pars_name_list.append(aux[0])
+                pars_value_list.append(aux[2])
+    f.close()
+    
+    pars = [pars_name_list,pars_value_list]
+    
+    return pars
 
+def check_package(string_name,msg):
+    
+    package = string_name
+    found   = False
+    
+    try:
+        __import__(package)
+        found = True
+        print '[*] '+str(package)
+ 
+    except ImportError:
+        if (msg == ''):
+            msg = '[not found]'
+        print '[x] '+str(package)+' '+str(msg)
+    
+    return found
 
+def check_packages(pck_list,msg_list):
+    
+    eval = True
+    c = 0
+    for pck in pck_list:
+        check = (check_package(pck,msg_list[c]) and eval)
+        eval = check
+        c = c + 1
+    
+    return eval
+        
+        
+        
+    
+    
