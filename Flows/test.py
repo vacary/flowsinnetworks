@@ -37,7 +37,7 @@ import math
 def general_test(G,node_src,node_sink,TIME_OF_EVENT,INPUT_FLOW,vpars):
 
     #G=examples.example_Larre()
-    
+
     source = node_src
     sink = node_sink
 
@@ -48,7 +48,7 @@ def general_test(G,node_src,node_sink,TIME_OF_EVENT,INPUT_FLOW,vpars):
     param.tol_thin_flow=1e-10
     param.tol_lp=1e-12
     param.tol_cut=1e-12
-    
+
     param.nmax =500
 
     flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow,param)
@@ -72,14 +72,14 @@ def general_test(G,node_src,node_sink,TIME_OF_EVENT,INPUT_FLOW,vpars):
         plt.figure("Flows, Extra values", figsize = [8,10])
         flows.postprocess_extravalues(G, source, sink)
         flows.plot_extravalues(G)
-        
+
     try:
         if (vpars[0] == True):
             vdata.genVData2(G,vpars[1],vpars[2],vpars[3],vpars[4])
     except:
         import sys
         print(sys.exc_info())
-        print('[ MSG ] test.py ')       
+        print('[ MSG ] test.py ')
 
     return None
 
