@@ -10,16 +10,16 @@ def generate_graph(d,n,graph_file):
 
     #print(l)
 
-    # for path in list(l):
-    #     if (len(path)==2):
-    #         H.remove_edge(path[0],path[1])
-    #     if (len(path)>=2):
-    #         for i in range(1,len(path)-1):
-    #             print path[i]
-    #             try: 
-    #                 H.remove_node(path[i])
-    #             except:
-    #                 print('node was already')
+    for path in list(l):
+        if (len(path)==2):
+            H.remove_edge(path[0],path[1])
+        if (len(path)>=2):
+            for i in range(1,len(path)-1):
+                print path[i]
+                try:
+                    H.remove_node(path[i])
+                except:
+                    print('node was already')
 
     G=nx.MultiDiGraph(H)
 
@@ -38,6 +38,5 @@ def generate_graph(d,n,graph_file):
     #nx.draw_networkx(G)
     #flows.display_graph(G)
     #plt.show()
-
 
 

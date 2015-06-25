@@ -2611,6 +2611,7 @@ def f_e_minus(G, e, time):
     print("Warning: time ='",time, "is out of range of definition of f_e_minus")
     return
 
+
 def f_e_plus(G, e, time):
     ntail = e[0]
     nhead = e[1]
@@ -2630,6 +2631,8 @@ def f_e_plus(G, e, time):
 
 def postprocess_extravalues(G, source, sink):
 
+    print_debug("Start postprocess_extravalues(G, source, sink) ")
+
     simpleG = nx.DiGraph()
     simpleG.add_nodes_from(G.nodes())
     for e in G.edges(keys=True):
@@ -2641,7 +2644,7 @@ def postprocess_extravalues(G, source, sink):
 
     cut_value, partition = nx.minimum_cut(simpleG, source, sink)
     X, Xbar = partition
-    print(cut_value, partition)
+    print_debug(cut_value, partition)
     G.name=dict([])
     G.name['max_flow']= cut_value
  
@@ -2652,7 +2655,7 @@ def postprocess_extravalues(G, source, sink):
     edges_cut =set.intersection(set(G.out_edges(X,keys=True)),set(G.in_edges(Xbar,keys=True)))
     G.name['edges_cut']= edges_cut
 
-    print (edges_cut)
+    print_debug(edges_cut)
 
     switch_time_f_e_minus=[]
     Tmax_minus=1e+24
@@ -2664,7 +2667,7 @@ def postprocess_extravalues(G, source, sink):
             if (titi <= Tmax_minus):
                 switch_time_f_e_minus.append(titi)
     switch_time_f_e_minus.sort()
-    print("switch_time_f_e_minus",switch_time_f_e_minus)
+    print_debug("switch_time_f_e_minus",switch_time_f_e_minus)
     G.name['switching_times_f_Xbar_minus']= switch_time_f_e_minus
 
 
@@ -2679,7 +2682,7 @@ def postprocess_extravalues(G, source, sink):
             if (titi <= Tmax_plus):
                 switch_time_f_e_plus.append(titi)
     switch_time_f_e_plus.sort()
-    print("switch_time_f_e_plus",switch_time_f_e_plus)
+    print_debug("switch_time_f_e_plus",switch_time_f_e_plus)
     G.name['switching_times_f_Xbar_plus']= switch_time_f_e_plus
 
 
@@ -2689,7 +2692,7 @@ def postprocess_extravalues(G, source, sink):
         for e  in edges_cut:
             flow = flow + f_e_minus(G, e, t)
         f_Xbar_minus.append(flow)
-    print('f_Xbar_minus =' , f_Xbar_minus)
+    print_debug('f_Xbar_minus =' , f_Xbar_minus)
     G.name['f_Xbar_minus'] = f_Xbar_minus
 
     f_Xbar_plus = []
@@ -2698,7 +2701,7 @@ def postprocess_extravalues(G, source, sink):
         for e  in edges_cut:
             flow = flow + f_e_plus(G, e, t)
         f_Xbar_plus.append(flow)
-    print('f_Xbar_plus =' , f_Xbar_plus)
+    print_debug('f_Xbar_plus =' , f_Xbar_plus)
 
     G.name['f_Xbar_plus'] = f_Xbar_plus
 
@@ -2707,7 +2710,7 @@ def postprocess_extravalues(G, source, sink):
         for titi in G.node[e[1]]['label_overtime']:
             switch_time_f_e_minus_sink.append(titi)
     switch_time_f_e_minus_sink.sort()
-    print("switch_time_f_e_minus_sink",switch_time_f_e_minus_sink)
+    print_debug("switch_time_f_e_minus_sink",switch_time_f_e_minus_sink)
     G.name['switching_times_f_sink_minus']= switch_time_f_e_minus_sink
     f_sink_minus=[]
     for t in switch_time_f_e_minus_sink:
@@ -2745,7 +2748,6 @@ def isF_sink_minus_increasing(G,tol):
 
 def plot_extravalues(G):
 
-    print(drepr(G.name))
 
     min_x=0.0
     max_x=0.0

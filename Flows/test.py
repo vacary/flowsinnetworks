@@ -829,33 +829,15 @@ def test22(pars):
 def test23(pars,graph_file):
     print( '################ start test 23 ###############')
 
-    #G=nx.read_gml('./graphs/G1_gen.gml') #ok
 
-    #G=nx.read_gml('./graphs/G2_gen.gml')  #ok
-
-
-    #G=nx.read_gml('./graphs/G5_gen.gml') # ok
-
-    #G=nx.read_gml('./graphs/G6_gen.gml') # ok
-
-    #G=nx.read_gml('./graphs/G8_gen.gml')  ok
-
-    #G=nx.read_gml('./graphs/G7_gen.gml')  # bug  e=in_edges[0] IndexError: list index out of range. fixed in current_shortest_path graph
-
-    #G=nx.read_gml('./graphs/G3_gen.gml')  #bug first  e=in_edges[0] IndexError:  and now alpha  ==0
-
-    #G=nx.read_gml('./graphs/Galpha_gen.gml')  #minimal test that produced alpha =0.0
-
-    #G=nx.read_gml('./graphs/Gmedium_gen.gml')
-    #G=nx.read_gml('./graphs/G_d4_n400_gen.gml')
-    #G=nx.read_gml('./graphs/G_d6_n600_gen.gml')
-    #nx.write_gml(G,'G_gen.gml')
 
     G=nx.read_gml(graph_file)
     G=nx.MultiDiGraph(G)
 
     source = G.nodes()[0]
     sink = G.nodes()[-1]
+
+
 
 
     len(list(nx.connected_components(nx.MultiGraph(G))))==1
@@ -899,6 +881,7 @@ def test23(pars,graph_file):
         flows.plot_flows_queues_cumulativeflows(G)
 
     flows.postprocess_extravalues(G, source, sink)
+
     if with_draw :
         plt.figure("Flows, Extra values", figsize = [8,10])
 
@@ -918,9 +901,41 @@ def test23(pars,graph_file):
     #
     ###############################
 
+    G.name['isF_Xbar_minus_increasing']=flows.isF_Xbar_minus_increasing(G, param.tol_thin_flow)
+    G.name['isF_sink_minus_increasing']=flows.isF_sink_minus_increasing(G, param.tol_thin_flow)
+    print(flows.drepr(G.name))
 
 
-    return  flows.isF_Xbar_minus_increasing(G, param.tol_thin_flow),G
+    if False:
+        # clean up useless edges to simplify
+        G_simplified=nx.MultiDiGraph()
+        G_simplified.add_nodes_from(G.nodes())
+        print("original number of nodes", len(G.nodes()))
+        print("original number of edges", len(G.edges()))
+
+
+        #G_simplified.add_edges_from(G.edges(keys=True))
+        for e in G.edges(keys=True):
+            val_max =0.0
+            for val in G[e[0]][e[1]][e[2]]['f_e_minus_overtime']:
+                val_max = max(val,val_max)
+            if val_max > 0.0:
+                G_simplified.add_edge(*e)
+                G_simplified[e[0]][e[1]][e[2]]['time']=G[e[0]][e[1]][e[2]]['time']
+                G_simplified[e[0]][e[1]][e[2]]['capacity']=G[e[0]][e[1]][e[2]]['capacity']
+
+        for n in G.nodes():
+            if n!= source:
+                if G_simplified.in_edges(n,keys=True) == []:
+                    G_simplified.remove_node(n)
+        import os
+        nx.write_gml(G_simplified, os.path.splitext(graph_file)[0]+"_simplified.gml")
+        print("simplified number of nodes", len(G_simplified.nodes()))
+        print("simplified number of edges", len(G_simplified.edges()))
+
+
+
+    return  G
 
 
     print( '################ end test 23 ###############')
@@ -959,6 +974,27 @@ if __name__ == '__main__':
 
     #test21([])
     #test22([])
+
+    #print(test23([],'./graphs/G1_gen.gml')) #ok
+
+    #print(test23([],'./graphs/G2_gen.gml'))  #ok
+
+
+    #print(test23([],'./graphs/G5_gen.gml')) # ok
+
+    #print(test23([],'./graphs/G6_gen.gml')) # ok
+
+    #print(test23([],'./graphs/G8_gen.gml'))  ok
+
+    #print(test23([],'./graphs/G7_gen.gml'))  # bug  e=in_edges[0] IndexError: list index out of range. fixed in current_shortest_path graph
+
+    #print(test23([],'./graphs/G3_gen.gml'))  #bug first  e=in_edges[0] IndexError:  and now alpha  ==0
+
+    #print(test23([],'./graphs/Galpha_gen.gml'))  #minimal test that produced alpha =0.0
+
+    #print(test23([],'./graphs/Gmedium_gen.gml'))
+    #print(test23([],'./graphs/G_d4_n400_gen.gml'))
+    #print(test23([],'./graphs/G_d6_n600_gen.gml'))
 
     #print(test23([],'./graphs/G3_gen.gml'))
     print(test23([],'./graphs/G_gen_infinite.gml'))

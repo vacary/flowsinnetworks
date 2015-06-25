@@ -2,8 +2,8 @@ import gen_graph
 import test
 import sys
 def test_random_varyingdn():
-    degree = 6
-    number_nodes_init=7
+    degree = 3
+    number_nodes_init=4
     k=0
     while (True and k<20):
 
@@ -23,9 +23,16 @@ def test_random_varyingdn():
                 gen_graph.generate_graph(degree,number_nodes+1,filename)
             else:
                 gen_graph.generate_graph(degree,number_nodes,filename)
-            isincreasing, tk = test.test23([],filename)
-            if not isincreasing:
-                print("the flow trough the cut is not increasing")
+            G= test.test23([],filename)
+            if (not G.name['isF_Xbar_minus_increasing'][0]) and\
+               (not G.name['isF_sink_minus_increasing'][0]):
+                print(filename, ": the flow trough the cut and the sink is not increasing")
+                raw_input()
+            if not G.name['isF_Xbar_minus_increasing'][0]:
+                print(filename, ": the flow trough the cut is not increasing")
+                #raw_input()
+            if not G.name['isF_sink_minus_increasing'][0]:
+                print(filename, ":the flow at sink is not increasing")
                 raw_input()
             kk=kk+1
             print('############################################################')
