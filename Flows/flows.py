@@ -2069,7 +2069,7 @@ def assert_thin_flow(G,source,b,E1,d,param):
                               G.node[e[0]]['label_thin_flow']]))\
                          <= tol))
         else:
-            assert(  G.node[e[1]]['label_thin_flow'] <= G.node[e[0]]['label_thin_flow'] )
+            assert(  G.node[e[1]]['label_thin_flow'] <= G.node[e[0]]['label_thin_flow'] + tol )
 
 
 def assert_thin_flow_without_resetting(G,source,b,d=None, param=None):
