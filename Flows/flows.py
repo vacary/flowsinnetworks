@@ -1534,7 +1534,13 @@ def solve_lp_for_shortcircuit(G,E_star,P,I,b,source):
     print_debug("T=", T)
     Pc=set.difference(set(G.edges(keys=True)),P)
     Tc=set.difference(set(G.edges(keys=True)),T)
-    nz=7*len(G)+1;
+
+    
+    # Rough evaluation of the number of entries in the A matrix of the LP
+    # a rigorous counting process should be interesting
+    nz=7*len(G.edges())+1;
+    
+    print_debug("nz =", nz)
     ia = swiglpk.intArray(nz);
     ja = swiglpk.intArray(nz);
 
@@ -1745,6 +1751,10 @@ def solve_lp_for_shortcircuit(G,E_star,P,I,b,source):
 
     zz=zz-1
 
+
+    print_debug("zz =", zz)
+
+    
     swiglpk.glp_load_matrix(lp, zz, ia, ja, ar);
 
     parm = swiglpk.glp_smcp()
@@ -1816,6 +1826,9 @@ def compute_thin_flow_short_circuit(G, source, b, E1, demand=None, param = None)
     """
     print_debug('################ start compute_thin_flow ###############')
 
+    #global debug_print
+    #debug_print=True
+    
     if  not(G.is_multigraph() and G.is_directed()):
         raise RuntimeError("Flows module deals only with nx.MultiDiGraph\n \
         If your graph is not a MultiDiGraph, you can copy it with nx.MultiDiGraph.copy(G) ")
@@ -1965,7 +1978,7 @@ def compute_thin_flow_short_circuit(G, source, b, E1, demand=None, param = None)
     print_debug("E_star=",E1.edges(keys=True))
     print_debug("Nombre d'iterations :", k)
 
-
+    #debug_print=False
     print_debug('G:')
     display_graph(G,print_debug)
 
@@ -2568,7 +2581,6 @@ def plot_thin_flows_and_labels(G,timeofevent):
 
 
 def postprocess_flows_queues_cumulativeflows(G):
-    debug_print= True
     # Compute flows f_e_plus, f_e_minus, F_e_plus, F_e_minus,  on the right interval
     for ntail,nbrs in G.adjacency_iter():
         #G.node[ntail]['shifted_time'] = []
@@ -2814,7 +2826,7 @@ def plot_flows_queues_cumulativeflows(G, edge=None, key=None):
 
 
 def postprocess_flows_queues_cumulativeflows_timestepping(G,timesteps):
-    debug_print= True
+
     # Compute flows f_e_plus, f_e_minus, F_e_plus, F_e_minus,  on the right interval
     for ntail,nbrs in G.adjacency_iter():
         #G.node[ntail]['shifted_time'] = []
