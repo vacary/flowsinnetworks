@@ -826,7 +826,7 @@ def test22(pars):
 
     print( '################ end test 22 ###############')
 
-def test23(pars,graph_file):
+def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=[2.0]):
     print( '################ start test 23 ###############')
 
 
@@ -837,17 +837,10 @@ def test23(pars,graph_file):
     source = G.nodes()[0]
     sink = G.nodes()[-1]
 
-
-
-
-    len(list(nx.connected_components(nx.MultiGraph(G))))==1
-
+    #len(list(nx.connected_components(nx.MultiGraph(G))))==1
     #l = list( nx.simple_paths.all_simple_paths(G,0,17))
     #print(l)
     #raw_input()
-
-    timeofevent=[0.0,100.0]
-    inputflow=[2.0]
 
     G.name= dict([])
 
@@ -857,7 +850,6 @@ def test23(pars,graph_file):
     param.tol_cut=1e-12
 
     param.nmax =500
-
 
     flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow,param)
     print("timeofevent=",timeofevent)
@@ -975,29 +967,29 @@ if __name__ == '__main__':
     #test21([])
     #test22([])
 
-    #print(test23([],'./graphs/G1_gen.gml')) #ok
+    #print(test_file([],'./graphs/G1_gen.gml')) #ok
 
-    #print(test23([],'./graphs/G2_gen.gml'))  #ok
+    #print(test_file([],'./graphs/G2_gen.gml'))  #ok
 
 
-    #print(test23([],'./graphs/G5_gen.gml')) # ok
+    #print(test_file([],'./graphs/G5_gen.gml')) # ok
 
-    #print(test23([],'./graphs/G6_gen.gml')) # ok
+    #print(test_file([],'./graphs/G6_gen.gml')) # ok
 
-    #print(test23([],'./graphs/G8_gen.gml'))  ok
+    #print(test_file([],'./graphs/G8_gen.gml'))  ok
 
-    #print(test23([],'./graphs/G7_gen.gml'))  # bug  e=in_edges[0] IndexError: list index out of range. fixed in current_shortest_path graph
+    #print(test_file([],'./graphs/G7_gen.gml'))  # bug  e=in_edges[0] IndexError: list index out of range. fixed in current_shortest_path graph
 
-    #print(test23([],'./graphs/G3_gen.gml'))  #bug first  e=in_edges[0] IndexError:  and now alpha  ==0
+    #print(test_file([],'./graphs/G3_gen.gml'))  #bug first  e=in_edges[0] IndexError:  and now alpha  ==0
 
-    #print(test23([],'./graphs/Galpha_gen.gml'))  #minimal test that produced alpha =0.0
+    #print(test_file([],'./graphs/Galpha_gen.gml'))  #minimal test that produced alpha =0.0
 
-    #print(test23([],'./graphs/Gmedium_gen.gml'))
-    #print(test23([],'./graphs/G_d4_n400_gen.gml'))
-    #print(test23([],'./graphs/G_d6_n600_gen.gml'))
+    #print(test_file([],'./graphs/Gmedium_gen.gml'))
+    #print(test_file([],'./graphs/G_d4_n400_gen.gml'))
+    #print(test_file([],'./graphs/G_d6_n600_gen.gml'))
 
-    #print(test23([],'./graphs/G3_gen.gml'))
-    print(test23([],'./graphs/G_gen_infinite.gml'))
+    #print(test_file([],'./graphs/G3_gen.gml'))
+    print(test_file([],'./graphs/G_gen_infinite.gml'))
 
 
     # Time-stepping examples.

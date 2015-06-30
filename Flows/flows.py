@@ -1415,12 +1415,21 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
     # Fixed point method
     bi=dict(b)
 
+    # initialize the fixed point iterations with the previous values of the thin flows
+    for e in E1.edges(keys=True):
+        bi[source]= bi[source] + G[e[0]][e[1]][e[2]]['thin_flow']
+        
+    for n in G.nodes():
+        for e in set.intersection(set(G.out_edges(n,keys=True)), set(E1.edges(keys=True))) :
+            print_debug('e in intersection(set(G.out_edges(n)), set(E1.edges()))', e   )
+            bi[n] = bi[n] -  G[e[0]][e[1]][e[2]]['thin_flow']
+
+    
     err = float('Inf')
     k=1
     while (err >= param.tol_thin_flow and k < param.nmax):
         print_debug( '#################################################################################')
-        print( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
-
+ 
         biold=dict(bi)
         compute_thin_flow_without_resetting(G_anchored,source,bi,param=param)
         assert_thin_flow_without_resetting(G_anchored,source,bi)
@@ -1471,10 +1480,12 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
             err = err + abs(bi[n]-biold[n])
         #err= err/G.number_of_nodes()
         #raw_input()
+        print( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
+               
         k =k+1
 
     if (k < param.nmax) :
-        print( "  Fixed point suceeded. number of iterations :", k, 'erreur :', err, '<=', param.tol_thin_flow)
+        print( "  Fixed point suceeded. number of iterations :", k-1, 'erreur :', err, '<=', param.tol_thin_flow)
     else:
         print( "  Fixed point number of iterations max reached :", k, 'erreur :', err, '>', param.tol_thin_flow)
 
@@ -1886,7 +1897,17 @@ def compute_thin_flow_short_circuit(G, source, b, E1, demand=None, param = None)
     bi=dict(b)
 
 
+    # initialize the fixed point iterations with the previous values of the thin flows
+    for e in E1.edges(keys=True):
+        bi[source]= bi[source] + G[e[0]][e[1]][e[2]]['thin_flow']
+        
+    for n in G.nodes():
+        for e in set.intersection(set(G.out_edges(n,keys=True)), set(E1.edges(keys=True))) :
+            print_debug('e in intersection(set(G.out_edges(n)), set(E1.edges()))', e   )
+            bi[n] = bi[n] -  G[e[0]][e[1]][e[2]]['thin_flow']
 
+    
+    
     k=1
     P_current=set([])
     P_previous=set([])
@@ -1898,8 +1919,7 @@ def compute_thin_flow_short_circuit(G, source, b, E1, demand=None, param = None)
 
     while (continue_while and k < param.nmax):
         print_debug( '#################################################################################')
-        print( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
-
+ 
         biold=dict(bi)
         compute_thin_flow_without_resetting(G_anchored,source,bi,param=param)
         assert_thin_flow_without_resetting(G_anchored,source,bi)
@@ -1964,14 +1984,15 @@ def compute_thin_flow_short_circuit(G, source, b, E1, demand=None, param = None)
                     continue_while=False
 
 
+        print( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
 
         k =k+1
 
 
     if (k < param.nmax) :
-        print( "  Fixed point suceeded. number of iterations :", k, 'erreur :', err, '<=', param.tol_thin_flow)
+        print( "  Fixed point suceeded. number of iterations :", k-1, 'erreur :', err, '<=', param.tol_thin_flow)
     else:
-        print( "  Fixed point number of iterations max reached :", k, 'erreur :', err, '>', param.tol_thin_flow)
+        print( "  Fixed point number of iterations max reached :", k-1, 'erreur :', err, '>', param.tol_thin_flow)
 
 
     print_debug("I=", I_current)

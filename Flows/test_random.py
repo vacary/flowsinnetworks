@@ -3,7 +3,7 @@ import test
 import sys
 def test_random_varyingdn():
     degree = 5
-    number_nodes_init=20
+    number_nodes_init=50
     k=0
     while (True and k<20):
 
@@ -13,8 +13,8 @@ def test_random_varyingdn():
 
         #try:
         kk=0
-        while(kk < 500):
-            number_nodes=number_nodes_init+kk/100
+        while(kk < 50):
+            number_nodes=number_nodes_init+kk/10
             if degree >= number_nodes :
                 number_nodes_init = number_nodes_init+1
                 number_nodes=number_nodes_init+kk/100
@@ -23,7 +23,7 @@ def test_random_varyingdn():
                 gen_graph.generate_graph(degree,number_nodes+1,filename)
             else:
                 gen_graph.generate_graph(degree,number_nodes,filename)
-            G= test.test23([],filename)
+            G= test.test_file([],filename,timeofevent=[0.0,100.0], inputflow=[20.0])
             # if (not G.name['isF_Xbar_minus_increasing'][0]) and\
             #    (not G.name['isF_sink_minus_increasing'][0]):
             #     print(filename, ": the flow trough the cut and the sink is not increasing")
