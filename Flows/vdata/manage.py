@@ -318,10 +318,21 @@ def genVData2(G,time_step,Tmax,graphName,data_path):
         edge_key        = data['edge_key']
         edge_skey       = data['edge_skey']
         
-        time        = data['time']
-        capacity    = data['capacity']
+        try:
+
+            time            = data['time']
+            capacity        = data['capacity']
+            geometry        = data['geometry']
+            geometry_keys   = data['geometry_keys']
+            
+            SG.add_edge(u,v, edge_key = edge_key, edge_skey = edge_skey, time = time, capacity = capacity, geometry = geometry, geometry_keys = geometry_keys)  
+            
+        except:
         
-        SG.add_edge(u,v, edge_key = edge_key, edge_skey = edge_skey, time = time, capacity = capacity)  
+            time        = data['time']
+            capacity    = data['capacity']
+            
+            SG.add_edge(u,v, edge_key = edge_key, edge_skey = edge_skey, time = time, capacity = capacity)  
         
     # Save file with the graph data
 

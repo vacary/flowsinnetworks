@@ -42,5 +42,6 @@ if __name__ == "__main__":
             print "[MSG] Empty graph for the network"
 
     except:
+        print sys.exc_info()
         print "[MSG] Simulation" 
 

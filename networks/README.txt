@@ -4,7 +4,7 @@ Flow in networks - Visualization
 
 Maximiliano Olivares <maximiliano.olivares@inria.cl>
 
-Last update : June 24, 2015
+Last update : June 30, 2015
 
 ------------------------------------------------------------------
 

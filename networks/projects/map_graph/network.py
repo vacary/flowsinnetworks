@@ -1,35 +1,42 @@
 """
-NETWORK SETTINGS
+VISUALIZATION NETWORK SETTINGS
 
 """
 
-NETWORK_NAME = "map_graph"
-TYPE = "1" 
+import os, sys
+import networkx as nx
+from numpy import *
 
-TIME_OF_EVENT = [0.0,10.0,100.0]
-INPUT_FLOW = [4.0,4.0] 
+# Parameters 
+
+NETWORK_NAME = "map_graph"
+TYPE = "map_graph" 
+
+TIME_OF_EVENT = [0.0,50.0]
+INPUT_FLOW = [4.0] 
 
 TIME_STEP = 0.2
-T_MAX_VIS = 40 
+T_MAX_VIS = 30 
 FPS = 24 
 
 PRIORITY_GRAPHVIZ_LAYOUT = 1
-
 SIMULATION_DATA_AVAILABLE = 1
 
-import os, sys
-import networkx as nx
+# Required modules / packages 
+
 lib_path = os.path.abspath(os.path.join('..','..'))
 lib_path_flows = os.path.abspath(os.path.join('..','..','..'))
 sys.path.append(lib_path)
 sys.path.append(lib_path_flows)
-import lib.layouts as layouts
+
+import lib.layouts.graph as layouts
 import Flows.examples as exa
 
-# 
-import lib.maps as mp
+import lib.layouts.maps as mp
 
 def network_graph_data():
+
+    # Must return graph G with positions for each node with format pos = "[p[0],p[1],0.0]" 
 
     G = nx.MultiDiGraph()
 
@@ -38,20 +45,11 @@ def network_graph_data():
 
     # { begin graph definition } [ Example: G = exa.example_Larre() ]
 
-    #osm_file_path = os.path.join('.','osm','map_graph_test.osm')
-    #G = mp.get_graphFromOSMFile(osm_file_path)
-
-    G=nx.read_gml(os.path.join('.','data','map_graph.gml'))
-    G = nx.MultiDiGraph(G)
+    osm_file_path = os.path.join('.','osm','map_graph_test.osm')
+    G = mp.get_graphFromOSMFile(osm_file_path)
 
     # { end graph definition }
 
-    if (TYPE == "0"):
-        graphviz_layout = 'dot'
-        layouts.addNodePositionsToGraph(G,TYPE,PRIORITY_GRAPHVIZ_LAYOUT, graphviz_layout)
-
-    #else:
-    #    { procedure to set node positions }
 
     return [G,source,sink]
 
