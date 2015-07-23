@@ -34,6 +34,47 @@ except:
 
 import math
 
+def general_test_dev(G,node_src,node_sink,TIME_OF_EVENT,INPUT_FLOW,network_gml_file_path):
+
+    #G=examples.example_Larre()
+
+    source = node_src
+    sink = node_sink
+
+    timeofevent = TIME_OF_EVENT
+    inputflow = INPUT_FLOW
+
+    param=flows.parameters()
+    param.tol_thin_flow=1e-10
+    param.tol_lp=1e-12
+    param.tol_cut=1e-12
+
+    param.nmax =500
+
+    flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow,param)
+    print("timeofevent=",timeofevent)
+    print("inputflow=",inputflow)
+
+    with_draw=True
+    if with_draw :
+        plt.close('all')
+        plt.figure("Thin flows and associated labels", figsize = [8,10])
+        flows.plot_thin_flows_and_labels(G,timeofevent)
+
+    flows.postprocess_flows_queues_cumulativeflows(G)
+    flows.display_graph(G)
+
+    if with_draw :
+        plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
+        flows.plot_flows_queues_cumulativeflows(G)
+
+    if with_draw :
+        plt.figure("Flows, Extra values", figsize = [8,10])
+        flows.postprocess_extravalues(G, source, sink)
+        flows.plot_extravalues(G)
+
+    return None
+
 def general_test(G,node_src,node_sink,TIME_OF_EVENT,INPUT_FLOW,vpars):
 
     #G=examples.example_Larre()
