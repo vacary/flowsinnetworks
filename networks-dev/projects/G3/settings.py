@@ -13,13 +13,13 @@ from numpy import *
 # Parameters 
 
 NETWORK_NAME = "G3"
-TYPE = "n1" 
+TYPE = "n2" 
 
-TIME_OF_EVENT = [0.0,10.0,20.0]
+TIME_OF_EVENT = [0.0,10.0,100.0]
 INPUT_FLOW = [4.0,4.0] 
 
-TIME_STEP = 0.1 
-T_MAX_VIS = 15 
+TIME_STEP = 0.15
+T_MAX_VIS = 50
 FPS = 24
 
 PRIORITY_GRAPHVIZ_LAYOUT = 1
@@ -70,9 +70,9 @@ def network_custom_layout(G):
     # Example: 
     # graphviz_layout = "circo" 
     # graph_layouts.addNodePositionsToGraph(G,PRIORITY_GRAPHVIZ_LAYOUT,graphviz_layout) 
-
+    
     gviz_file_path = os.path.abspath(os.path.join(dir_path,'rsc','gviz','G3_gen.txt'))
-
+    
     gviz_layouts.addGeometryFromGVizFile(G,gviz_file_path)
 
     # { end custom layout method }

@@ -19,7 +19,7 @@ def addGeometryFromGVizFile(G,gviz_file_path):
     
     N = G.number_of_nodes()
     
-    if (N < 5):
+    if (N < 150):
         
         splines_degree = 2
     
@@ -79,6 +79,7 @@ def addGeometryFromGVizFile(G,gviz_file_path):
             geometry = bsplines.getPointsFromBSplineInterpolation(controlPoints,splines_degree)
             
             edge = (edge_tail,edge_head)
+            
   
             if edge not in edge_log:
                 edge_log[edge] = 1
@@ -86,8 +87,11 @@ def addGeometryFromGVizFile(G,gviz_file_path):
                 edge_log[edge] = edge_log[edge] + 1
               
             edge_id = edge_log[edge]-1
-              
-            G.edge[edge[0]][edge[1]][edge_id]['geometry'] = str(geometry)
+            
+            try:
+                G.edge[edge[0]][edge[1]][edge_id]['geometry'] = str(geometry)
+            except:
+                pass
 
     f.close()    
            

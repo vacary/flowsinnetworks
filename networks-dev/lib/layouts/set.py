@@ -60,11 +60,13 @@ if __name__ == "__main__":
 
                 import settings as ns
                 import lib.layouts.gviz as gviz_layouts
-                #import lib.layouts.geometry as gvtk
+                import lib.layouts.geometry as gvtk
                 
                 graph_data      = ns.network_graph_data()
                 data_path       = os.path.abspath(os.path.join(network_path,'data'))
-                rsc_path        = os.path.abspath(os.path.join(network_path,'rsc')) 
+                rsc_path        = os.path.abspath(os.path.join(network_path,'rsc'))
+                
+                TIME_STEP       = ns.TIME_STEP
 
             except:
                 
@@ -94,10 +96,10 @@ if __name__ == "__main__":
                     
                     try: 
                         
-                        G = ns.network_custom_layout(G)  
+                        G = ns.network_custom_layout(G)
                         ##########
                         # Process geometry for VTK
-                        
+                        G = gvtk.tracerFilter(G,TIME_STEP)
                         ##########                        
                         nx.write_gml(G,network_gml_file_path)
                         
@@ -116,9 +118,9 @@ if __name__ == "__main__":
                          
                         A = nx.to_agraph(G)
                         
-                        if (G.number_of_nodes() <= 20):
+                        if (G.number_of_nodes() <= 50):
                             graphviz_prog = 'dot'
-                            graphviz_args = '-Nshape=circle -Granksep=2.0 -Grankdir=LR'
+                            graphviz_args = '-Nshape=circle -Granksep=3.0 -Grankdir=LR'
                         else:
                             graphviz_prog = 'sfdp'
                             graphviz_args = '-Goverlap=prism'
@@ -129,7 +131,7 @@ if __name__ == "__main__":
                         gviz_layouts.addGeometryFromGVizFile(G,gviz_file_path)
                         ##########
                         # Process geometry for VTK
-                        
+                        G = gvtk.tracerFilter(G,TIME_STEP)
                         ##########
                         nx.write_gml(G,network_gml_file_path)
                         

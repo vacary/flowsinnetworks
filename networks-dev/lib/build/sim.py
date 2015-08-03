@@ -19,7 +19,7 @@ def check_empty_entries(arg_lst):
     
     return valid_entries
 
-def applyGraphFilter(G,node_source,node_sink):
+def graphFilter(G,node_source,node_sink):
     
     H = nx.MultiDiGraph()
 
@@ -38,7 +38,12 @@ def applyGraphFilter(G,node_source,node_sink):
         time        = data['time']
         capacity    = data['capacity']
         
-        H.add_edge(u,v, time = time, capacity = capacity)
+        sw_time     = str(data['switching_times'])
+        z_e_time    = str(data['z_e_overtime'])
+        f_e_plus    = str(data['f_e_plus_overtime'])
+        f_e_minus   = str(data['f_e_minus_overtime'])
+                
+        H.add_edge(u,v, time = time, capacity = capacity, switching_times = sw_time, z_e_overtime = z_e_time, f_e_plus_overtime = f_e_plus, f_e_minus_overtime = f_e_minus)
 
     return H
 
@@ -46,15 +51,12 @@ def appendAndGetRequiredPaths(callFromUpdate,NETWORK_NAME):
     
     if (callFromUpdate == '1'):
         lib_path_flows      = os.path.abspath(os.path.join('..'))
-        lib_path            = os.path.abspath(os.path.join('.','lib'))
         network_path        = os.path.abspath(os.path.join('.','projects',NETWORK_NAME))
     else:
         lib_path_flows      = os.path.abspath(os.path.join('..','..','..'))
-        lib_path            = os.path.abspath(os.path.join('..','..','lib'))
         network_path        = os.path.abspath(os.path.join('..','..','projects',NETWORK_NAME))
         
     sys.path.append(lib_path_flows)
-    sys.path.append(lib_path)
     sys.path.append(network_path)
 
     return [lib_path_flows,network_path]
@@ -86,35 +88,22 @@ if __name__ == "__main__":
             
             import Flows.test as ftest
             import settings as ns
-            import layouts.graph as graph_layouts
             
             graph_data      = ns.network_graph_data()
             data_path       = os.path.abspath(os.path.join(network_path,'data'))
             
             G               = graph_data[0]
             node_source     = graph_data[1]
-            node_sink       = graph_data[2] 
-            
-            custom_layout   = ns.CUSTOM_LAYOUT
-            
-            TIME_OF_EVENT   = ns.TIME_OF_EVENT 
+            node_sink       = graph_data[2]
+            TIME_OF_EVENT   = ns.TIME_OF_EVENT
             INPUT_FLOW      = ns.INPUT_FLOW
-            T_MAX           = ns.T_MAX_VIS 
-            TIME_STEP       = ns.TIME_STEP
             
             if (len(G.nodes())) > 0:
                         
-                # CREATE SIMULATION DATA FILES
+                # CREATE SIMULATION DATA FILE
                         
                 try:
-                    
-                    VDATA_T_MAX = max(T_MAX,1E-12)
-                    VDATA_TIME_STEP = max(TIME_STEP,1E-12)
-                    VDATA_NGRAPH = str(ns.NETWORK_NAME)
-                    VDATA_PATH = str(data_path)
-          
-                    vpars = [True, VDATA_TIME_STEP,VDATA_T_MAX,VDATA_NGRAPH,VDATA_PATH]
-                
+                                    
                     # Create graph file with simulation data    
                     
                     network_gml_file_path = os.path.abspath(os.path.join(data_path,NETWORK_NAME+'.gml'))
@@ -131,7 +120,7 @@ if __name__ == "__main__":
 
                     ###################
                     
-                    G = applyGraphFilter(G,node_source,node_sink)
+                    G = graphFilter(G,node_source,node_sink)
                     
                     nx.write_gml(G,network_gml_file_path)
                     

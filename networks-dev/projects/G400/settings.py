@@ -13,14 +13,14 @@ from numpy import *
 # Parameters 
 
 NETWORK_NAME = "G400"
-TYPE = "geometry" 
+TYPE = "n2" 
 
-TIME_OF_EVENT = [0.0,10.0,20.0]
-INPUT_FLOW = [4.0,4.0] 
+TIME_OF_EVENT = [0.0,75.0]
+INPUT_FLOW = [10.0] 
 
-TIME_STEP = 0.1 
-T_MAX_VIS = 15 
-FPS = 24 
+TIME_STEP = 0.5
+T_MAX_VIS = 50 
+FPS = 24
 
 PRIORITY_GRAPHVIZ_LAYOUT = 1
 SIMULATION_DATA_AVAILABLE = 1

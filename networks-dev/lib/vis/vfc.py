@@ -147,13 +147,13 @@ class VtkNodesElements:
         tprop = labelMapper.GetLabelTextProperty()
         
         nodes_N = G.number_of_nodes() 
-        nodes_N_limit = 50
+        nodes_N_limit = 75
         
         
         if (nodes_N <= nodes_N_limit):
             tprop.SetColor(0.8,0.8,0.8)
         else:
-            tprop.SetColor(0.45,0.45,0.45)
+            tprop.SetColor(0.5,0.5,0.5)
         
         tprop.SetFontSize(lbFontSize)
         tprop.SetBold(1)

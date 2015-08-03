@@ -13,7 +13,7 @@ from numpy import *
 # Parameters 
 
 NETWORK_NAME = "Larre"
-TYPE = "geometry"
+TYPE = "n2"
 
 TIME_OF_EVENT = [0.0,10.0,20.0]
 INPUT_FLOW = [4.0,4.0] 

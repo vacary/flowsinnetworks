@@ -10,7 +10,7 @@ import os, sys
 import networkx as nx
 import random
 
-import numpy as np
+from numpy import *
 
 lib_path = os.path.abspath(os.path.join('..','..','..','lib'))
 sys.path.append(lib_path)

@@ -4,7 +4,7 @@ Call to simulation program
 
 """
 
-options_list    = ['-b','-s','-l']
+options_list    = ['-b','-s','-l','-data']
 
 import os, sys
 
@@ -83,6 +83,16 @@ if __name__ == "__main__":
                     except:
                         print(sys.exc_info())
                         print '[MSG] update.py -layout error'
+
+                if (update_option == '-data'):
+                    try:
+
+                        sys.argv = ['gen.py',NETWORK_NAME,'1']
+                        execfile(os.path.join('.','lib','build','gen.py'))
+
+                    except:
+                        print(sys.exc_info())
+                        print '[MSG] gen.py -data generator error'                        
     
             else: 
                 

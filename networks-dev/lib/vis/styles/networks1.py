@@ -10,7 +10,7 @@ import os, sys
 import networkx as nx
 import random
 
-import numpy as np
+from numpy import *
 
 lib_path = os.path.abspath(os.path.join('..','..','..','lib'))
 sys.path.append(lib_path)
@@ -44,11 +44,60 @@ def setScene(G,renderer,pars):
     renderer.AddActor2D(vtkNodes.vtkActor2D)
     renderer.AddActor2D(vtkNodes.vtkActor2Dst)
     
-    nw = n1.VtkNetwork(G)
+    nw      = n1.VtkNetwork(G)
     renderer.AddActor(nw.vtkActor)
 
-    return None
+    return nw
     
-def update():
+def update(time_id,G,nw,fminus_data,pars,globalNumberOfSteps):
+
+    edges_dict = nw.edges_dict
     
+    time_step               = pars['TIME_STEP']
+      
+    globalNumberOfTimeSteps = globalNumberOfSteps
+      
+      
+    for e in sorted(set(G.edges_iter())):
+          
+        edges = G.edge[e[0]][e[1]]
+          
+        edge_id = 0
+         
+        while (edge_id < len(edges)):
+         
+            key     = edges[edge_id]['edge_key']    
+            time    = edges[edge_id]['time']
+             
+            listOfEdgeCellIDs = edges_dict[(e[0],e[1],edge_id)][0]
+            listOfPointIDs  = edges_dict[(e[0],e[1],edge_id)][1]
+               
+            numberOfDivisions = int(ceil(time/time_step))
+            
+            for i in xrange(numberOfDivisions):
+
+                fminus_value = 0.0
+
+                if (time_id > 0):
+                                     
+                    if (time_id-1 - i >= 0):
+                         
+                        fminus_value = fminus_data[time_id-i-1,key]
+                                                 
+                if (fminus_value > 0):
+                    color = [0,255,0,255]
+                else:
+                    color = [100,100,100,20]
+                     
+                cell_id = listOfEdgeCellIDs[i]
+                nw.setCellColorByID(cell_id,color)
+                
+                width = fminus_value
+                
+                points  = listOfPointIDs[i]
+                for k in xrange(len(points)):
+                    nw.setPointWidthByID(points[k],width)
+      
+            edge_id = edge_id + 1
+
     return None

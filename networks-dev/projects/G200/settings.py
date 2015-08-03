@@ -13,13 +13,13 @@ from numpy import *
 # Parameters 
 
 NETWORK_NAME = "G200"
-TYPE = "geometry" 
+TYPE = "n2" 
 
-TIME_OF_EVENT = [0.0,10.0,20.0]
+TIME_OF_EVENT = [0.0,10.0,100.0]
 INPUT_FLOW = [4.0,4.0] 
 
-TIME_STEP = 0.1 
-T_MAX_VIS = 15 
+TIME_STEP = 0.25
+T_MAX_VIS = 50
 FPS = 24 
 
 PRIORITY_GRAPHVIZ_LAYOUT = 1
