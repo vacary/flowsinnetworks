@@ -1,9 +1,8 @@
 
 import vtk
-
 import networkx as nx
-from numpy import *
 
+from numpy import *
 
 def getLabelSize(G):
 
@@ -78,7 +77,7 @@ def addInfoAnnotations(G,renderer,pars):
         msgTxt += '  Middle mouse - Pan \n'
         msgTxt += '  Scroll wheel - Zoom \n'
 
-    if (pars['TYPE'] in ['n0','n1','n2']):
+    if (pars['TYPE'] in ['n0','n1','n2','network']):
     
         msgTxt += '  [ StyleImage ]\n\n'
         msgTxt += '  Controls:\n\n'
@@ -96,12 +95,33 @@ def addInfoAnnotations(G,renderer,pars):
     return msgTxt
 
 def setBackgroundStyle(renderer):
+
+#     renderer.GradientBackgroundOn()
+#     renderer.SetBackground(0,0,0)
+#     renderer.SetBackground2(0.5,0.5,0.5)
     
-    renderer.GradientBackgroundOn()
-    renderer.SetBackground(0.1,0.1,0.1)
-    renderer.SetBackground2(0.2,0.2,0.2)
+    #renderer.SetBackground(70/255.0,80/255.0,90/255.0)
+    #renderer.SetBackground(47/255.0,47/255.0,47/255.0)
+
+    #renderer.SetBackground(5/255.0,5/255.0,20/255.0)
+
+    #renderer.SetBackground(70/255.0,80/255.0,90/255.0)
+
+#     renderer.GradientBackgroundOn()
+#      
+#     #renderer.SetBackground(5/255.0,5/255.0,20/255.0)
+#     renderer.SetBackground(5/255.0,20/255.0,20/255.0)
+#     renderer.SetBackground2(60/255.0,90/255.0,100/255.0)
+#     
+#     renderer.SetBackground2(76/255.0,90/255.0,100/255.0)
+#     renderer.SetBackground2(70/255.0,80/255.0,90/255.0)
+
     
+    #renderer.SetBackground(35/255.0,35/255.0,35/255.0)
+    #renderer.SetBackground(0/255.0,0/255.0,0/255.0)
     
+    pass
+     
     
     
     

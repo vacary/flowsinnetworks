@@ -76,7 +76,7 @@ class VtkNodesElements:
             else:
                 
                 color   = [50,50,50,255]
-                scale   = 0.75
+                scale   = 1.0
                 label = str(G.node[i]['nlabel'])
                 
             labels.SetValue(c,label)
@@ -105,7 +105,7 @@ class VtkNodesElements:
         source = vtk.vtkSphereSource()
         source.SetRadius(nodeRadius)
         source.SetPhiResolution(16)
-        source.SetThetaResolution(16)
+        source.SetThetaResolution(40)
             
         if (vtk.VTK_MAJOR_VERSION <= 5):   
             self.vtkFilter.SetInput(self.vtkPolyData)
@@ -134,7 +134,7 @@ class VtkNodesElements:
         #self.vtkActor.GetProperty().SetPointSize(50)
         self.vtkActor.GetProperty().SetSpecularColor(0,0,0)
         self.vtkActor.GetProperty().SetSpecular(0.1)
-        self.vtkActor.GetProperty().SetAmbient(0.1)
+        self.vtkActor.GetProperty().SetAmbient(0.01)
         self.vtkActor.GetProperty().SetDiffuse(0.1)
         self.vtkActor.GetProperty().SetOpacity(opacity)
         #self.vtkActor.GetProperty().LightingOff()
@@ -153,7 +153,7 @@ class VtkNodesElements:
         if (nodes_N <= nodes_N_limit):
             tprop.SetColor(0.8,0.8,0.8)
         else:
-            tprop.SetColor(0.5,0.5,0.5)
+            tprop.SetColor(0.25,0.25,0.25)
         
         tprop.SetFontSize(lbFontSize)
         tprop.SetBold(1)
@@ -209,6 +209,195 @@ class VtkNodesElements:
         tprop.SetVerticalJustificationToCentered()
         
         self.vtkActor2Dst.SetMapper(st_labelMapper)
+        
+        
+class vtkQueueBoxUsingRefPosition:
+    
+    def __init__(self,p0,p1,pos,h,distanceFactor,widthFactor):
+        
+        self.vtkPoints          = vtk.vtkPoints()
+        self.vtkLines           = vtk.vtkCellArray()
+        self.vtkPolyData        = vtk.vtkPolyData()
+        self.vtkMapper          = vtk.vtkPolyDataMapper()  
+        self.vtkActor           = vtk.vtkActor()
+        
+        self._initialize(p0, p1, pos, h, distanceFactor, widthFactor)
+        
+    def _initialize(self,p0,p1,pos,h,distanceFactor,widthFactor):
+        
+        # geometry and topology
+
+        d = array(p1) - array(p0)
+        
+        u = d/linalg.norm(d)
+        
+        v = zeros(3)
+        
+        if (abs(u[0])> 0):
+        
+            v[0] = -u[1]/u[0]
+            v[1] = 1.0
+            v[2] = 0
+        
+        
+        else:
+            
+            v[0] = 1.0
+            v[1] = 0
+            v[2] = 0
+        
+        w = v/linalg.norm(v)
+        
+        qm = pos + distanceFactor*w
+        
+        qbp = qm + 0.5*widthFactor*w + 0.5*h*u 
+        qbm = qm - 0.5*widthFactor*w + 0.5*h*u
+        qhp = qbp - h*u
+        qhm = qbm - h*u   
+        
+        z_aux = 1*1E-5
+        qbp[2] = z_aux
+        qbm[2] = z_aux
+        qhp[2] = z_aux
+        qhm[2] = z_aux
+        
+        self.vtkPoints.InsertNextPoint(qhm)
+        self.vtkPoints.InsertNextPoint(qbm)
+        self.vtkPoints.InsertNextPoint(qbp)
+        self.vtkPoints.InsertNextPoint(qhp)
+        
+        for i in xrange(0,self.vtkPoints.GetNumberOfPoints()-1):
+            line = vtk.vtkLine()
+            line.GetPointIds().SetId(0,i)
+            line.GetPointIds().SetId(1,i+1)
+            self.vtkLines.InsertNextCell(line)
+        
+        # polydata
+        
+        self.vtkPolyData.SetPoints(self.vtkPoints)
+        self.vtkPolyData.SetLines(self.vtkLines)
+        
+        # mapper
+    
+        self.vtkMapper = vtk.vtkPolyDataMapper()   
+ 
+        if (vtk.VTK_MAJOR_VERSION <= 5):   
+            self.vtkMapper.SetInput(self.vtkPolyData)
+        else:
+            self.vtkMapper.SetInputData(self.vtkPolyData)
+        
+        # actor
+        
+        self.vtkActor.SetMapper(self.vtkMapper)
+        self.vtkActor.GetProperty().SetLineWidth(1.5)    
+        self.vtkActor.GetProperty().SetColor(0.5,0.5,0.5)
+
+class vtkQueueRibbonUsingRefPosition:
+
+    def __init__(self,p0,p1,pos,h,distanceFactor,widthFactor):
+        
+        self.flag               = 0
+
+        self.vtkPoints          = vtk.vtkPoints()
+        self.vtkLines           = vtk.vtkCellArray()
+        self.vtkPolyData        = vtk.vtkPolyData()
+        self.vtkFilter          = vtk.vtkRibbonFilter()
+        self.vtkMapper          = vtk.vtkPolyDataMapper()
+        self.vtkActor           = vtk.vtkActor()
+
+        self.u                 = array(3)
+
+        self._initialize(p0,p1,pos,h,distanceFactor,widthFactor)
+
+    def _initialize(self,p0,p1,pos,h,distanceFactor,widthFactor):
+        
+        # geometry and topology 
+
+        d = array(p1) - array(p0)
+        
+        u = d/linalg.norm(d)
+
+        self.u = u
+        
+        v = zeros(3)
+        
+        if (abs(u[0])> 0):
+        
+            v[0] = -u[1]/u[0]
+            v[1] = 1.0
+            v[2] = 0.0
+        
+        else:
+            
+            v[0] = 1.0
+            v[1] = 0
+            v[2] = 0  
+        
+        w = v/linalg.norm(v)
+        
+        qm = pos + distanceFactor*w
+        
+        q0 = qm + (h/2.0)*u 
+        q1 = qm - (h/2.0)*u 
+
+        z_aux = 1*1E-5
+        q0[2] = z_aux
+        q1[2] = z_aux
+
+        self.vtkPoints.InsertNextPoint(q0)
+        self.vtkPoints.InsertNextPoint(q1)
+        
+        if (p0[0]==p1[0]):
+            self.flag = 1
+        
+        for i in xrange(0,self.vtkPoints.GetNumberOfPoints()-1): 
+            line = vtk.vtkLine()
+            line.GetPointIds().SetId(0,i)
+            line.GetPointIds().SetId(1,i+1)
+            self.vtkLines.InsertNextCell(line)
+
+        # polydata
+        
+        self.vtkPolyData.SetPoints(self.vtkPoints)
+        self.vtkPolyData.SetLines(self.vtkLines)
+       
+        # filter
+       
+        if (vtk.VTK_MAJOR_VERSION <= 5):   
+            self.vtkFilter.SetInput(self.vtkPolyData)
+        else:
+            self.vtkFilter.SetInputData(self.vtkPolyData)
+         
+        self.vtkFilter.UseDefaultNormalOn()        
+        self.vtkFilter.SetAngle(0)  
+            
+        self.vtkFilter.SetWidth(0.5*widthFactor)
+ 
+        # mapper
+ 
+        self.vtkMapper.SetInputConnection(self.vtkFilter.GetOutputPort())
+    
+        # actor
+    
+        self.vtkActor.SetMapper(self.vtkMapper)
+
+        self.vtkActor.GetProperty().SetColor(0,0,1)
+        #self.vtkActor.GetProperty().SetSpecularColor(1,1,1)
+        #self.vtkActor.GetProperty().SetSpecular(0.25)
+        #self.vtkActor.GetProperty().SetAmbient(0.75)
+        #self.vtkActor.GetProperty().SetDiffuse(0.1)
+        self.vtkActor.GetProperty().SetOpacity(1)
+        
+
+    def setEndPoint(self,point):
+
+        self.vtkPoints.SetPoint(1, point)
+
+    def setEndPointFromValue(self,value):
+ 
+        point = lambdaPoint(value,self.vtkPoints.GetPoint(0),-self.u)
+        self.vtkPoints.SetPoint(1, point)
+
 
 
 class VtkTubes:

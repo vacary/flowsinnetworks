@@ -17,6 +17,9 @@ import networkx as nx
 import random
 
 import vtk
+output = vtk.vtkFileOutputWindow()
+output.SetFileName("log.txt")
+vtk.vtkOutputWindow().SetInstance(output)
 
 from numpy import *
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
@@ -30,6 +33,7 @@ import lib.vis.styles.geometry2     as vstyle_gm2
 import lib.vis.styles.networks0     as vstyle_n0
 import lib.vis.styles.networks1     as vstyle_n1
 import lib.vis.styles.networks2     as vstyle_n2
+import lib.vis.styles.test as vstyle_test
 
 class Visualization:
  
@@ -43,7 +47,7 @@ class Visualization:
         self.time_step                  = self.pars['TIME_STEP']
         self.Tmax                       = self.pars['T_MAX_VIS']
 
-        self.globalNumberOfTimeSteps    = int(ceil(self.Tmax/self.time_step))
+        self.globalNumberOfTimeSteps    = int(floor(self.Tmax/self.time_step))
 
         self.SIMULATION_DATA_AVAILABLE  = self.pars['SIMULATION_DATA_AVAILABLE']
         self.PRIORITY_GRAPHVIZ_LAYOUT   = self.pars['PRIORITY_GRAPHVIZ_LAYOUT']
@@ -55,6 +59,8 @@ class Visualization:
         self.nw                         = None
         self.arrayOf_f_e_minus          = None
         self.arrayOf_Queues             = None
+        
+        self.style_pars                 = {}
         
         self.time_id                    = 0
         
@@ -92,7 +98,13 @@ class Visualization:
         if (self.TYPE in ['n2']):
             
             self.getSimulationData()
-            self.nw = vstyle_n2.setScene(self.G,self.renderer,self.pars)
+            self.nw = vstyle_n2.setScene(self.G,self.renderer,self.pars,self.style_pars)
+            
+        if (self.TYPE in ['network']):
+            
+            self.getSimulationData()
+            self.nw = vstyle_test.setScene(self.G,self.renderer,self.pars,self.style_pars)
+                
             
     def setInteractorStyle(self,renderWindowInteractor):
         
@@ -100,7 +112,7 @@ class Visualization:
              
             renderWindowInteractor.SetInteractorStyle(vtk.vtkInteractorStyleRubberBand3D())
         
-        if (self.TYPE in ['n0','n1','n2']):
+        if (self.TYPE in ['n0','n1','n2','network']):
             
             renderWindowInteractor.SetInteractorStyle(vtk.vtkInteractorStyleImage())
         
@@ -111,6 +123,9 @@ class Visualization:
         self.arrayOf_f_e_minus  = load(fm)
         fm.close()
         
+        self.style_pars['max_f_e_minus'] = self.arrayOf_f_e_minus.max()
+        
+        
     def update(self,time_id):
 
         if (self.TYPE in ['n1']):
@@ -120,8 +135,12 @@ class Visualization:
         if (self.TYPE in ['n2']):
             vstyle_n2.update(time_id,self.G,self.nw,self.arrayOf_f_e_minus,self.pars,self.globalNumberOfTimeSteps)
             self.nw.vtkPolyData.Modified()
-                
-        #print 'update'
+
+        if (self.TYPE in ['network']):
+            vstyle_test.update(time_id,self.G,self.nw,self.arrayOf_f_e_minus,self.pars,self.globalNumberOfTimeSteps)
+            self.nw.vtkPolyData.Modified()
+            
+       #print 'update'
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -144,6 +163,8 @@ class MainWindow(QtGui.QMainWindow):
         self.repeat                             = False
         self.renderTimeInterval                 = 1000/(1.0*viz.fps)
         self.globalNumberOfTimeSteps            = viz.globalNumberOfTimeSteps
+        
+        self.writer                        = vtk.vtkFFMPEGWriter()
   
         self.timerObj                           = QtCore.QTimer()
         QtCore.QObject.connect(self.timerObj,QtCore.SIGNAL("timeout()"),self.updateForAnimation)
@@ -169,7 +190,8 @@ class MainWindow(QtGui.QMainWindow):
         self.renderer = viz.renderer
         self.vtkWidget.GetRenderWindow().AddRenderer(self.renderer)
         
-        self.renderWindowInteractor = self.vtkWidget.GetRenderWindow().GetInteractor()
+        self.renderWindow = self.vtkWidget.GetRenderWindow()
+        self.renderWindowInteractor = self.renderWindow.GetInteractor()
         viz.setInteractorStyle(self.renderWindowInteractor)
         
         self.viz = viz
@@ -177,14 +199,29 @@ class MainWindow(QtGui.QMainWindow):
         self.show()
         
         self.renderWindowInteractor.Initialize()
+        
+        windowToImageFilter = vtk.vtkWindowToImageFilter()
+        windowToImageFilter.SetInput(self.renderWindow)
+        windowToImageFilter.SetInputBufferTypeToRGBA()
+        windowToImageFilter.ReadFrontBufferOff()
+        windowToImageFilter.Update()
+        
+#         self.writer.SetInputConnection(windowToImageFilter.GetOutputPort())
+#         self.writer.SetFileName("test.avi")        
+        
+        
 
     def updateVTKWidget(self,time_id):
         self.viz.update(time_id)
         self.renderWindowInteractor.GetRenderWindow().Render()
+        
     
     def playAnimation(self):
         self.animation  = True
+        self.repeat     = False
         self.timerObj.start(self.renderTimeInterval)
+
+#         self.writer.Start()
 
     def repeatAnimation(self):
         self.animation  = True
@@ -195,11 +232,15 @@ class MainWindow(QtGui.QMainWindow):
         self.animation = False
         self.timerObj.stop()
         self.updateSlider(self.timer)
-     
+        
+#         self.writer.End()
+        
     def stopAnimation(self):
         self.animation = False
         self.timerObj.stop()
         self.updateSlider(0)
+        
+        
      
     def firstAnimation(self):
         self.animation = False
@@ -227,6 +268,7 @@ class MainWindow(QtGui.QMainWindow):
         self.updateSlider(aux_time)
         
     def updateSlider(self,timer):
+        self.writer.Write()
         self.ui.slider_11.setSliderPosition(timer)
         aux_time = int(timer*self.time_step*10.0)/10.0
         self.ui.textSliderValue_11.setText(str(aux_time))    
@@ -249,7 +291,7 @@ class MainWindow(QtGui.QMainWindow):
                     self.pauseAnimation()
                 else:
                     self.timer = 0
-                    self.playAnimation()
+                    self.repeatAnimation()
                     
 
     def executeAnimation(self):

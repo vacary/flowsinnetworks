@@ -165,7 +165,7 @@ class VtkNetwork:
         vtkFilter.UseDefaultNormalOn()
         vtkFilter.SetAngle(0)
            
-        vtkFilter.SetWidth(0.02)
+        vtkFilter.SetWidth(0.2)
         vtkFilter.SetVaryWidth(1)
    
         # mapper

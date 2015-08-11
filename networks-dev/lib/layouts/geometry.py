@@ -3,6 +3,8 @@ import sys, os
 import networkx as nx
 from numpy import *
 
+import matplotlib.pyplot as plt
+
 def getPointsFromStrList(str_list):
     
     str_list = str_list[2:-2].replace(' ','').replace("'",'').split('],[')
@@ -21,11 +23,13 @@ def tracerFilter(G,time_step):
     
     edge_log = {}
 
+    flag = 0
+
     for edge in  G.edges_iter():
         
         edge_tail = G.node[edge[0]]
         edge_head = G.node[edge[1]]
-        
+    
         if edge not in edge_log:
             edge_log[edge] = 0
         else:
@@ -37,7 +41,10 @@ def tracerFilter(G,time_step):
         str_edge_geometry   = G.edge[edge[0]][edge[1]][edge_id]['geometry']
         route_points        = getPointsFromStrList(str_edge_geometry)
         
-        numberOfDivisions   = int(ceil(time/time_step))
+        numberOfDivisions   = int(floor(time/time_step))
+
+#         print '----'
+
         
         ##############
         
@@ -58,52 +65,84 @@ def tracerFilter(G,time_step):
         correction  = 0.0
         dTotal      = 0.0
         
-        for i in xrange(numberOfDivisions-1):
-        
-            colorset = [random.random(),random.random(),random.random()]
-        
-            d2Travel = partition_route_length - correction
-            dTotal = 0.0
- 
-            while (d2Travel > 0):
-                          
-                pos     = array(points[k])
-                npos    = array(points[k+1])
-                            
-                dTravelled      = linalg.norm(npos-pos)
-                d2Travel        = d2Travel - dTravelled
-                
-                if (d2Travel >= 0):
-                    dTotal = dTotal + dTravelled
-                
-                k = k + 1
-        
-                newRoutePoints.append(pos.tolist()) #########
-                idCounter = idCounter + 1
-                
-                
-            if (d2Travel < 0):
-                
-                u_direction = (pos - npos)/linalg.norm(pos - npos)
-                final_pos   = npos + u_direction*abs(d2Travel)
-                dTravelled  = linalg.norm(final_pos-pos)
-                dTotal      = dTotal + dTravelled
-                
-                correction  = abs(d2Travel)
+        if (numberOfDivisions == 1):
             
-            else:
+            for k in xrange(len(points)):
+                newRoutePoints.append(points[k])
+                idCounter = idCounter + 1
+            listOfIds.append(idCounter-1)
                 
-                final_pos   = npos
-
-            newRoutePoints.append(final_pos.tolist()) #########
-            listOfIds.append(idCounter)
-            idCounter = idCounter + 1
+        else:
         
-        newRoutePoints.append([points[-1][0],points[-1][1],points[-1][2]])
+            for i in xrange(numberOfDivisions-1):
+     
+                d2Travel = partition_route_length - correction
+                dTotal = 0.0
+      
+                while (d2Travel > 0):
+                               
+                    pos     = array(points[k])
+                    npos    = array(points[k+1])
+                                 
+                    dTravelled      = linalg.norm(npos-pos)
+                    d2Travel        = d2Travel - dTravelled
+                     
+                    if (d2Travel >= 0):
+                        dTotal = dTotal + dTravelled
+                     
+                    k = k + 1
+             
+                    newRoutePoints.append(pos.tolist()) #########
+                    idCounter = idCounter + 1
+                     
+                     
+                if (d2Travel < 0):
+                     
+                    u_direction = (pos - npos)/linalg.norm(pos - npos)
+                    final_pos   = npos + u_direction*abs(d2Travel)
+                    dTravelled  = linalg.norm(final_pos-pos)
+                    dTotal      = dTotal + dTravelled
+                     
+                    correction  = abs(d2Travel)
+                 
+                else:
+                     
+                    final_pos   = npos
+                     
+                newRoutePoints.append(final_pos.tolist()) #########
+                listOfIds.append(idCounter)
+                idCounter = idCounter + 1
+             
+            k = k + 1
+        
+            while (k < len(points)-1):
+                newRoutePoints.append(points[k])
+                idCounter = idCounter + 1
+                k = k + 1
+            listOfIds.append(idCounter)
+                
+        
+        newRoutePoints.append(points[-1])
+        idCounter = idCounter + 1
         listOfIds.append(idCounter)
+        
+        
+#         for point in points:
+#             plt.plot(point[0],point[1],'ro')
+#             
+#         for gpoint in newRoutePoints:
+#             plt.plot(gpoint[0],gpoint[1],'bx')
+        
+#         print edge_tail['pos']
+#         print newRoutePoints[0]
+#         print edge_head['pos']
+#         print newRoutePoints[-1]
+#         print listOfIds
         
         new_geometry = newRoutePoints
         geometry_ids = listOfIds
+        
+        #plt.show()
         
         #print geometry_ids
         

@@ -119,7 +119,7 @@ def genDataFiles(G,time_step,Tmax,NETWORK_NAME,data_path):
     
     # Data arrays
     
-    globalNumberOfTimeSteps = int(ceil(Tmax / time_step))
+    globalNumberOfTimeSteps = int(floor(Tmax / time_step))
 
     N = globalNumberOfTimeSteps
     
@@ -131,6 +131,8 @@ def genDataFiles(G,time_step,Tmax,NETWORK_NAME,data_path):
 
     edge_log = {}
     edge_key = 0
+
+    plt.clf()
 
     for edge in  G.edges_iter():
         
@@ -168,7 +170,9 @@ def genDataFiles(G,time_step,Tmax,NETWORK_NAME,data_path):
         data    = getArrayOfValuesOvertime(required_values, xArray, vArray, time_step, N)
         #plt.plot(data[:,0],data[:,1],'b*',c=[random.random(),random.random(),random.random()])
         
+        
         arrayOf_Queues[:,edge_key] = data[:,1] 
+        
          
         #------------------------------
         # f plus values overtime 
@@ -178,8 +182,10 @@ def genDataFiles(G,time_step,Tmax,NETWORK_NAME,data_path):
         vArray  = getArrayFromStrList(str_f_e_plus_overtime)
          
         data    = getArrayOfValuesOvertime(required_values, xArray, vArray, time_step, N)
-        #plt.plot(data[:,0],data[:,1],'bx',c=[random.random(),random.random(),random.random()])
-         
+        
+        plt.plot(data[:,0],data[:,1],'bx',c=[random.random(),random.random(),random.random()])
+        #plt.savefig('fplus.png') 
+        
         arrayOf_f_e_plus[:,edge_key] = data[:,1] 
         
         #-------------------------------
@@ -199,15 +205,14 @@ def genDataFiles(G,time_step,Tmax,NETWORK_NAME,data_path):
                 fe_minus_value = min(arrayOf_f_e_plus[t,edge_key],capacity)
               
             arrayOf_f_e_minus[t,edge_key] = fe_minus_value
-          
-        arrayOf_f_e_minus[:,edge_key] = data[:,1]
-        #plt.plot(data[:,0],arrayOf_f_e_minus[:,edge_key],'bx',c=[random.random(),random.random(),random.random()],markersize=20)
+        
+        #plt.plot(data[:,0],fe_minus_value,'bx',c=[random.random(),random.random(),random.random()])
+        #plt.savefig('fminus.png') 
         
         # *** end key assignation ***
          
         edge_key = edge_key + 1
 
-        #plt.show()
         
     # Create .dat files
     

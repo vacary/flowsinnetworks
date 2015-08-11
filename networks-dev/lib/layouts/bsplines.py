@@ -1,8 +1,9 @@
 
 import numpy as np
 import scipy.interpolate as interpolate
+import matplotlib.pyplot as plt
 
-def getPointsFromBSplineInterpolation(controlPoints,degree):
+def getPointsFromBSplineInterpolation(controlPoints,degree,numberOfPoints):
 
     controlPoints = np.array(controlPoints)
     n_points = len(controlPoints)
@@ -10,7 +11,7 @@ def getPointsFromBSplineInterpolation(controlPoints,degree):
     y = controlPoints[:,1]
     
     t = range(len(x))
-    ipl_t = np.linspace(1.0, len(controlPoints) - degree,150)
+    ipl_t = np.linspace(1.0, len(controlPoints) - degree,numberOfPoints)
     
     x_tup = interpolate.splrep(t, x, k=degree, per=1)
     y_tup = interpolate.splrep(t, y, k=degree, per=1)

@@ -117,14 +117,14 @@ if __name__ == "__main__":
                     try:
                          
                         A = nx.to_agraph(G)
-                        
-                        if (G.number_of_nodes() <= 50):
+
+                        if (G.number_of_nodes() <= 10):
                             graphviz_prog = 'dot'
-                            graphviz_args = '-Nshape=circle -Granksep=3.0 -Grankdir=LR'
+                            graphviz_args = '-Grankdir=LR -Goverlap=prism'
                         else:
                             graphviz_prog = 'sfdp'
                             graphviz_args = '-Goverlap=prism'
-                            
+                        
                         gviz_file_path = os.path.abspath(os.path.join(rsc_path,'gviz',NETWORK_NAME+'.txt'))
                         A.draw(gviz_file_path,format='plain', prog = graphviz_prog, args=graphviz_args)
                         #A.draw(gviz_file_path.replace('.','')+'.png',format='png', prog = graphviz_prog, args=graphviz_args)

@@ -1,6 +1,6 @@
 """
 
-VISUALIZATION STYLE - NETWORKS2
+VISUALIZATION STYLE - TEST
 
 """
 
@@ -17,7 +17,7 @@ sys.path.append(lib_path)
 
 import lib.vis.vfc as vfc
 import lib.vis.general as gen
-import lib.vis.Vtk.n2 as n2
+import lib.vis.Vtk.test as test
 
 def setScene(G,renderer,pars,style_pars):
 
@@ -28,12 +28,33 @@ def setScene(G,renderer,pars,style_pars):
 
     # STYLE PARAMETERS
     
-    NODE_SIZE           = 0.25
     NODE_OPACITY        = 1.0
     NODE_LABEL_FONTSIZE = gen.getLabelSize(G)
 
     # VTK SCENE
     
+    nw_bck  = test.VtkNetworkBck(G,style_pars)
+    renderer.AddActor(nw_bck.vtkActor)
+    
+        
+    nw      = test.VtkNetwork(G,style_pars)
+    renderer.AddActor(nw.vtkActor)
+    
+    renderer.ResetCamera()
+    
+    cameraPosition = renderer.GetActiveCamera().GetPosition()
+    zPos = cameraPosition[2]
+    
+    aux = 10**(ceil(log10(cameraPosition[2])))
+    
+    EDGE_WIDTH  = 0.8*1.5*zPos/1000.0
+
+    NODE_SIZE   = 0.5*min(8*EDGE_WIDTH,0.35)
+         
+    nw_bck.vtkFilter.SetWidth(EDGE_WIDTH)
+    nw.vtkFilter.SetWidth(EDGE_WIDTH)
+    
+
     node_source_label   = pars['NODE_SOURCE_LABEL']
     node_sink_label     = pars['NODE_SINK_LABEL']
     
@@ -43,17 +64,10 @@ def setScene(G,renderer,pars,style_pars):
     renderer.AddActor(vtkNodes.vtkActor)
     renderer.AddActor2D(vtkNodes.vtkActor2D)
     renderer.AddActor2D(vtkNodes.vtkActor2Dst)
+
     
-    nw      = n2.VtkNetwork(G,style_pars)
-    renderer.AddActor(nw.vtkActor)
-    renderer.AddActor2D(nw.vtkColorBar)
-    
+    #renderer.AddActor2D(nw.vtkColorBar)
     renderer.ResetCamera()
-    
-    cameraPosition = renderer.GetActiveCamera().GetPosition()
-    EDGE_WIDTH          = cameraPosition[2]*(1/1100.0)
-    nw.vtkFilter.SetWidth(EDGE_WIDTH)
-    nw.vtkActor.GetProperty().SetLineWidth(4)
     
     return nw
     
@@ -79,7 +93,7 @@ def update(time_id,G,nw,fminus_data,pars,globalNumberOfSteps):
              
             listOfEdgeCellIDs = edges_dict[(e[0],e[1],edge_id)][0]
                
-            numberOfDivisions = int(ceil(time/time_step))
+            numberOfDivisions = int(floor(time/time_step))
 
             
             for i in xrange(numberOfDivisions):
@@ -94,7 +108,7 @@ def update(time_id,G,nw,fminus_data,pars,globalNumberOfSteps):
                     
                 cell_id = listOfEdgeCellIDs[i]
                 nw.setCellColorByID(cell_id,fminus_value)
-      
+
             edge_id = edge_id + 1
 
     return None

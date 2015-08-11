@@ -1,0 +1,4 @@
+ERROR: In /build/buildd/vtk6-6.0.0/IO/FFMPEG/vtkFFMPEGWriter.cxx, line 564
+vtkFFMPEGWriter (0x2411ec0): Movie not started.
+
+

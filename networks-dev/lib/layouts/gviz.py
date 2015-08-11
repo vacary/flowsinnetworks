@@ -14,18 +14,11 @@ lib_path = os.path.abspath(os.path.join(dir_path,'..','..'))
 sys.path.append(lib_path)
 
 import lib.layouts.bsplines as bsplines
+import matplotlib.pyplot as plt
 
-def addGeometryFromGVizFile(G,gviz_file_path):
+def addGeometryFromGVizFile(G,gviz_file_path,splines_degree=3,numberOfPoints=50):
     
     N = G.number_of_nodes()
-    
-    if (N < 150):
-        
-        splines_degree = 2
-    
-    else:
-        
-        splines_degree = 3 
     
     dict_nodes_geometry = {}
 
@@ -59,14 +52,14 @@ def addGeometryFromGVizFile(G,gviz_file_path):
              
             edge_tail = int(list[1])
             edge_head = int(list[2])
-                         
+            
             edge_npoints = int(list[3])
             controlPoints = []
             pos_tail = dict_nodes_geometry[edge_tail]
             pos_head = dict_nodes_geometry[edge_head]
-             
+            
             controlPoints.append(pos_tail)
-             
+            
             aux = 4
             for c in xrange(edge_npoints):
                 pos_x = float(list[aux])
@@ -76,7 +69,10 @@ def addGeometryFromGVizFile(G,gviz_file_path):
                  
             controlPoints.append(pos_head)
              
-            geometry = bsplines.getPointsFromBSplineInterpolation(controlPoints,splines_degree)
+            geometry = bsplines.getPointsFromBSplineInterpolation(controlPoints,splines_degree,numberOfPoints)
+            
+            #for point in geometry:
+            #    plt.plot(point[0],point[1],'r.')
             
             edge = (edge_tail,edge_head)
             
@@ -94,6 +90,8 @@ def addGeometryFromGVizFile(G,gviz_file_path):
                 pass
 
     f.close()    
-           
+    
+    #plt.show()
+    
     return G
 
