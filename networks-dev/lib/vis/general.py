@@ -63,6 +63,9 @@ def addInfoAnnotations(G,renderer,pars):
     annotation.SetText(2,msgTxt)
     annotation.SetMaximumFontSize(14)
     #annotation.GetTextProperty().SetColor(0.75,0.75,0.75)
+    annotation.GetTextProperty().SetBold(0)
+    annotation.GetTextProperty().SetItalic(0)
+    annotation.GetTextProperty().SetShadow(0)
     renderer.AddViewProp(annotation)
 
 
@@ -89,7 +92,10 @@ def addInfoAnnotations(G,renderer,pars):
     msgTxt = '\n' + msgTxt    
     annotation2 = vtk.vtkCornerAnnotation() 
     annotation2.SetText(0,''.join(msgTxt))
-    annotation2.SetMaximumFontSize(12)
+    annotation2.SetMaximumFontSize(13)
+    annotation2.GetTextProperty().SetBold(0)
+    annotation2.GetTextProperty().SetItalic(0)
+    annotation2.GetTextProperty().SetShadow(0)
     renderer.AddViewProp(annotation2)
     
     return msgTxt
@@ -118,6 +124,7 @@ def setBackgroundStyle(renderer):
 
     
     #renderer.SetBackground(35/255.0,35/255.0,35/255.0)
+    renderer.SetBackground(10/255.0,10/255.0,10/255.0)
     #renderer.SetBackground(0/255.0,0/255.0,0/255.0)
     
     pass

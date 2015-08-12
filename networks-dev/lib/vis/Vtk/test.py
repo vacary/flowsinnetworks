@@ -14,6 +14,7 @@ import vtk
 import networkx as nx
 import random
 
+import matplotlib.pyplot as plt
 from numpy import *
 import math
 
@@ -33,13 +34,7 @@ class VtkNetworkBck:
         self.vtkFilter      = vtk.vtkRibbonFilter()
         self.vtkMapper      = vtk.vtkPolyDataMapper()
         self.vtkActor       = vtk.vtkActor()
-        self.vtkColorBar    = vtk.vtkScalarBarActor()
         
-        self.edges_dict     = {}
-        self.cells_colors   = vtk.vtkUnsignedCharArray()
-        
-        self.lut            = vtk.vtkLookupTable()
-    
         self._initialize(G,style_pars)
         
     def _initialize(self,G,style_pars):
@@ -133,7 +128,6 @@ class VtkNetworkBck:
             inf_point_index = sup_point_index + 1
             
             #########
-            self.edges_dict[(edge[0],edge[1],edge_id)] = [edgeCellIDs,edgeCellPointsIDs]
             
         self.vtkPolyData.SetPoints(self.vtkPoints)
         self.vtkPolyData.SetLines(self.vtkLineCells)
@@ -149,16 +143,10 @@ class VtkNetworkBck:
         self.vtkFilter.SetAngle(0) 
             
         self.vtkFilter.SetWidth(1)
-        #self.vtkFilter.SetVaryWidth(1)
         
         # mapper
         
         self.vtkMapper.SetInputConnection(self.vtkFilter.GetOutputPort())
-        
-        self.vtkMapper.ScalarVisibilityOn()
-        self.vtkMapper.SetScalarModeToUseCellFieldData()
-        self.vtkMapper.SelectColorArray('Colors')
-
         self.vtkActor.SetMapper(self.vtkMapper)
         
         if (G.number_of_nodes() <= 75):
@@ -170,6 +158,7 @@ class VtkNetwork:
      
     def __init__(self,G,style_pars):
      
+        #network
         self.vtkPoints      = vtk.vtkPoints()
         self.vtkLineCells   = vtk.vtkCellArray()
         self.vtkPolyData    = vtk.vtkPolyData()
@@ -179,9 +168,27 @@ class VtkNetwork:
         self.vtkColorBar    = vtk.vtkScalarBarActor()
         
         self.edges_dict     = {}
+        
         self.cells_colors   = vtk.vtkUnsignedCharArray()
         
         self.lut            = vtk.vtkLookupTable()
+        
+        #queue boxes
+        self.vtkQBoxesPoints      = vtk.vtkPoints()
+        self.vtkQBoxesLineCells   = vtk.vtkCellArray()
+        self.vtkQBoxesCellsColors = vtk.vtkUnsignedCharArray()
+        self.vtkQBoxesPolyData    = vtk.vtkPolyData()
+        self.vtkQBoxesMapper      = vtk.vtkPolyDataMapper()
+        self.vtkQBoxesActor       = vtk.vtkActor()
+    
+        #queues
+        self.vtkQPoints      = vtk.vtkPoints()
+        self.vtkQLineCells   = vtk.vtkCellArray()
+        self.vtkQCellsColors = vtk.vtkUnsignedCharArray()
+        self.vtkQPolyData    = vtk.vtkPolyData()
+        self.vtkQFilter      = vtk.vtkRibbonFilter()
+        self.vtkQMapper      = vtk.vtkPolyDataMapper()
+        self.vtkQActor       = vtk.vtkActor()        
     
         self._initialize(G,style_pars)
         
@@ -197,9 +204,7 @@ class VtkNetwork:
         cell_id         = 0
 
         for edge in G.edges_iter():
-
-            #print edge
-   
+            
             edge_tail = G.node[edge[0]]
             edge_head = G.node[edge[1]]
             
@@ -275,12 +280,180 @@ class VtkNetwork:
                 
             sup_point_index = inf_point_index + len(edge_geometry) - 1
             inf_point_index = sup_point_index + 1
+                
+
+            # queues
             
+            # ---- qbox ----
+            
+            qratio = 0.22
+            widthFactor = 0.075*0.5
+            distanceFactor = 0.0
+            h = 1.25*widthFactor
+
+            # reference points
+            p = array(edge_geometry[0])
+            q = array(edge_geometry[1])
+            
+            u = (q-p)/linalg.norm(q-p)
+            
+            v = zeros(3)
+            
+            if (abs(u[0])> 0):
+            
+                v[0] = -u[1]/u[0]
+                v[1] = 1.0
+                v[2] = 0
+            else:
+                v[0] = 1.0
+                v[1] = 0
+                v[2] = 0
+            
+            w = v/linalg.norm(v)
+            
+            qm = p + u*qratio + distanceFactor*w
+            
+            qbp = qm + 0.5*widthFactor*w + 0.5*h*u 
+            qbm = qm - 0.5*widthFactor*w + 0.5*h*u
+            qhp = qbp - h*u
+            qhm = qbm - h*u   
+
+            z_aux = 2*1E-5
+            qbp[2] = z_aux
+            qbm[2] = z_aux
+            qhp[2] = z_aux
+            qhm[2] = z_aux
+
+            # add points for the box     
+            self.vtkQBoxesPoints.InsertNextPoint(qhm)
+            self.vtkQBoxesPoints.InsertNextPoint(qbm)
+            self.vtkQBoxesPoints.InsertNextPoint(qbp)
+            self.vtkQBoxesPoints.InsertNextPoint(qhp)
+            
+            # create polyline for cell
+            q_inf_key = edge_counter*4
+            polyLine = vtk.vtkPolyLine()
+            polyLine.GetPointIds().SetNumberOfIds(4)
+            polyLine.GetPointIds().SetId(0,q_inf_key)
+            polyLine.GetPointIds().SetId(1,q_inf_key+1)
+            polyLine.GetPointIds().SetId(2,q_inf_key+2)
+            polyLine.GetPointIds().SetId(3,q_inf_key+3)
+            self.vtkQBoxesLineCells.InsertNextCell(polyLine)
+            
+            # ---- queue ----
+            
+            qb = 0.5*(qbp + qbm)
+            qh = qb - h*u
+            
+            qb[2] = z_aux
+            qh[2] = z_aux 
+            
+            #add points for queue element
+            self.vtkQPoints.InsertNextPoint(qb)
+            self.vtkQPoints.InsertNextPoint(qh)
+            
+            #create polyline for queue cell
+            q_inf_key = edge_counter*2
+            polyLine = vtk.vtkPolyLine()
+            polyLine.GetPointIds().SetNumberOfIds(2)
+            polyLine.GetPointIds().SetId(0,q_inf_key)
+            polyLine.GetPointIds().SetId(1,q_inf_key+1)
+            self.vtkQLineCells.InsertNextCell(polyLine)
+            
+            queuePointsIDs  = [q_inf_key,q_inf_key+1]
+            
+            queueRefPoints  = [qb,qh]
+            queueMaxHeight  = linalg.norm(qh-qb)
+            queueRefDirection = (qh-qb)/queueMaxHeight
+            queueMaxQValue = style_pars['max_z_e']
+            
+            queueBoxCellID  = edge_counter
+            queueCellID     = edge_counter
+            
+            edge_counter = edge_counter + 1
+
             #########
-            self.edges_dict[(edge[0],edge[1],edge_id)] = [edgeCellIDs,edgeCellPointsIDs]
+            
+            aux = []
+            
+            aux.append(edgeCellIDs)
+            aux.append(edgeCellPointsIDs)
+            aux.append(queuePointsIDs)
+            aux.append(queueRefPoints)
+            aux.append(queueMaxHeight)
+            aux.append(queueRefDirection)
+            aux.append(queueMaxQValue)
+            aux.append(queueBoxCellID)
+            aux.append(queueCellID)
+            
+            self.edges_dict[(edge[0],edge[1],edge_id)] = aux 
+            
             
         self.vtkPolyData.SetPoints(self.vtkPoints)
         self.vtkPolyData.SetLines(self.vtkLineCells)
+        
+        # \begin{ qboxes } 
+        
+        self.vtkQBoxesPolyData.SetPoints(self.vtkQBoxesPoints)
+        self.vtkQBoxesPolyData.SetLines(self.vtkQBoxesLineCells)
+
+        if (vtk.VTK_MAJOR_VERSION <= 5):                # check VTK version
+            self.vtkQBoxesMapper.SetInput(self.vtkQBoxesPolyData)
+        else:
+            self.vtkQBoxesMapper.SetInputData(self.vtkQBoxesPolyData)
+
+        self.vtkQBoxesCellsColors.SetNumberOfComponents(4)
+        self.vtkQBoxesCellsColors.SetName('QBoxesColors')
+
+        for i in xrange(self.vtkQBoxesLineCells.GetNumberOfCells()):
+            nColor = [int(255*0.0),int(255*0.8),int(255*0.0),255]
+            #nColor = [int(255*0.15),int(255*0.15),int(255*0.15),int(255*0)]
+            self.vtkQBoxesCellsColors.InsertNextTupleValue(nColor)
+        self.vtkQBoxesPolyData.GetCellData().AddArray(self.vtkQBoxesCellsColors)
+
+        self.vtkQBoxesMapper.ScalarVisibilityOn()
+        self.vtkQBoxesMapper.SetScalarModeToUseCellFieldData()
+        self.vtkQBoxesMapper.SelectColorArray('QBoxesColors')
+
+        self.vtkQBoxesActor.SetMapper(self.vtkQBoxesMapper)
+
+        self.vtkQBoxesActor.GetProperty().SetLineWidth(2)
+                
+        # \end{ qboxes }
+        
+        # \begin{ queues }
+
+        self.vtkQPolyData.SetPoints(self.vtkQPoints)
+        self.vtkQPolyData.SetLines(self.vtkQLineCells)
+        
+        if (vtk.VTK_MAJOR_VERSION <= 5):   
+            self.vtkQFilter.SetInput(self.vtkQPolyData)
+        else:
+            self.vtkQFilter.SetInputData(self.vtkQPolyData)
+                
+        self.vtkQFilter.UseDefaultNormalOn()        
+        self.vtkQFilter.SetAngle(0) 
+        self.vtkQFilter.SetWidth(1.0)
+    
+        self.vtkQMapper.SetInputConnection(self.vtkQFilter.GetOutputPort())
+
+        self.vtkQCellsColors.SetNumberOfComponents(4)
+        self.vtkQCellsColors.SetName('QColors')
+
+        for i in xrange(self.vtkQLineCells.GetNumberOfCells()):
+            nColor = [int(255*(random.random())),int(255*(random.random())),int(255*(random.random())),0]
+            #nColor = [int(255*0.15),int(255*0.15),int(255*0.15),int(255*0)]
+            self.vtkQCellsColors.InsertNextTupleValue(nColor)
+        self.vtkQPolyData.GetCellData().AddArray(self.vtkQCellsColors)
+
+        self.vtkQMapper.ScalarVisibilityOn()
+        self.vtkQMapper.SetScalarModeToUseCellFieldData()
+        self.vtkQMapper.SelectColorArray('QColors')
+
+        self.vtkQActor.SetMapper(self.vtkQMapper)      
+        self.vtkQFilter.SetWidth(0.5*widthFactor)       
+        
+        # \end{ queues }
         
         # colors 
         
@@ -334,7 +507,7 @@ class VtkNetwork:
         self.vtkColorBar.SetLookupTable(self.vtkMapper.GetLookupTable())
         self.vtkColorBar.SetTitle("Flow rate")
         self.vtkColorBar.SetMaximumWidthInPixels(60)
-        #self.vtkColorBar.SetMaximumHeightInPixels(500)
+        self.vtkColorBar.SetMaximumHeightInPixels(500)
         self.vtkColorBar.SetOrientationToVertical()
         self.vtkColorBar.GetTitleTextProperty().SetFontSize(100)
         self.vtkColorBar.GetTitleTextProperty().SetLineOffset(25)
@@ -358,11 +531,7 @@ class VtkNetwork:
         self.vtkMapper.SetScalarRange(0,style_pars['max_f_e_minus'])
         self.vtkMapper.SetLookupTable(self.lut)
         self.vtkColorBar.SetLookupTable(self.lut)
-        
-    def setCellColorByID2(self,cell_id,color_tuple):
-        
-        self.vtkPolyData.GetCellData().GetArray('Colors').SetTuple(cell_id,color_tuple)
-        
+                
     def setCellColorByID(self,cell_id,flow_value):
         
         color = [0,0,0]
@@ -374,11 +543,39 @@ class VtkNetwork:
             #color_tuple = [int(0.32*255),int(0.32*255),int(0.32*255),alpha]
             #color_tuple = [int(255),int(0*255),int(0*255),alpha]       
             #color_tuple = [int(color[0]*255),int(color[1]*255),int(color[2]*255),alpha]
+            
+            if (flow_value < 0):
+                color_tuple = [int(1*255),int(0*255),int(0*255),255]
+            
         else:
             alpha = int(255*0.825)
             color_tuple = [int(color[0]*255),int(color[1]*255),int(color[2]*255),alpha]
         
         self.vtkPolyData.GetCellData().GetArray('Colors').SetTuple(cell_id,color_tuple)
+                
+    def setQBoxCellColorByID(self,cell_id,queue_value):
+        
+        color_tuple = [int(255*0.75),int(255*0.0),int(255*0.0),int(255*1)]
+        if (queue_value < 1E-10):
+            #color_tuple = [int(255*0.25),int(255*0.25),int(255*0.25),255]
+            color_tuple = [int(255*0.0),int(255*0.8),int(255*0),int(255)]
+        
+        if (queue_value < 0):
+            color_tuple = [int(255*0.2),int(255*0.2),int(255*0.2),int(255)]
+            
+        self.vtkQBoxesPolyData.GetCellData().GetArray('QBoxesColors').SetTuple(cell_id,color_tuple)
+        
+    def setQCellColorByID(self,cell_id,queue_value):
+
+        color_tuple = [int(255*1.0),int(0),int(0),int(255*1)]
+        if (queue_value < 1E-10):
+            color_tuple = [int(255*0),int(0.5*255),int(0.0),int(255*1)]
+            
+        if (queue_value < 0):
+            color_tuple = [int(255*0.25),int(255*0.25),int(255*0.25),int(255)]
+        #color_tuple[3] = int(0*random.random()*255)
+        self.vtkQPolyData.GetCellData().GetArray('QColors').SetTuple(cell_id,color_tuple)
+        
         
         
         

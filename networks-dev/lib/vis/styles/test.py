@@ -38,6 +38,8 @@ def setScene(G,renderer,pars,style_pars):
     
         
     nw      = test.VtkNetwork(G,style_pars)
+    renderer.AddActor(nw.vtkQActor)
+    renderer.AddActor(nw.vtkQBoxesActor)
     renderer.AddActor(nw.vtkActor)
     
     renderer.ResetCamera()
@@ -49,10 +51,11 @@ def setScene(G,renderer,pars,style_pars):
     
     EDGE_WIDTH  = 0.8*1.5*zPos/1000.0
 
-    NODE_SIZE   = 0.5*min(8*EDGE_WIDTH,0.35)
+    NODE_SIZE   = max(min(1.1*EDGE_WIDTH,0.15),0.15)
          
     nw_bck.vtkFilter.SetWidth(EDGE_WIDTH)
     nw.vtkFilter.SetWidth(EDGE_WIDTH)
+    
     
 
     node_source_label   = pars['NODE_SOURCE_LABEL']
@@ -64,14 +67,17 @@ def setScene(G,renderer,pars,style_pars):
     renderer.AddActor(vtkNodes.vtkActor)
     renderer.AddActor2D(vtkNodes.vtkActor2D)
     renderer.AddActor2D(vtkNodes.vtkActor2Dst)
-
+        
+    nw.vtkColorBar.GetPositionCoordinate().SetValue(0.92,0.04)
+    nw.vtkColorBar.SetWidth(0.05)
+    nw.vtkColorBar.SetHeight(0.4)
     
-    #renderer.AddActor2D(nw.vtkColorBar)
+    renderer.AddActor2D(nw.vtkColorBar)
     renderer.ResetCamera()
     
     return nw
     
-def update(time_id,G,nw,fminus_data,pars,globalNumberOfSteps):
+def update(time_id,G,nw,fminus_data,ze_data,pars,globalNumberOfSteps):
 
     edges_dict = nw.edges_dict
     
@@ -79,7 +85,8 @@ def update(time_id,G,nw,fminus_data,pars,globalNumberOfSteps):
       
     globalNumberOfTimeSteps = globalNumberOfSteps
       
-      
+    edge_counter = 0
+    
     for e in sorted(set(G.edges_iter())):
           
         edges = G.edge[e[0]][e[1]]
@@ -108,7 +115,39 @@ def update(time_id,G,nw,fminus_data,pars,globalNumberOfSteps):
                     
                 cell_id = listOfEdgeCellIDs[i]
                 nw.setCellColorByID(cell_id,fminus_value)
+            
+            # queue update
+            
+            queue_value     = ze_data[time_id,key]        
+            
+            qPointsIDs   = edges_dict[(e[0],e[1],edge_id)][2]
+            qPoints      = edges_dict[(e[0],e[1],edge_id)][3]
+            q_max_h      = edges_dict[(e[0],e[1],edge_id)][4]
+            q_u          = edges_dict[(e[0],e[1],edge_id)][5]
+            q_max_qvalue = edges_dict[(e[0],e[1],edge_id)][6]
+            qBoxID       = edges_dict[(e[0],e[1],edge_id)][7]
+            qID          = edges_dict[(e[0],e[1],edge_id)][8]
 
+            
+            if (queue_value > 0 and q_max_qvalue > 0):
+                
+                h = max( q_max_h*(queue_value/q_max_qvalue) , 1E-5 )
+                
+                newPoint = qPoints[0] + q_u*h
+                    
+                nw.vtkQPoints.SetPoint(qPointsIDs[1],newPoint)
+                
+            else:
+                
+                newPoint = qPoints[0] + q_u*0.001
+                
+                nw.vtkQPoints.SetPoint(qPointsIDs[1],newPoint)
+            
+            nw.setQBoxCellColorByID(qBoxID,queue_value)
+            nw.setQCellColorByID(qID,queue_value)
+            
             edge_id = edge_id + 1
 
+            
+        
     return None

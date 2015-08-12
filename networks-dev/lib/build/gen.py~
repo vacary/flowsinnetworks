@@ -168,7 +168,7 @@ def genDataFiles(G,time_step,Tmax,NETWORK_NAME,data_path):
         vArray  = getArrayFromStrList(str_z_e_overtime)
         
         data    = getArrayOfValuesOvertime(required_values, xArray, vArray, time_step, N)
-        #plt.plot(data[:,0],data[:,1],'b*',c=[random.random(),random.random(),random.random()])
+        plt.plot(data[:,0],data[:,1],'b*',c=[random.random(),random.random(),random.random()])
         #plt.savefig('ze.png') 
         
         arrayOf_Queues[:,edge_key] = data[:,1] 
@@ -183,7 +183,7 @@ def genDataFiles(G,time_step,Tmax,NETWORK_NAME,data_path):
          
         data    = getArrayOfValuesOvertime(required_values, xArray, vArray, time_step, N)
         
-        #plt.plot(data[:,0],data[:,1],'bx',c=[random.random(),random.random(),random.random()])
+        plt.plot(data[:,0],data[:,1],'bx',c=[random.random(),random.random(),random.random()])
         #plt.savefig('fplus.png') 
         
         arrayOf_f_e_plus[:,edge_key] = data[:,1] 

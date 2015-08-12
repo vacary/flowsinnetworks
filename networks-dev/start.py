@@ -54,6 +54,7 @@ class Visualization:
         self.fps                        = self.pars['FPS']
         
         self.renderer                   = vtk.vtkRenderer()
+        self.interactor                 = None
         
         self.G                          = None
         self.nw                         = None
@@ -88,7 +89,8 @@ class Visualization:
             
         if (self.TYPE in ['n0']):
             
-            vstyle_n0.setScene(self.G,self.renderer,self.pars)            
+            vstyle_n0.setScene(self.G,self.renderer,self.pars)                        
+            pass
             
         if (self.TYPE in ['n1']):
             
@@ -104,8 +106,11 @@ class Visualization:
             
             self.getSimulationData()
             self.nw = vstyle_test.setScene(self.G,self.renderer,self.pars,self.style_pars)
-                
             
+    def setInteractor(self,renderWindowInteractor):
+        
+        self.interactor = renderWindowInteractor 
+
     def setInteractorStyle(self,renderWindowInteractor):
         
         if (self.TYPE in ['geometry','geometry2']):
@@ -125,6 +130,13 @@ class Visualization:
         
         self.style_pars['max_f_e_minus'] = self.arrayOf_f_e_minus.max()
         
+        # z_e_minus_data
+        fm = file(os.path.join('.','projects',str(self.network_name),'data',str(self.network_name)+'_z_e.dat'),'rb')
+        self.arrayOf_z_e  = load(fm)
+        fm.close()
+        
+        self.style_pars['max_z_e'] = self.arrayOf_z_e.max()        
+        
         
     def update(self,time_id):
 
@@ -137,9 +149,12 @@ class Visualization:
             self.nw.vtkPolyData.Modified()
 
         if (self.TYPE in ['network']):
-            vstyle_test.update(time_id,self.G,self.nw,self.arrayOf_f_e_minus,self.pars,self.globalNumberOfTimeSteps)
+            vstyle_test.update(time_id,self.G,self.nw,self.arrayOf_f_e_minus,self.arrayOf_z_e,self.pars,self.globalNumberOfTimeSteps)
             self.nw.vtkPolyData.Modified()
+            self.nw.vtkQPolyData.Modified()
+            self.nw.vtkQBoxesPolyData.Modified()
             
+  
        #print 'update'
 
 
@@ -164,7 +179,7 @@ class MainWindow(QtGui.QMainWindow):
         self.renderTimeInterval                 = 1000/(1.0*viz.fps)
         self.globalNumberOfTimeSteps            = viz.globalNumberOfTimeSteps
         
-        self.writer                        = vtk.vtkFFMPEGWriter()
+        #self.writer                        = vtk.vtkFFMPEGWriter()
   
         self.timerObj                           = QtCore.QTimer()
         QtCore.QObject.connect(self.timerObj,QtCore.SIGNAL("timeout()"),self.updateForAnimation)
@@ -192,19 +207,22 @@ class MainWindow(QtGui.QMainWindow):
         
         self.renderWindow = self.vtkWidget.GetRenderWindow()
         self.renderWindowInteractor = self.renderWindow.GetInteractor()
+        viz.setInteractor(self.renderWindowInteractor)
         viz.setInteractorStyle(self.renderWindowInteractor)
         
         self.viz = viz
         
+        self.renderer.ResetCamera()
+        
         self.show()
         
         self.renderWindowInteractor.Initialize()
-        
-        windowToImageFilter = vtk.vtkWindowToImageFilter()
-        windowToImageFilter.SetInput(self.renderWindow)
-        windowToImageFilter.SetInputBufferTypeToRGBA()
-        windowToImageFilter.ReadFrontBufferOff()
-        windowToImageFilter.Update()
+           
+#         windowToImageFilter = vtk.vtkWindowToImageFilter()
+#         windowToImageFilter.SetInput(self.renderWindow)
+#         windowToImageFilter.SetInputBufferTypeToRGBA()
+#         windowToImageFilter.ReadFrontBufferOff()
+#         windowToImageFilter.Update()
         
 #         self.writer.SetInputConnection(windowToImageFilter.GetOutputPort())
 #         self.writer.SetFileName("test.avi")        
@@ -268,7 +286,7 @@ class MainWindow(QtGui.QMainWindow):
         self.updateSlider(aux_time)
         
     def updateSlider(self,timer):
-        self.writer.Write()
+        #self.writer.Write()
         self.ui.slider_11.setSliderPosition(timer)
         aux_time = int(timer*self.time_step*10.0)/10.0
         self.ui.textSliderValue_11.setText(str(aux_time))    

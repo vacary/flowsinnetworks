@@ -1,4 +1,4 @@
-ERROR: In /build/buildd/vtk6-6.0.0/IO/FFMPEG/vtkFFMPEGWriter.cxx, line 564
-vtkFFMPEGWriter (0x2411ec0): Movie not started.
+ERROR: In /build/buildd/vtk6-6.0.0/Rendering/OpenGL/vtkOpenGLTexture.cxx, line 58
+vtkOpenGLTexture (0x7248f80): PBO should have been deleted in ReleaseGraphicsResources()
 
 
