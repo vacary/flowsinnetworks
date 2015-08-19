@@ -10,7 +10,7 @@ dir_path = os.path.dirname(path)
 
 import networkx as nx
 from numpy import *
-    
+
 def get_vparameters(visualization_settings_path):
     
     sys.path.append(visualization_settings_path)
@@ -46,12 +46,19 @@ def get_graphFromGMLFile(network_gml_file_path):
     
     c = 0
     
+    label_overtime = ""
+    
     for n in SG.nodes_iter():
         
         G.add_node(n)
         G.node[n]['id']     = c
         
         G.node[n]['nlabel'] = SG.node[n]['nlabel']
+        
+        try: 
+            G.node[n]['label_overtime'] = SG.node[n]['label_overtime']
+        except:
+            G.node[n]['label_overtime'] = label_overtime
         
         str_pos = str(SG.node[n]['pos'])
         aux = str_pos.translate(None,''.join(['[',']'])).split(',')
@@ -66,19 +73,16 @@ def get_graphFromGMLFile(network_gml_file_path):
         time        = data['time']
         capacity    = data['capacity']
 
-        edge_key        = -1
-        edge_skey       = -1
-                
-        geometry        = ''
-        geometry_keys   = ''
+        edge_key            = -1                
+        geometry            = ''
+        geometry_keys       = ''
+        switching_times     = ''
+        z_e_overtime        = ''
+        f_e_minus_overtime  = ''
+        f_e_plus_overtime   = ''
         
         try:
             edge_key        = data['edge_key']
-        except:
-            pass
-        
-        try:
-            edge_skey       = data['edge_skey']
         except:
             pass
         
@@ -91,8 +95,28 @@ def get_graphFromGMLFile(network_gml_file_path):
             geometry_keys   = data['geometry_keys']
         except:
             pass
-            
-        G.add_edge(u,v, edge_key = edge_key, edge_skey = edge_skey, time = time, capacity = capacity, geometry = geometry, geometry_keys = geometry_keys)
+        
+        try:
+            switching_times = data['switching_times']
+        except:
+            pass
+        
+        try:
+            z_e_overtime = data['z_e_overtime']
+        except:
+            pass
+        
+        try: 
+            f_e_minus_overtime = data['f_e_minus_overtime']
+        except:
+            pass
+        
+        try:
+            f_e_plus_overtime = data['f_e_plus_overtime']
+        except:
+            pass
+        
+        G.add_edge(u,v,edge_key=edge_key,time=time,capacity=capacity,geometry=geometry,geometry_keys=geometry_keys,switching_times=switching_times,z_e_overtime=z_e_overtime,f_e_minus_overtime=f_e_minus_overtime,f_e_plus_overtime=f_e_plus_overtime)
         
     return G
 

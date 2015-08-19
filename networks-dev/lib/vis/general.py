@@ -71,7 +71,7 @@ def addInfoAnnotations(G,renderer,pars):
 
     msgTxt = '  Interactor Style:\n\n'
     
-    if (pars['TYPE'] in ['geometry','geometry2']):
+    if (pars['TYPE'] in ['geometry']):
 
         msgTxt += '  [ RubberBand3D ]\n\n'
         msgTxt += '  Controls:\n\n'
@@ -79,8 +79,9 @@ def addInfoAnnotations(G,renderer,pars):
         msgTxt += '  Shift + Right mouse - Zoom \n'
         msgTxt += '  Middle mouse - Pan \n'
         msgTxt += '  Scroll wheel - Zoom \n'
+        #msgTxt += '  \n\n\n\n'
 
-    if (pars['TYPE'] in ['n0','n1','n2','network']):
+    if (pars['TYPE'] in ['network']):
     
         msgTxt += '  [ StyleImage ]\n\n'
         msgTxt += '  Controls:\n\n'
@@ -88,6 +89,7 @@ def addInfoAnnotations(G,renderer,pars):
         msgTxt += '  Control + Left mouse - Rotation (2D) \n'
         msgTxt += '  Middle mouse - Pan \n'
         msgTxt += '  Scroll wheel - Zoom \n'
+        #msgTxt += '  \n\n\n\n'
     
     msgTxt = '\n' + msgTxt    
     annotation2 = vtk.vtkCornerAnnotation() 

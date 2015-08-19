@@ -28,12 +28,10 @@ from lib.GUI.pyQT_GUI import *
 import lib.req.manage   as req_mn  # software requirements validation methods
 import lib.vis.manage   as vis_mn  # visualization manage methods
 
+import lib.vis.interactors as interactors
+
 import lib.vis.styles.geometry      as vstyle_gm
-import lib.vis.styles.geometry2     as vstyle_gm2
-import lib.vis.styles.networks0     as vstyle_n0
-import lib.vis.styles.networks1     as vstyle_n1
-import lib.vis.styles.networks2     as vstyle_n2
-import lib.vis.styles.test as vstyle_test
+import lib.vis.styles.network       as vstyle_nw
 
 class Visualization:
  
@@ -83,29 +81,10 @@ class Visualization:
 
             vstyle_gm.setScene(self.G,self.renderer,self.pars)
         
-        if (self.TYPE == 'geometry2'):
-            
-            vstyle_gm2.setScene(self.G,self.renderer,self.pars)
-            
-        if (self.TYPE in ['n0']):
-            
-            vstyle_n0.setScene(self.G,self.renderer,self.pars)                        
-            pass
-            
-        if (self.TYPE in ['n1']):
-            
-            self.getSimulationData()
-            self.nw = vstyle_n1.setScene(self.G,self.renderer,self.pars)
-            
-        if (self.TYPE in ['n2']):
-            
-            self.getSimulationData()
-            self.nw = vstyle_n2.setScene(self.G,self.renderer,self.pars,self.style_pars)
-            
         if (self.TYPE in ['network']):
             
             self.getSimulationData()
-            self.nw = vstyle_test.setScene(self.G,self.renderer,self.pars,self.style_pars)
+            self.nw = vstyle_nw.setScene(self.G,self.renderer,self.pars,self.style_pars)
             
     def setInteractor(self,renderWindowInteractor):
         
@@ -113,13 +92,17 @@ class Visualization:
 
     def setInteractorStyle(self,renderWindowInteractor):
         
-        if (self.TYPE in ['geometry','geometry2']):
+        if (self.TYPE in ['geometry']):
              
             renderWindowInteractor.SetInteractorStyle(vtk.vtkInteractorStyleRubberBand3D())
-        
-        if (self.TYPE in ['n0','n1','n2','network']):
             
-            renderWindowInteractor.SetInteractorStyle(vtk.vtkInteractorStyleImage())
+        if (self.TYPE in ['network']):
+            
+            #renderWindowInteractor.SetInteractorStyle(vtk.vtkInteractorStyleImage())
+            #sval = 999
+            #renderWindowInteractor.SetInteractorStyle(iren.CustomInteractorStyle(sval))
+
+            renderWindowInteractor.SetInteractorStyle(interactors.CustomInteractorStyle(self.renderer,self.G))
         
     def getSimulationData(self):
            
@@ -140,16 +123,8 @@ class Visualization:
         
     def update(self,time_id):
 
-        if (self.TYPE in ['n1']):
-            vstyle_n1.update(time_id,self.G,self.nw,self.arrayOf_f_e_minus,self.pars,self.globalNumberOfTimeSteps)
-            self.nw.vtkPolyData.Modified()
-            
-        if (self.TYPE in ['n2']):
-            vstyle_n2.update(time_id,self.G,self.nw,self.arrayOf_f_e_minus,self.pars,self.globalNumberOfTimeSteps)
-            self.nw.vtkPolyData.Modified()
-
         if (self.TYPE in ['network']):
-            vstyle_test.update(time_id,self.G,self.nw,self.arrayOf_f_e_minus,self.arrayOf_z_e,self.pars,self.globalNumberOfTimeSteps)
+            vstyle_nw.update(time_id,self.G,self.nw,self.arrayOf_f_e_minus,self.arrayOf_z_e,self.pars,self.globalNumberOfTimeSteps)
             self.nw.vtkPolyData.Modified()
             self.nw.vtkQPolyData.Modified()
             self.nw.vtkQBoxesPolyData.Modified()
