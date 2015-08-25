@@ -13,7 +13,7 @@ from numpy import *
 # Parameters 
 
 NETWORK_NAME = "Larre"
-TYPE = "network"
+TYPE = "interactor"
 
 TIME_OF_EVENT = [0.0,40.0]
 INPUT_FLOW = [4.0] 

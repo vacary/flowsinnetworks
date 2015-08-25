@@ -42,9 +42,6 @@ def tracerFilter(G,time_step):
         route_points        = getPointsFromStrList(str_edge_geometry)
         
         numberOfDivisions   = int(floor(time/time_step))
-
-#         print '----'
-
         
         ##############
         
@@ -121,12 +118,12 @@ def tracerFilter(G,time_step):
                 k = k + 1
             listOfIds.append(idCounter)
                 
-        
-        newRoutePoints.append(points[-1])
-        idCounter = idCounter + 1
-        listOfIds.append(idCounter)
-        
-        
+        if (linalg.norm(array(newRoutePoints[-1]) - array(points[-1])) > 1E-5):
+
+            newRoutePoints.append(points[-1])
+            idCounter = idCounter + 1
+            listOfIds.append(idCounter)
+    
 #         for point in points:
 #             plt.plot(point[0],point[1],'ro')
 #             

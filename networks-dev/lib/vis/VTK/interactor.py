@@ -2,7 +2,7 @@
 
 VISUALIZATION METHODS AND CLASSES
 
-network
+interactor
 
 """
 
@@ -12,6 +12,8 @@ import vtk
 import networkx as nx
 import random
 
+import json
+
 from numpy import *
 import math
 
@@ -20,6 +22,9 @@ sys.path.append(lib_path)
 
 import lib.vis.general as gen
 import lib.vis.VTK.rsc.colormaps as cmap
+
+
+# BACKGROUND LAYER
 
 class VtkNetworkBck:
      
@@ -151,203 +156,7 @@ class VtkNetworkBck:
         else:
             self.vtkActor.GetProperty().SetColor(0.1,0.1,0.1)
 
-
-class VtkNodes:
-    
-    def __init__(self,nxGraph,nodeRadius,opacity,lbFontSize,node_source_label,node_sink_label):
-        
-        self.vtkPoints          = vtk.vtkPoints()
-        self.vtkVertices        = vtk.vtkCellArray()
-        self.vtkPolyData        = vtk.vtkPolyData()
-        self.vtkFilter          = vtk.vtkGlyph3D()
-        self.vtkMapper          = vtk.vtkPolyDataMapper()
-        
-        self.colors             = vtk.vtkUnsignedCharArray()
-        
-        self.vtkActor           = vtk.vtkActor()    # actor for nodes
-        
-        self.vtkPoints_st_labels    = vtk.vtkPoints()
-        self.st_labels              = vtk.vtkStringArray()
-        
-        self.labels                 = vtk.vtkStringArray() 
-        
-        self.vtkActor_labels        = vtk.vtkActor2D()  # actor for labels 
-        self.vtkActor_st_labels     = vtk.vtkActor2D()  # actor for labels (nodes in {source,sink})
-
-        self._initialize(nxGraph,nodeRadius,opacity,lbFontSize,node_source_label,node_sink_label)
-
-    def _initialize(self,G,nodeRadius,opacity,lbFontSize,node_source_label,node_sink_label):
-    
-        # Points for st labels
-        self.vtkPoints_st_labels.SetNumberOfPoints(2)
-    
-        # Labels
-        self.labels.SetNumberOfValues(G.number_of_nodes())
-        self.labels.SetName("labels")    
-    
-        # Colors
-        self.colors.SetNumberOfComponents(4)
-        self.colors.SetName("Colors")
-        
-        c = 0
-                
-        for i in G.nodes_iter():
-            
-            posX = G.node[i]['pos'][0] 
-            posY = G.node[i]['pos'][1]
-            posZ = G.node[i]['pos'][2] + 0.0005
-            
-            self.vtkPoints.InsertPoint(G.node[i]['id'],posX,posY,posZ)
-            
-            if (G.node[i]['nlabel'] == node_source_label):
-                
-                #color   = [int(1*255),0,0,255]
-                color   = [255,0,0,255]
-                label   = ''#str(G.node[i]['nlabel'])
-                
-                self.vtkPoints_st_labels.SetPoint(0,[posX,posY,posZ])
-                
-            elif (G.node[i]['nlabel'] == node_sink_label ):
-                
-                color   = [0,50,255,255]
-                label   = ''#str(G.node[i]['nlabel'])
-                
-                self.vtkPoints_st_labels.SetPoint(1,[posX,posY,posZ])
-                
-            else:
-                
-                color   = [75,75,75,255]
-                label = str(G.node[i]['nlabel'])
-            
-            self.labels.SetValue(c,label)
-            self.colors.InsertNextTupleValue(color)
-            
-            self.vtkVertices.InsertNextCell(1)
-            self.vtkVertices.InsertCellPoint(c)
-            
-            c = c + 1
-            
-        # polydata
-            
-        self.vtkPolyData.SetPoints(self.vtkPoints)
-        self.vtkPolyData.SetVerts(self.vtkVertices)
-        
-        ### add arrays 
-        self.vtkPolyData.GetPointData().AddArray(self.labels)
-        self.vtkPolyData.GetPointData().AddArray(self.colors)
-        
-        # filter for nodes
-                    
-        source = vtk.vtkRegularPolygonSource()
-        source.SetNumberOfSides(50)
-        source.SetRadius(nodeRadius)
-              
-        if (vtk.VTK_MAJOR_VERSION <= 5):
-            self.vtkFilter.SetInput(self.vtkPolyData)
-            self.vtkFilter.SetSource(source.GetOutput())
-        else:
-            self.vtkFilter.SetInputData(self.vtkPolyData)
-            self.vtkFilter.SetSourceConnection(source.GetOutputPort())
-            
-
-#         source = vtk.vtkSphereSource()
-#         source.SetRadius(1)
-#         source.SetPhiResolution(16)
-#         source.SetThetaResolution(40)
-#              
-#         if (vtk.VTK_MAJOR_VERSION <= 5):   
-#             self.vtkFilter.SetInput(self.vtkPolyData)
-#             self.vtkFilter.SetSource(source.GetOutput())
-#         else:
-#             self.vtkFilter.SetInputData(self.vtkPolyData)
-#             self.vtkFilter.SetSourceConnection(source.GetOutputPort())
-        
-        
-        # mapper
- 
-        self.vtkMapper.SetInputConnection(self.vtkFilter.GetOutputPort())
-        
-        self.vtkMapper.ScalarVisibilityOn()
-        self.vtkMapper.SetScalarModeToUsePointFieldData()
-        self.vtkMapper.SelectColorArray("Colors")
-        
-        # actor
-        
-        self.vtkActor.SetMapper(self.vtkMapper)
-
-        self.vtkActor.GetProperty().SetSpecularColor(0,0,0)
-        self.vtkActor.GetProperty().SetSpecular(0.1)
-        self.vtkActor.GetProperty().SetAmbient(0.05)
-        self.vtkActor.GetProperty().SetDiffuse(0.5)
-        self.vtkActor.GetProperty().SetOpacity(opacity)
-
-
-        ### Labels
-        
-        labelMapper = vtk.vtkLabeledDataMapper()
-        labelMapper.SetInputData(self.vtkPolyData)
-        labelMapper.SetLabelModeToLabelFieldData()
-        tprop = labelMapper.GetLabelTextProperty()
-         
-        if (G.number_of_nodes()  <= 75):
-            tprop.SetColor(0.8,0.8,0.8)
-        else:
-            tprop.SetColor(0.25,0.25,0.25)
-        
-        tprop.SetFontSize(lbFontSize)
-        tprop.SetBold(1)
-        tprop.SetItalic(0)
-        tprop.SetShadow(0)
-        tprop.SetJustificationToCentered()
-        tprop.SetVerticalJustificationToCentered()
-
-        self.vtkActor_labels.SetMapper(labelMapper)
-
-        #### Labels for source and sink node
-        
-        self.st_labels.SetNumberOfValues(2)
-        self.st_labels.SetName("st_labels")
-        
-        st_verts = vtk.vtkCellArray()
-        st_verts.InsertNextCell(1)
-        st_verts.InsertCellPoint(0)
-        st_verts.InsertNextCell(1)
-        st_verts.InsertCellPoint(1)
-        
-        self.st_labels.SetValue(0,'s')#node_source_label)
-        self.st_labels.SetValue(1,'t')#node_sink_label)
-        
-        st_pointData  = vtk.vtkPolyData()   
-        st_pointData.SetPoints(self.vtkPoints_st_labels)          
-        st_pointData.SetVerts(st_verts)         
-        
-        st_pointData.GetPointData().AddArray(self.st_labels)            
-         
-        st_mapper = vtk.vtkPolyDataMapper()
-        
-        if (vtk.VTK_MAJOR_VERSION <= 5):
-            st_mapper.SetInput(st_pointData)
-        else:
-            st_mapper.SetInputData(st_pointData)
-                        
-        st_labelMapper = vtk.vtkLabeledDataMapper()
-        st_labelMapper.SetInputData(st_pointData)
-        st_labelMapper.SetLabelModeToLabelFieldData()
-        tprop = st_labelMapper.GetLabelTextProperty()
-        tprop.SetFontSize(lbFontSize)
-        tprop.SetBold(1)
-        tprop.SetItalic(0)
-        
-        if ( G.number_of_nodes() <= 25 ):
-            tprop.SetShadow(0)
-        else:
-            tprop.SetShadow(1)
-        
-        tprop.SetJustificationToCentered()
-        tprop.SetVerticalJustificationToCentered()
-        
-        self.vtkActor_st_labels.SetMapper(st_labelMapper)
-
+# ANIMATION LAYER
 
 class VtkNetwork:
      
@@ -781,7 +590,355 @@ class VtkNetwork:
             color_tuple = [int(255*0.25),int(255*0.25),int(255*0.25),int(255)]
         #color_tuple[3] = int(0*random.random()*255)
         self.vtkQPolyData.GetCellData().GetArray('QColors').SetTuple(cell_id,color_tuple)
+
+
+# NODES LAYER
+
+class VtkNodes:
+    
+    def __init__(self,nxGraph,nodeRadius,opacity,lbFontSize,node_source_label,node_sink_label):
+        
+        self.vtkPoints          = vtk.vtkPoints()
+        self.vtkVertices        = vtk.vtkCellArray()
+        self.vtkPolyData        = vtk.vtkPolyData()
+        self.vtkFilter          = vtk.vtkGlyph3D()
+        self.vtkMapper          = vtk.vtkPolyDataMapper()
+        
+        self.colors             = vtk.vtkUnsignedCharArray()
+        
+        self.vtkActor           = vtk.vtkActor()    # actor for nodes
+        
+        self.vtkPoints_st_labels    = vtk.vtkPoints()
+        self.st_labels              = vtk.vtkStringArray()
+        
+        self.labels                 = vtk.vtkStringArray() 
+        
+        self.vtkActor_labels        = vtk.vtkActor2D()  # actor for labels 
+        self.vtkActor_st_labels     = vtk.vtkActor2D()  # actor for labels (nodes in {source,sink})
+
+        self._initialize(nxGraph,nodeRadius,opacity,lbFontSize,node_source_label,node_sink_label)
+
+    def _initialize(self,G,nodeRadius,opacity,lbFontSize,node_source_label,node_sink_label):
+    
+        # Points for st labels
+        self.vtkPoints_st_labels.SetNumberOfPoints(2)
+    
+        # Labels
+        self.labels.SetNumberOfValues(G.number_of_nodes())
+        self.labels.SetName("labels")    
+    
+        # Colors
+        self.colors.SetNumberOfComponents(4)
+        self.colors.SetName("Colors")
+        
+        c = 0
+                
+        for i in G.nodes_iter():
+            
+            posX = G.node[i]['pos'][0] 
+            posY = G.node[i]['pos'][1]
+            posZ = G.node[i]['pos'][2] + 0.0005
+            
+            self.vtkPoints.InsertPoint(G.node[i]['id'],posX,posY,posZ)
+            
+            if (G.node[i]['nlabel'] == node_source_label):
+                
+                #color   = [int(1*255),0,0,255]
+                color   = [255,0,0,255]
+                label   = ''#str(G.node[i]['nlabel'])
+                
+                self.vtkPoints_st_labels.SetPoint(0,[posX,posY,posZ])
+                
+            elif (G.node[i]['nlabel'] == node_sink_label ):
+                
+                color   = [0,50,255,255]
+                label   = ''#str(G.node[i]['nlabel'])
+                
+                self.vtkPoints_st_labels.SetPoint(1,[posX,posY,posZ])
+                
+            else:
+                
+                color   = [75,75,75,255]
+                label = str(G.node[i]['nlabel'])
+            
+            self.labels.SetValue(c,label)
+            self.colors.InsertNextTupleValue(color)
+            
+            self.vtkVertices.InsertNextCell(1)
+            self.vtkVertices.InsertCellPoint(c)
+            
+            c = c + 1
+            
+        # polydata
+            
+        self.vtkPolyData.SetPoints(self.vtkPoints)
+        self.vtkPolyData.SetVerts(self.vtkVertices)
+        
+        ### add arrays 
+        self.vtkPolyData.GetPointData().AddArray(self.labels)
+        self.vtkPolyData.GetPointData().AddArray(self.colors)
+        
+        # filter for nodes
+                    
+        source = vtk.vtkRegularPolygonSource()
+        source.SetNumberOfSides(50)
+        source.SetRadius(nodeRadius)
+              
+        if (vtk.VTK_MAJOR_VERSION <= 5):
+            self.vtkFilter.SetInput(self.vtkPolyData)
+            self.vtkFilter.SetSource(source.GetOutput())
+        else:
+            self.vtkFilter.SetInputData(self.vtkPolyData)
+            self.vtkFilter.SetSourceConnection(source.GetOutputPort())
+            
+
+#         source = vtk.vtkSphereSource()
+#         source.SetRadius(1)
+#         source.SetPhiResolution(16)
+#         source.SetThetaResolution(40)
+#              
+#         if (vtk.VTK_MAJOR_VERSION <= 5):   
+#             self.vtkFilter.SetInput(self.vtkPolyData)
+#             self.vtkFilter.SetSource(source.GetOutput())
+#         else:
+#             self.vtkFilter.SetInputData(self.vtkPolyData)
+#             self.vtkFilter.SetSourceConnection(source.GetOutputPort())
         
         
+        # mapper
+ 
+        self.vtkMapper.SetInputConnection(self.vtkFilter.GetOutputPort())
+        
+        self.vtkMapper.ScalarVisibilityOn()
+        self.vtkMapper.SetScalarModeToUsePointFieldData()
+        self.vtkMapper.SelectColorArray("Colors")
+        
+        # actor
+        
+        self.vtkActor.SetMapper(self.vtkMapper)
+
+        self.vtkActor.GetProperty().SetSpecularColor(0,0,0)
+        self.vtkActor.GetProperty().SetSpecular(0.1)
+        self.vtkActor.GetProperty().SetAmbient(0.05)
+        self.vtkActor.GetProperty().SetDiffuse(0.5)
+        self.vtkActor.GetProperty().SetOpacity(opacity)
+
+
+        ### Labels
+        
+        labelMapper = vtk.vtkLabeledDataMapper()
+        labelMapper.SetInputData(self.vtkPolyData)
+        labelMapper.SetLabelModeToLabelFieldData()
+        tprop = labelMapper.GetLabelTextProperty()
+         
+        if (G.number_of_nodes()  <= 75):
+            tprop.SetColor(0.8,0.8,0.8)
+        else:
+            tprop.SetColor(0.25,0.25,0.25)
+        
+        tprop.SetFontSize(lbFontSize)
+        tprop.SetBold(1)
+        tprop.SetItalic(0)
+        tprop.SetShadow(0)
+        tprop.SetJustificationToCentered()
+        tprop.SetVerticalJustificationToCentered()
+
+        self.vtkActor_labels.SetMapper(labelMapper)
+
+        #### Labels for source and sink node
+        
+        self.st_labels.SetNumberOfValues(2)
+        self.st_labels.SetName("st_labels")
+        
+        st_verts = vtk.vtkCellArray()
+        st_verts.InsertNextCell(1)
+        st_verts.InsertCellPoint(0)
+        st_verts.InsertNextCell(1)
+        st_verts.InsertCellPoint(1)
+        
+        self.st_labels.SetValue(0,'s')#node_source_label)
+        self.st_labels.SetValue(1,'t')#node_sink_label)
+        
+        st_pointData  = vtk.vtkPolyData()   
+        st_pointData.SetPoints(self.vtkPoints_st_labels)          
+        st_pointData.SetVerts(st_verts)         
+        
+        st_pointData.GetPointData().AddArray(self.st_labels)            
+         
+        st_mapper = vtk.vtkPolyDataMapper()
+        
+        if (vtk.VTK_MAJOR_VERSION <= 5):
+            st_mapper.SetInput(st_pointData)
+        else:
+            st_mapper.SetInputData(st_pointData)
+                        
+        st_labelMapper = vtk.vtkLabeledDataMapper()
+        st_labelMapper.SetInputData(st_pointData)
+        st_labelMapper.SetLabelModeToLabelFieldData()
+        tprop = st_labelMapper.GetLabelTextProperty()
+        tprop.SetFontSize(lbFontSize)
+        tprop.SetBold(1)
+        tprop.SetItalic(0)
+        
+        if ( G.number_of_nodes() <= 25 ):
+            tprop.SetShadow(0)
+        else:
+            tprop.SetShadow(1)
+        
+        tprop.SetJustificationToCentered()
+        tprop.SetVerticalJustificationToCentered()
+        
+        self.vtkActor_st_labels.SetMapper(st_labelMapper)
+
+
+# INTERACTOR LAYER
+
+class VtkNetworkInteractorLayer:
+    
+    ''' Class to get graph information using a VTK interactor
+    '''
+    
+    def __init__(self,G):
+
+        # Main layer attributes 
+        self.vtkPoints      = vtk.vtkPoints()
+        self.vtkLineCells   = vtk.vtkCellArray()
+        self.vtkPolyData    = vtk.vtkPolyData()
+        self.vtkFilter      = vtk.vtkRibbonFilter()
+        self.vtkMapper      = vtk.vtkPolyDataMapper()
+        self.vtkActor       = vtk.vtkActor()
+    
+        # Edge info
+        self.vtkData        = vtk.vtkStringArray()
+        self.vtkData.SetName('CellData')
+    
+        self._initialize(G)
+    
+    def _initialize(self,G):
+        
+        ''' Network data is processed using the information for each edge.
+        '''
+        
+        # Process graph data and set the vtkCells for each edge 
+                
+        edges_id_log = {} 
+        
+        for edge in G.edges_iter():
+            
+            if edge not in edges_id_log:
+                edges_id_log[edge] = 0
+            else:
+                edges_id_log[edge] = edges_id_log[edge] + 1
+            
+            edge_tail   = G.node[edge[0]]
+            edge_head   = G.node[edge[1]]
+            edge_id     = edges_id_log[edge]
+            
+            # Available access to graph attributes with the format: 
+            # G.edge[edge[0]][edge[1]][edge_id]['attr']
+
+            current_edge = G.edge[edge[0]][edge[1]][edge_id]
+                
+            ### Get geometry information (list of points) for the edge
+            ### * Graph list data is available as string
+            
+            str_edge_geometry   = current_edge['geometry']
+            edge_geometry       = gen.getPointsFromStrList(str_edge_geometry)   # full list of points for the edge
+            
+            self.setEdgeVtkCells(edge_geometry,edge)
+            self.setEdgeVtkCellData(G,edge,edge_id)
+            
+        # Set PolyData
+        
+        self.vtkPolyData.SetPoints(self.vtkPoints)
+        self.vtkPolyData.SetLines(self.vtkLineCells)
+        
+        # Add data
+        
+        self.vtkPolyData.GetCellData().AddArray(self.vtkData)
+        
+        # Apply RibbonFilter
+        
+        if (vtk.VTK_MAJOR_VERSION <= 5):
+            self.vtkFilter.SetInput(self.vtkPolyData)
+        else:
+            self.vtkFilter.SetInputData(self.vtkPolyData)
+            
+        self.vtkFilter.UseDefaultNormalOn() # To prevent change of orientation for the ribbons 
+        self.vtkFilter.SetAngle(0)
+        
+        self.vtkFilter.SetWidth(1)
+        
+        # Mapper
+
+        self.vtkMapper.SetInputConnection(self.vtkFilter.GetOutputPort())
+        self.vtkActor.SetMapper(self.vtkMapper)
+        
+        self.vtkActor.GetProperty().SetColor(0.0,0.0,1.0)
+        self.vtkActor.GetProperty().SetOpacity(0.0001)
+        
+    def setEdgeVtkCells(self,edge_geometry,edge):
+        
+        cellPointsIds = []
+        
+        for point in edge_geometry:
+            
+            point[2] = point[2] + 1E-4 # increase position z-coordinate
+            
+            self.vtkPoints.InsertNextPoint(point) # add point to be used in the PolyData definition
+            
+            pointId = self.vtkPoints.GetNumberOfPoints() - 1
+            cellPointsIds.append(pointId)
+            
+        # create polyline for cell
+        
+        cellNumberOfPoints = len(cellPointsIds)
+        
+        polyline = vtk.vtkPolyLine()
+        polyline.GetPointIds().SetNumberOfIds(cellNumberOfPoints)
+        
+        for i in xrange(cellNumberOfPoints):
+            polyline.GetPointIds().SetId(i,cellPointsIds[i])
+        
+        self.vtkLineCells.InsertNextCell(polyline)
         
         
+    def setEdgeVtkCellData(self,G,edge,edge_id):
+        
+        # Get edge data from graph
+
+        ntail_id  = edge[0]
+        nhead_id  = edge[1]
+        
+        label_ntail = G.node[ntail_id]['nlabel']
+        label_nhead = G.node[nhead_id]['nlabel']
+        
+        ntail_label_overtime    = gen.getFloatListFromStrList(G.node[ntail_id]['label_overtime'])
+        nhead_label_overtime    = gen.getFloatListFromStrList(G.node[nhead_id]['label_overtime'])
+        f_e_plus_overtime       = gen.getFloatListFromStrList(G.edge[ntail_id][nhead_id][edge_id]['f_e_plus_overtime'])
+        f_e_minus_overtime      = gen.getFloatListFromStrList(G.edge[ntail_id][nhead_id][edge_id]['f_e_minus_overtime'])
+        switching_times         = gen.getFloatListFromStrList(G.edge[ntail_id][nhead_id][edge_id]['switching_times'])
+        z_e_overtime            = gen.getFloatListFromStrList(G.edge[ntail_id][nhead_id][edge_id]['z_e_overtime'])
+        
+        aux_dict = {}
+        
+        aux_dict['selected_edge']           = '(%s, %s) "%i"' %(label_ntail,label_nhead,edge_id)
+        aux_dict['ntail_label_overtime']    = ntail_label_overtime 
+        aux_dict['nhead_label_overtime']    = nhead_label_overtime
+        aux_dict['f_e_plus_overtime']       = f_e_plus_overtime
+        aux_dict['f_e_minus_overtime']      = f_e_minus_overtime
+        aux_dict['switching_times']         = switching_times
+        aux_dict['z_e_overtime']            = z_e_overtime
+        aux_dict['time']                    = G.edge[ntail_id][nhead_id][edge_id]['time']
+        aux_dict['capacity']                = G.edge[ntail_id][nhead_id][edge_id]['capacity']
+        
+        data = json.dumps(aux_dict)
+        
+        j = self.vtkLineCells.GetNumberOfCells() - 1
+        self.vtkData.InsertNextValue(data)
+        
+            
+            
+            
+            
+            

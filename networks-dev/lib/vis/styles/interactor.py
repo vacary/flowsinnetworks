@@ -1,6 +1,6 @@
 """
 
-VISUALIZATION STYLE - NETWORK
+VISUALIZATION STYLE - INTERACTOR
 
 """
 
@@ -16,7 +16,7 @@ lib_path = os.path.abspath(os.path.join('..','..','..','lib'))
 sys.path.append(lib_path)
 
 import lib.vis.general as gen
-import lib.vis.VTK.network as VTK
+import lib.vis.VTK.interactor as VTK
 
 def setScene(G,renderer,pars,style_pars):
 
@@ -39,12 +39,15 @@ def setScene(G,renderer,pars,style_pars):
     # VTK SCENE
     
     nw_bck  = VTK.VtkNetworkBck(G,style_pars)
-    renderer.AddActor(nw_bck.vtkActor)    
+    renderer.AddActor(nw_bck.vtkActor)   
 
     nw      = VTK.VtkNetwork(G,style_pars)
     renderer.AddActor(nw.vtkQActor)
     renderer.AddActor(nw.vtkQBoxesActor)
-    renderer.AddActor(nw.vtkActor)
+    renderer.AddActor(nw.vtkActor)    
+    
+    nw_interactorLayer = VTK.VtkNetworkInteractorLayer(G)
+    renderer.AddActor(nw_interactorLayer.vtkActor)
     
     # PARAMETERS - CORRECTED VALUES
     
@@ -57,10 +60,11 @@ def setScene(G,renderer,pars,style_pars):
     
     EDGE_WIDTH  = 0.7*1.5*zPos/1000.0
     NODE_SIZE   = 0.9*max(min(1.1*EDGE_WIDTH,0.15),0.15)
-         
+        
     nw_bck.vtkFilter.SetWidth(EDGE_WIDTH)
     nw.vtkFilter.SetWidth(EDGE_WIDTH)
-        
+    nw_interactorLayer.vtkFilter.SetWidth(EDGE_WIDTH)
+    
     node_source_label   = pars['NODE_SOURCE_LABEL']
     node_sink_label     = pars['NODE_SINK_LABEL']
         
@@ -69,15 +73,14 @@ def setScene(G,renderer,pars,style_pars):
     renderer.AddActor(vtkNodes.vtkActor)    
     renderer.AddActor2D(vtkNodes.vtkActor_labels)
     renderer.AddActor2D(vtkNodes.vtkActor_st_labels)
-
+    
     nw.vtkColorBar.GetPositionCoordinate().SetValue(0.92,0.04)
     nw.vtkColorBar.SetWidth(0.05)
     nw.vtkColorBar.SetHeight(0.4)
     
     renderer.AddActor2D(nw.vtkColorBar)
-    renderer.ResetCamera()    
+    renderer.ResetCamera()        
     
-
     return nw
     
 def update(time_id,G,nw,fminus_data,ze_data,pars,globalNumberOfSteps):
@@ -150,8 +153,6 @@ def update(time_id,G,nw,fminus_data,ze_data,pars,globalNumberOfSteps):
             nw.setQCellColorByID(qID,queue_value)
             
             edge_id = edge_id + 1
-
-            
         
     return None
 

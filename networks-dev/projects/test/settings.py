@@ -13,7 +13,7 @@ from numpy import *
 # Parameters 
 
 NETWORK_NAME = "test"
-TYPE = "network" 
+TYPE = "interactor" 
 
 TIME_OF_EVENT = [0.0,10.0,100.0]
 INPUT_FLOW = [20.0,0.0] 

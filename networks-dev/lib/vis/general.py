@@ -38,6 +38,22 @@ def getPointsFromStrList(str_list):
     
     return points
 
+def getKeysFromStrList(str_list):
+
+    str_list = str_list[1:-1]
+    
+    output = [int(elm) for elm in str_list.split(',')]
+    
+    return output
+
+def getFloatListFromStrList(str_list):
+
+    str_list = str_list[1:-1]
+    
+    output = [float(elm) for elm in str_list.split(',')]
+    
+    return output
+
 def getArrayFromStrList(str_list):
 
     str_list = str_list[1:-1]
@@ -81,7 +97,7 @@ def addInfoAnnotations(G,renderer,pars):
         msgTxt += '  Scroll wheel - Zoom \n'
         #msgTxt += '  \n\n\n\n'
 
-    if (pars['TYPE'] in ['network']):
+    if (pars['TYPE'] in ['network','interactor']):
     
         msgTxt += '  [ StyleImage ]\n\n'
         msgTxt += '  Controls:\n\n'

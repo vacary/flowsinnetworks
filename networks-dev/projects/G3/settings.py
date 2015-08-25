@@ -13,7 +13,7 @@ from numpy import *
 # Parameters 
 
 NETWORK_NAME = "G3"
-TYPE = "network" 
+TYPE = "interactor" 
 
 TIME_OF_EVENT = [0.0,10.0,20.0,30.0,100.0]
 INPUT_FLOW = [5.0,0.0,2.0,0.1] 

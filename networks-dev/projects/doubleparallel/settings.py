@@ -13,7 +13,7 @@ from numpy import *
 # Parameters 
 
 NETWORK_NAME = "doubleparallel"
-TYPE = "network"#"geometry" 
+TYPE = "interactor"#"geometry" 
 
 TIME_OF_EVENT = [0.0,10.0,100.0]
 INPUT_FLOW = [4.0,4.0] 
