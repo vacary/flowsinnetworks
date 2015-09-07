@@ -13,7 +13,7 @@ from numpy import *
 # Parameters 
 
 NETWORK_NAME = "G400"
-TYPE = "interactor" 
+TYPE = "network" 
 
 TIME_OF_EVENT = [0.0,75.0]
 INPUT_FLOW = [10.0] 

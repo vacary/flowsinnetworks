@@ -4,7 +4,7 @@ Flow in networks - Visualization
 
 Maximiliano Olivares <maximiliano.olivares@inria.cl>
 
-Last update : August 25, 2015
+Last update : July 15, 2015
 
 ------------------------------------------------------------------
 
@@ -24,8 +24,8 @@ to be executed:
 - vtk			/ '6.0.0'
 - networkx		/ '1.9.1'
 - PyQT4
-- matplotlib		/ '1.3.1'
-- pygraphviz
+- matplotlib	/ '1.3.1'
+* pygraphviz (optional / under evaluation)
 * lxml (required to work with *.osm files)
 
 * Python Version : 2.7.6

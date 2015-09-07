@@ -24,7 +24,7 @@ def getLabelSize(G):
 
     return fontSize
 
-def getPointsFromStrList(str_list):
+def get_points_from_string_list(str_list):
     
     str_list = str_list[2:-2].replace(' ','').replace("'",'').split('],[')
     points = []
@@ -38,7 +38,7 @@ def getPointsFromStrList(str_list):
     
     return points
 
-def getKeysFromStrList(str_list):
+def get_int_array_from_string_list(str_list):
 
     str_list = str_list[1:-1]
     
@@ -54,7 +54,7 @@ def getFloatListFromStrList(str_list):
     
     return output
 
-def getArrayFromStrList(str_list):
+def get_array_from_string_list(str_list):
 
     str_list = str_list[1:-1]
     
@@ -62,7 +62,9 @@ def getArrayFromStrList(str_list):
     
     return output
 
-def addInfoAnnotations(G,renderer,pars):
+def infoAnnotations(G,renderer,pars):
+    
+    listOfAnnotations = []
     
     network_name    =   pars['NETWORK_NAME']
     numberOfNodes   =   G.number_of_nodes()
@@ -75,14 +77,15 @@ def addInfoAnnotations(G,renderer,pars):
     msgTxt += '  '+str(numberOfNodes)+' nodes\n'
     msgTxt += '  '+str(numberOfEdges)+' edges\n\n'
     
-    annotation = vtk.vtkCornerAnnotation() 
-    annotation.SetText(2,msgTxt)
-    annotation.SetMaximumFontSize(14)
-    #annotation.GetTextProperty().SetColor(0.75,0.75,0.75)
-    annotation.GetTextProperty().SetBold(0)
-    annotation.GetTextProperty().SetItalic(0)
-    annotation.GetTextProperty().SetShadow(0)
-    renderer.AddViewProp(annotation)
+    annotation_info_nw = vtk.vtkCornerAnnotation() 
+    annotation_info_nw.SetText(2,msgTxt)
+    annotation_info_nw.SetMaximumFontSize(14)
+    #annotation_info_nw.GetTextProperty().SetColor(0.75,0.75,0.75)
+    annotation_info_nw.GetTextProperty().SetBold(0)
+    annotation_info_nw.GetTextProperty().SetItalic(0)
+    annotation_info_nw.GetTextProperty().SetShadow(0)
+
+    renderer.AddViewProp(annotation_info_nw)
 
 
     msgTxt = '  Interactor Style:\n\n'
@@ -107,16 +110,18 @@ def addInfoAnnotations(G,renderer,pars):
         msgTxt += '  Scroll wheel - Zoom \n'
         #msgTxt += '  \n\n\n\n'
     
-    msgTxt = '\n' + msgTxt    
-    annotation2 = vtk.vtkCornerAnnotation() 
-    annotation2.SetText(0,''.join(msgTxt))
-    annotation2.SetMaximumFontSize(13)
-    annotation2.GetTextProperty().SetBold(0)
-    annotation2.GetTextProperty().SetItalic(0)
-    annotation2.GetTextProperty().SetShadow(0)
-    renderer.AddViewProp(annotation2)
+    msgTxt = '\n' + msgTxt
     
-    return msgTxt
+    annotation_info_iren = vtk.vtkCornerAnnotation()
+    annotation_info_iren.SetText(0,''.join(msgTxt))
+    annotation_info_iren.SetMaximumFontSize(13)
+    annotation_info_iren.GetTextProperty().SetBold(0)
+    annotation_info_iren.GetTextProperty().SetItalic(0)
+    annotation_info_iren.GetTextProperty().SetShadow(0)
+    
+    renderer.AddViewProp(annotation_info_iren)
+    
+    return [annotation_info_nw, annotation_info_iren]
 
 def setBackgroundStyle(renderer):
 

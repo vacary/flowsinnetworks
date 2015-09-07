@@ -1,4 +1,848 @@
+ERROR: In /build/buildd/vtk6-6.0.0/Common/Core/vtkLookupTable.cxx, line 1081
+vtkLookupTable (0x7167120): Index 20 is greater than the number of colors 20
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
+Warning: In /build/buildd/vtk6-6.0.0/Filters/Modeling/vtkRibbonFilter.cxx, line 193
+vtkRibbonFilter (0x7157440): Less than two points in line!
+
+
 ERROR: In /build/buildd/vtk6-6.0.0/Rendering/OpenGL/vtkOpenGLTexture.cxx, line 58
-vtkOpenGLTexture (0x30deb40): PBO should have been deleted in ReleaseGraphicsResources()
+vtkOpenGLTexture (0x7185d50): PBO should have been deleted in ReleaseGraphicsResources()
+
+
+ERROR: In /build/buildd/vtk6-6.0.0/Rendering/OpenGL/vtkOpenGLTexture.cxx, line 58
+vtkOpenGLTexture (0x7148e90): PBO should have been deleted in ReleaseGraphicsResources()
+
+
+ERROR: In /build/buildd/vtk6-6.0.0/Rendering/OpenGL/vtkOpenGLTexture.cxx, line 58
+vtkOpenGLTexture (0x7b42960): PBO should have been deleted in ReleaseGraphicsResources()
 
 

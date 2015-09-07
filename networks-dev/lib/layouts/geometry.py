@@ -45,7 +45,6 @@ def tracerFilter(G,time_step):
         
         ##############
         
-        idCounter       = 0
         newRoutePoints  = []
         listOfIds       = [0]
         
@@ -66,8 +65,8 @@ def tracerFilter(G,time_step):
             
             for k in xrange(len(points)):
                 newRoutePoints.append(points[k])
-                idCounter = idCounter + 1
-            listOfIds.append(idCounter-1)
+
+            listOfIds.append(len(newRoutePoints)-1)
                 
         else:
         
@@ -90,7 +89,6 @@ def tracerFilter(G,time_step):
                     k = k + 1
              
                     newRoutePoints.append(pos.tolist()) #########
-                    idCounter = idCounter + 1
                      
                      
                 if (d2Travel < 0):
@@ -107,22 +105,19 @@ def tracerFilter(G,time_step):
                     final_pos   = npos
                      
                 newRoutePoints.append(final_pos.tolist()) #########
-                listOfIds.append(idCounter)
-                idCounter = idCounter + 1
+                listOfIds.append(len(newRoutePoints)-1)
              
             k = k + 1
         
             while (k < len(points)-1):
                 newRoutePoints.append(points[k])
-                idCounter = idCounter + 1
                 k = k + 1
-            listOfIds.append(idCounter)
-                
+
         if (linalg.norm(array(newRoutePoints[-1]) - array(points[-1])) > 1E-5):
 
             newRoutePoints.append(points[-1])
-            idCounter = idCounter + 1
-            listOfIds.append(idCounter)
+
+        listOfIds.append(len(newRoutePoints)-1)
     
 #         for point in points:
 #             plt.plot(point[0],point[1],'ro')

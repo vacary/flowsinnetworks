@@ -1,6 +1,6 @@
 '''
 
- Inria Chile - Flows In Networks
+ Inria Chile - Flows In Networks (IV)
  
  Dynamic flow visualization
 
@@ -36,41 +36,56 @@ import lib.GUI.Dialog as Qt_Dialog
 
 import lib.req.manage               as req_mn  # software requirements validation methods
 import lib.vis.manage               as vis_mn  # visualization manage methods
-import lib.vis.interactors          as interactors
-import lib.vis.styles.geometry      as vstyle_gm
+
+import lib.vis.interactor           as interactor
 import lib.vis.styles.network       as vstyle_nw
-import lib.vis.styles.interactor    as vstyle_iren
+
 
 class Visualization:
  
-    def __init__(self,pars):
+    def __init__(self, pars):
         
-        self.pars                       = pars
+        self.pars = pars
         
-        self.network_name               = self.pars['NETWORK_NAME']
-        self.TYPE                       = self.pars['TYPE']
+        self.network_name = self.pars['NETWORK_NAME']
+        self.TYPE = self.pars['TYPE']
 
-        self.time_step                  = self.pars['TIME_STEP']
-        self.Tmax                       = self.pars['T_MAX_VIS']
+        self.time_step = self.pars['TIME_STEP']
+        self.Tmax = self.pars['T_MAX_VIS']
 
-        self.globalNumberOfTimeSteps    = int(floor(self.Tmax/self.time_step))
-
-        self.SIMULATION_DATA_AVAILABLE  = self.pars['SIMULATION_DATA_AVAILABLE']
-        self.PRIORITY_GRAPHVIZ_LAYOUT   = self.pars['PRIORITY_GRAPHVIZ_LAYOUT']
-        self.fps                        = self.pars['FPS']
+        self.SIMULATION_DATA_AVAILABLE = self.pars['SIMULATION_DATA_AVAILABLE']
+        self.PRIORITY_GRAPHVIZ_LAYOUT = self.pars['PRIORITY_GRAPHVIZ_LAYOUT']
+        self.fps = self.pars['FPS']
         
-        self.renderer                   = vtk.vtkRenderer()
-        self.interactor                 = None
-        self.interactorAnnotation       = vtk.vtkTextActor()
+        self.globalNumberOfTimeSteps = int(floor(self.Tmax/self.time_step))
         
-        self.G                          = None
-        self.nw                         = None
-        self.arrayOf_f_e_minus          = None
-        self.arrayOf_Queues             = None
+        self.renderer = vtk.vtkRenderer()
+        self.interactorAnnotation = vtk.vtkTextActor()
         
-        self.style_pars                 = {}
+        self.G = None
         
-        self.time_id                    = 0
+        self.nw                 = None
+        self.nw_nodes           = None
+        self.nw_data_times      = None
+        self.nw_data_capacities = None
+        
+        self.annotation_info_nw     = None
+        self.annotation_info_iren   = None
+        
+        self.show_colorbar              = True
+        self.show_annotations           = False        
+        self.show_nodes_st_labels       = True
+        self.show_data_layer_time       = False
+        self.show_data_layer_capacity   = False
+        self.show_nodes_non_st_labels   = False
+              
+        self.arrayOf_f_e_minus  = None
+        self.arrayOf_Queues     = None
+        
+        self.interactor = None
+        
+        self.style_pars = {}
+        self.time_id = 0
         
         self._initialize()
   
@@ -87,20 +102,18 @@ class Visualization:
         
         # Set VTK Elements according to the visualization type
         
-        if (self.TYPE == 'geometry'):
-
-            vstyle_gm.setScene(self.G,self.renderer,self.pars)
-        
         if (self.TYPE in ['network']):
             
-            self.getSimulationData()
-            self.nw = vstyle_nw.setScene(self.G,self.renderer,self.pars,self.style_pars)
-  
-        if (self.TYPE in ['interactor']):
-        
             self.setInteractorAnnotation()
             self.getSimulationData()
-            self.nw = vstyle_iren.setScene(self.G,self.renderer,self.pars,self.style_pars)      
+            vtkElements = vstyle_nw.scene_setup(self.G,self.renderer,self.pars,self.style_pars)
+  
+            self.nw = vtkElements['nw']
+            self.nw_data_times = vtkElements['nw_data_times']
+            self.nw_data_capacities = vtkElements['nw_data_capacities']
+            self.nw_nodes= vtkElements['nw_nodes']
+            self.annotation_info_nw = vtkElements['annotation_info_nw']
+            self.annotation_info_iren = vtkElements['annotation_info_iren']            
             
     def setInteractorAnnotation(self):
         
@@ -120,17 +133,9 @@ class Visualization:
 
     def setInteractorStyle(self,renderWindowInteractor):
         
-        if (self.TYPE in ['geometry']):
-             
-            renderWindowInteractor.SetInteractorStyle(vtk.vtkInteractorStyleRubberBand3D())
-        
         if (self.TYPE in ['network']):
         
-            renderWindowInteractor.SetInteractorStyle(vtk.vtkInteractorStyleImage())
-        
-        if (self.TYPE in ['interactor']):
-
-            renderWindowInteractor.SetInteractorStyle(interactors.CustomInteractorStyle())
+            renderWindowInteractor.SetInteractorStyle(interactor.CustomInteractorStyle())
         
     def getSimulationData(self):
            
@@ -152,23 +157,12 @@ class Visualization:
     def update(self,time_id):
 
         if (self.TYPE in ['network']):
-            
-            print self.G.nodes()
-            
-            vstyle_nw.update(time_id,self.G,self.nw,self.arrayOf_f_e_minus,self.arrayOf_z_e,self.pars,self.globalNumberOfTimeSteps)
-
-            self.nw.vtkPolyData.Modified()
-            self.nw.vtkQPolyData.Modified()
-            self.nw.vtkQBoxesPolyData.Modified()
-
-        if (self.TYPE in ['interactor']):
              
-            vstyle_iren.update(time_id,self.G,self.nw,self.arrayOf_f_e_minus,self.arrayOf_z_e,self.pars,self.globalNumberOfTimeSteps)
+            vstyle_nw.update(time_id,self.G,self.nw,self.arrayOf_f_e_minus,self.arrayOf_z_e,self.pars,self.globalNumberOfTimeSteps)
  
             self.nw.vtkPolyData.Modified()
             self.nw.vtkQPolyData.Modified()
             self.nw.vtkQBoxesPolyData.Modified()
-  
   
 class PlotDialog(QtGui.QDialog):
     
@@ -203,12 +197,12 @@ class PlotDialog(QtGui.QDialog):
         
         if (bool(edge_dict)):
             
+            edge_capacity    = edge_dict['capacity']
+            
             max_fe_1 = max(edge_dict['f_e_plus_overtime'] )
             max_fe_2 = max(edge_dict['f_e_minus_overtime'] )
-            y_lim = 1.05*max(max_fe_1,max_fe_2)
-            
-            
-            edge_capacity    = edge_dict['capacity']
+            max_fe_3 = edge_capacity 
+            y_lim = 1.05*max(max_fe_1,max_fe_2,max_fe_3)
             
             # z_e_overtime arrays
  
@@ -216,7 +210,9 @@ class PlotDialog(QtGui.QDialog):
             x_data = edge_dict['switching_times']
             y_data = edge_dict['z_e_overtime']
             ax.plot(x_data,y_data,'b')
-            ax.plot([time,time],[0,1.05*max(y_data)],'r',linewidth="2")
+            
+            ax.axvline(x=time,color='r')
+            #ax.plot([time,time],[0,1.05*max(y_data)],'r',linewidth="2")
             ax.set_title('z_e overtime')
             
             # f_e_plus_overtime
@@ -269,7 +265,9 @@ class PlotDialog(QtGui.QDialog):
             
         else:
             
-            print '[MSG] No edge selected'        
+            print '[MSG] No edge selected'
+            QtGui.QMessageBox.critical(self,"Error" ,"No edge selected")
+            
         
         #gc.collect()
 
@@ -289,7 +287,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle('FlowsInNetworks')
  
         # GUI elements for animation
-        
+                
         self.timer                              = 0
         self.time_step                          = viz.time_step
         self.animation                          = False
@@ -305,25 +303,33 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.slider_11.setRange(0,viz.globalNumberOfTimeSteps)
         QtCore.QObject.connect(self.ui.slider_11,QtCore.SIGNAL('valueChanged(int)'),self.updateFromSlider)
     
-        QtCore.QObject.connect(self.ui.btn_play,QtCore.SIGNAL('clicked()'),self.playAnimation)
-        QtCore.QObject.connect(self.ui.btn_pause,QtCore.SIGNAL('clicked()'),self.pauseAnimation)
-        QtCore.QObject.connect(self.ui.btn_stop,QtCore.SIGNAL('clicked()'),self.stopAnimation)
-        QtCore.QObject.connect(self.ui.btn_first,QtCore.SIGNAL('clicked()'),self.firstAnimation)
-        QtCore.QObject.connect(self.ui.btn_last,QtCore.SIGNAL('clicked()'),self.lastAnimation)
-        QtCore.QObject.connect(self.ui.btn_forward,QtCore.SIGNAL('clicked()'),self.forwardAnimation)
-        QtCore.QObject.connect(self.ui.btn_back,QtCore.SIGNAL('clicked()'),self.backwardAnimation)
-        QtCore.QObject.connect(self.ui.btn_repeat,QtCore.SIGNAL('clicked()'),self.repeatAnimation)
+        QtCore.QObject.connect(self.ui.actionPlay,QtCore.SIGNAL('triggered()'),self.playAnimation)
+        QtCore.QObject.connect(self.ui.actionPause,QtCore.SIGNAL('triggered()'),self.pauseAnimation)
+        QtCore.QObject.connect(self.ui.actionStop,QtCore.SIGNAL('triggered()'),self.stopAnimation)
+        QtCore.QObject.connect(self.ui.actionFirst,QtCore.SIGNAL('triggered()'),self.firstAnimation)
+        QtCore.QObject.connect(self.ui.actionLast,QtCore.SIGNAL('triggered()'),self.lastAnimation)
+        QtCore.QObject.connect(self.ui.actionForward,QtCore.SIGNAL('triggered()'),self.forwardAnimation)
+        QtCore.QObject.connect(self.ui.actionBack,QtCore.SIGNAL('triggered()'),self.backwardAnimation)
+        QtCore.QObject.connect(self.ui.actionRepeat,QtCore.SIGNAL('triggered()'),self.repeatAnimation)
 
-        #QtCore.QObject.connect(self.ui.btn_plot,QtCore.SIGNAL('clicked()'),self.plotSourceData)
-        QtCore.QObject.connect(self.ui.btn_plot,QtCore.SIGNAL('clicked()'),self.showPlotDialog)
+        QtCore.QObject.connect(self.ui.actionCapacity,QtCore.SIGNAL('triggered()'),self.displayNetworkDataCapacitiesLayer)
+        QtCore.QObject.connect(self.ui.actionStart,QtCore.SIGNAL('triggered()'),self.displayNetworkVisualization)
+        QtCore.QObject.connect(self.ui.actionTime,QtCore.SIGNAL('triggered()'),self.displayNetworkDataTimesLayer)
+        
+        QtCore.QObject.connect(self.ui.actionAnnotations,QtCore.SIGNAL('triggered()'),self.show_hide_annotations)
+        QtCore.QObject.connect(self.ui.actionScalarBar,QtCore.SIGNAL('triggered()'),self.update_show_hide_colorbar)
+        QtCore.QObject.connect(self.ui.actionStLabels,QtCore.SIGNAL('triggered()'),self.show_hide_st_labels)
+        QtCore.QObject.connect(self.ui.actionLabels,QtCore.SIGNAL('triggered()'),self.show_hide_non_st_labels)
+        
+        QtCore.QObject.connect(self.ui.actionPlot,QtCore.SIGNAL('triggered()'),self.showPlotDialog)
 
         ### VTKWidget ###
+        
+        self.viz = viz
 
-        self.viz                                = viz
-
-        self.vl                                 = QtGui.QVBoxLayout()
-        self.ui.vtkFrame_4.setLayout(self.vl)
-        self.vtkWidget                          = QVTKRenderWindowInteractor(self.ui.vtkFrame_4)
+        self.vl = QtGui.QVBoxLayout()
+        self.ui.vtkFrame.setLayout(self.vl)
+        self.vtkWidget = QVTKRenderWindowInteractor(self.ui.vtkFrame)
         self.vl.addWidget(self.vtkWidget)
         self.vtkWidget.GetRenderWindow().AddRenderer(self.viz.renderer)
         
@@ -348,7 +354,7 @@ class MainWindow(QtGui.QMainWindow):
 #         self.writer.SetInputConnection(windowToImageFilter.GetOutputPort())
 #         self.writer.SetFileName("test.avi")        
         
-    def updateVTKWidget(self,time_id):
+    def updateVTKWidget(self, time_id):
         self.viz.update(time_id)
         self.renderWindowInteractor.GetRenderWindow().Render()
         
@@ -436,11 +442,142 @@ class MainWindow(QtGui.QMainWindow):
 
     def showPlotDialog(self):
         
-        if (self.viz.TYPE in ['interactor']):
-
+        if (self.viz.TYPE in ['network']):
+            
             time = self.timer*self.time_step
             self.dialog_plot.update(time)
+
+    def displayNetworkDataTimesLayer(self, update_state=True):
+        
+        self.remove_extra_scene_props()
+        
+        if (update_state):
+            self.viz.show_data_layer_time = not(self.viz.show_data_layer_time)
+        
+        if (self.viz.show_data_layer_time):
             
+            self.viz.show_data_layer_capacity = False
+            
+            self.viz.nw_data_times.vtkActor.GetProperty().SetOpacity(0.75)
+            if (self.viz.show_colorbar):
+                opacity = 1
+            else:
+                opacity = 0
+                
+            self.viz.nw_data_times.vtkColorBarActor.GetProperty().SetOpacity(opacity)
+            self.viz.nw_data_times.vtkColorBarActor.GetTitleTextProperty().SetOpacity(opacity)
+            self.viz.nw_data_times.vtkColorBarActor.GetPositionCoordinate().SetValue(0.92,0.04)
+        
+        self.renderWindowInteractor.GetRenderWindow().Render()
+
+    def displayNetworkDataCapacitiesLayer(self, update_state=True):
+        
+        self.remove_extra_scene_props()
+        
+        if (update_state):
+            self.viz.show_data_layer_capacity = not(self.viz.show_data_layer_capacity)
+        
+        if (self.viz.show_data_layer_capacity):      
+            
+            self.viz.show_data_layer_time = False
+              
+            self.viz.nw_data_capacities.vtkActor.GetProperty().SetOpacity(0.75)
+            if (self.viz.show_colorbar):
+                opacity = 1
+            else:
+                opacity = 0
+                
+            self.viz.nw_data_capacities.vtkColorBarActor.GetProperty().SetOpacity(opacity)
+            self.viz.nw_data_capacities.vtkColorBarActor.GetTitleTextProperty().SetOpacity(opacity)
+            self.viz.nw_data_capacities.vtkColorBarActor.GetPositionCoordinate().SetValue(0.92,0.04)
+        
+        self.renderWindowInteractor.GetRenderWindow().Render()
+        
+    def displayNetworkVisualization(self):
+        
+        self.remove_extra_scene_props()
+        
+        self.viz.show_data_layer_capacity = False
+        self.viz.show_data_layer_time = False
+        
+        if (self.viz.show_colorbar):
+            opacity = 1
+        else:
+            opacity = 0
+            
+        self.viz.nw.vtkColorBarActor.GetProperty().SetOpacity(opacity)
+        self.viz.nw.vtkColorBarActor.GetTitleTextProperty().SetOpacity(opacity)
+        self.viz.nw.vtkColorBarActor.GetPositionCoordinate().SetValue(0.92,0.04)        
+        
+        self.renderWindowInteractor.GetRenderWindow().Render()
+        
+    def remove_extra_scene_props(self):
+        
+        self.viz.nw_data_times.vtkActor.GetProperty().SetOpacity(0)
+        self.viz.nw_data_times.vtkColorBarActor.GetProperty().SetOpacity(0)
+        self.viz.nw_data_times.vtkColorBarActor.GetTitleTextProperty().SetOpacity(0)
+        self.viz.nw_data_times.vtkColorBarActor.GetPositionCoordinate().SetValue(0.0,0.0)
+        
+        self.viz.nw_data_capacities.vtkActor.GetProperty().SetOpacity(0)
+        self.viz.nw_data_capacities.vtkColorBarActor.GetProperty().SetOpacity(0)
+        self.viz.nw_data_capacities.vtkColorBarActor.GetTitleTextProperty().SetOpacity(0)
+        self.viz.nw_data_capacities.vtkColorBarActor.GetPositionCoordinate().SetValue(0.0,0.0)        
+
+        self.viz.nw.vtkColorBarActor.GetProperty().SetOpacity(0)
+        self.viz.nw.vtkColorBarActor.GetTitleTextProperty().SetOpacity(0)
+        self.viz.nw.vtkColorBarActor.GetPositionCoordinate().SetValue(0.0,0.0)        
+        
+    def show_hide_non_st_labels(self):
+            
+        self.viz.show_nodes_non_st_labels = not(self.viz.show_nodes_non_st_labels)
+               
+        if (self.viz.show_nodes_non_st_labels):
+            opacity = 1
+        else:
+            opacity = 0
+
+        self.viz.nw_nodes.vtkActor_non_st_labels.GetMapper().GetLabelTextProperty().SetOpacity(opacity)
+        self.renderWindowInteractor.GetRenderWindow().Render()
+        
+    def show_hide_st_labels(self):
+            
+        self.viz.show_nodes_st_labels = not(self.viz.show_nodes_st_labels)
+               
+        if (self.viz.show_nodes_st_labels):
+            opacity = 1
+        else:
+            opacity = 0
+
+        self.viz.nw_nodes.vtkActor_st_labels.GetMapper().GetLabelTextProperty().SetOpacity(opacity)
+        self.renderWindowInteractor.GetRenderWindow().Render()
+        
+    def show_hide_annotations(self):
+        
+        self.viz.show_annotations = not(self.viz.show_annotations)
+        
+        if (self.viz.show_annotations):
+            opacity = 0
+        else:
+            opacity = 1
+        
+        self.viz.annotation_info_nw.GetTextProperty().SetOpacity(opacity)
+        self.viz.annotation_info_iren.GetTextProperty().SetOpacity(opacity)
+        
+        self.renderWindowInteractor.GetRenderWindow().Render()
+        
+    def update_show_hide_colorbar(self):
+        
+        self.viz.show_colorbar = not(self.viz.show_colorbar)
+        
+        if (self.viz.show_data_layer_time):
+            self.displayNetworkDataTimesLayer(update_state=False)
+
+        elif (self.viz.show_data_layer_capacity):
+            self.displayNetworkDataCapacitiesLayer(update_state=False)
+
+        else:
+            self.displayNetworkVisualization()
+
     def closeEvent(self,event):
 
         f = open(os.path.join('.','temp','data.txt'),"w")

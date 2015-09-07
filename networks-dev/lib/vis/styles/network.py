@@ -1,7 +1,5 @@
-"""
 
-VISUALIZATION STYLE - NETWORK
-
+"""Setup and update functions for 'network' style.
 """
 
 import vtk
@@ -12,79 +10,128 @@ import random
 
 from numpy import *
 
+# import visualization modules
 lib_path = os.path.abspath(os.path.join('..','..','..','lib'))
 sys.path.append(lib_path)
 
-import lib.vis.general as gen
+import lib.vis.util as util
 import lib.vis.VTK.network as VTK
 
-def setScene(G,renderer,pars,style_pars):
+def scene_setup(G, renderer, pars, sim_data_pars):
+    
+    """Set the elements for the visualization style
+    """
+    
+    scene_edges_layers = []
+    scene_edges_interactor_layers = []
+    
+    # Add Background Layer
+    
+    nw_bck = VTK.VtkNetworkBackgroundLayer(G, z_index=0)
+    renderer.AddActor(nw_bck.vtkActor)
+    scene_edges_layers.append(nw_bck)
+    
+    # Add Data Layers
 
-    # STYLE FUNCTION CALLS
-        
-    gen.addInfoAnnotations(G,renderer,pars)
-    gen.setBackgroundStyle(renderer)
+    ## times
+    nw_data_times = VTK.VtkNetworkDataTimesLayer(G, z_index=1)
+    
+    renderer.AddActor(nw_data_times.vtkActor)
+    renderer.AddActor2D(nw_data_times.vtkColorBarActor)
+    
+    nw_data_times.vtkColorBarActor.GetPositionCoordinate().SetValue(-999,-999)
+    nw_data_times.vtkColorBarActor.SetWidth(0.05)
+    nw_data_times.vtkColorBarActor.SetHeight(0.4)
+    
+    scene_edges_layers.append(nw_data_times)
 
-    # PARAMETERS - A PRIORI VALUES
-    
-    NODE_SIZE           = 0.2
-    NODE_OPACITY        = 1.0
-    NODE_LABEL_FONTSIZE = gen.getLabelSize(G)
-    
-    POINTS_SIZE         = 1.2
-    POINTS_OPACITY      = 0.9
-    
-    EDGE_WIDTH          = 1.0
-    
-    # VTK SCENE
-    
-    nw_bck  = VTK.VtkNetworkBck(G,style_pars)
-    renderer.AddActor(nw_bck.vtkActor)    
+    ## capacities
+    nw_data_capacities = VTK.VtkNetworkDataCapacitiesLayer(G, z_index=2)
 
-    nw      = VTK.VtkNetwork(G,style_pars)
-    renderer.AddActor(nw.vtkQActor)
-    renderer.AddActor(nw.vtkQBoxesActor)
+    renderer.AddActor(nw_data_capacities.vtkActor)
+    renderer.AddActor2D(nw_data_capacities.vtkColorBarActor)
+    
+    nw_data_capacities.vtkColorBarActor.GetPositionCoordinate().SetValue(-999,-999)
+    nw_data_capacities.vtkColorBarActor.SetWidth(0.05)
+    nw_data_capacities.vtkColorBarActor.SetHeight(0.4)
+    
+    scene_edges_layers.append(nw_data_capacities)
+    
+    # Add Animation Layer
+
+    nw = VTK.VtkNetworkAnimationLayer(G, sim_data_pars, z_index=3)
+    
     renderer.AddActor(nw.vtkActor)
+    renderer.AddActor(nw.vtkQBoxesActor)
+    renderer.AddActor(nw.vtkQActor)
+    renderer.AddActor2D(nw.vtkColorBarActor)
     
-    # PARAMETERS - CORRECTED VALUES
+    nw.vtkColorBarActor.GetPositionCoordinate().SetValue(0.92,0.04)
+    nw.vtkColorBarActor.SetWidth(0.05)
+    nw.vtkColorBarActor.SetHeight(0.4)    
+    
+    scene_edges_layers.append(nw)
+    
+    # Add Interaction Layer
+    
+    nw_edgesInteractorLayer = VTK.VtkNetworkEdgesInteractorLayer(G, z_index=4)
+    renderer.AddActor(nw_edgesInteractorLayer.vtkActor)
+    scene_edges_interactor_layers.append(nw_edgesInteractorLayer)
+        
+    # ----------
+    
+    # Scale correction for final display
     
     renderer.ResetCamera()
+     
+    camera_position = renderer.GetActiveCamera().GetPosition()
+    zPos = camera_position[2]
+     
+    EDGE_WIDTH = zPos/1000.0
+    NODE_SIZE = 0.9*max(min(1.1*EDGE_WIDTH,0.15),0.15)
     
-    cameraPosition  = renderer.GetActiveCamera().GetPosition()
-    zPos            = cameraPosition[2]
+    for layer in scene_edges_layers:
+        layer.vtkFilter.SetWidth(0.5*EDGE_WIDTH)
     
-    aux = 10**(ceil(log10(cameraPosition[2])))
+    for layer in scene_edges_interactor_layers:
+        layer.vtkFilter.SetWidth(0.75*EDGE_WIDTH)
     
-    EDGE_WIDTH  = 0.7*1.5*zPos/1000.0
-    NODE_SIZE   = 0.9*max(min(1.1*EDGE_WIDTH,0.15),0.15)
-         
-    nw_bck.vtkFilter.SetWidth(EDGE_WIDTH)
-    nw.vtkFilter.SetWidth(EDGE_WIDTH)
-        
-    node_source_label   = pars['NODE_SOURCE_LABEL']
-    node_sink_label     = pars['NODE_SINK_LABEL']
-        
-    vtkNodes = VTK.VtkNodes(G,NODE_SIZE,NODE_OPACITY,NODE_LABEL_FONTSIZE,node_source_label,node_sink_label)
-    vtkNodes.vtkActor.GetProperty().SetLineWidth(1.25)
-    renderer.AddActor(vtkNodes.vtkActor)    
-    renderer.AddActor2D(vtkNodes.vtkActor_labels)
-    renderer.AddActor2D(vtkNodes.vtkActor_st_labels)
-
-    nw.vtkColorBar.GetPositionCoordinate().SetValue(0.92,0.04)
-    nw.vtkColorBar.SetWidth(0.05)
-    nw.vtkColorBar.SetHeight(0.4)
-    
-    renderer.AddActor2D(nw.vtkColorBar)
     renderer.ResetCamera()    
     
+    # -----------
 
-    return nw
+    # Add Nodes Layer
     
-def update(time_id,G,nw,fminus_data,ze_data,pars,globalNumberOfSteps):
+    ## nodes
+    node_source_label = pars['NODE_SOURCE_LABEL'] 
+    node_sink_label = pars['NODE_SINK_LABEL']
+    nw_nodes = VTK.VtkNetworkNodesLayer(G, node_source_label, node_sink_label, NODE_SIZE, z_index=5)
+    renderer.AddActor(nw_nodes.vtkActor)
+    
+    ## labels
+    renderer.AddActor2D(nw_nodes.vtkActor_st_labels)
+    renderer.AddActor2D(nw_nodes.vtkActor_non_st_labels)
+    
+    annotation_info_nw, annotation_info_iren = util.infoAnnotations(G,renderer,pars)
+    
+    vtkElements = {}
+    vtkElements['nw'] = nw
+    vtkElements['nw_data_times'] = nw_data_times
+    vtkElements['nw_data_capacities'] = nw_data_capacities
+    vtkElements['nw_nodes'] = nw_nodes
+    vtkElements['annotation_info_nw'] = annotation_info_nw
+    vtkElements['annotation_info_iren'] = annotation_info_iren
 
-    edges_dict = nw.edges_dict
+    return vtkElements
     
-    time_step               = pars['TIME_STEP']
+def update(time_id, G, nw, fminus_data, ze_data, pars, globalNumberOfSteps):
+    
+    """Animation update procedure for the elements considered in the 'scene_setup' function
+    """
+
+    DYNAMIC_WIDTH = True
+    
+    time_step = pars['TIME_STEP']
       
     globalNumberOfTimeSteps = globalNumberOfSteps
       
@@ -98,14 +145,16 @@ def update(time_id,G,nw,fminus_data,ze_data,pars,globalNumberOfSteps):
          
         while (edge_id < len(edges)):
          
-            key     = edges[edge_id]['edge_key']    
-            time    = edges[edge_id]['time']
-             
-            listOfEdgeCellIDs = edges_dict[(e[0],e[1],edge_id)][0]
+            edge_animation_data = nw.edges_dict[(e[0],e[1],edge_id)]
+         
+            key = edges[edge_id]['edge_key']    
+            time = edges[edge_id]['time']
+            
+            listOfEdgeCellIds = edge_animation_data.edgeCellIds 
+            listOfEdgePointIds = edge_animation_data.edgeCellPointIds
                
             numberOfDivisions = int(floor(time/time_step))
 
-            
             for i in xrange(numberOfDivisions):
 
                 fminus_value = 0.0
@@ -116,42 +165,44 @@ def update(time_id,G,nw,fminus_data,ze_data,pars,globalNumberOfSteps):
                          
                         fminus_value = fminus_data[time_id-i-1,key]
                     
-                cell_id = listOfEdgeCellIDs[i]
-                nw.setCellColorByID(cell_id,fminus_value)
+                cell_id = listOfEdgeCellIds[i]
+                nw.setCellColorById(cell_id, fminus_value)
+            
+                if (DYNAMIC_WIDTH):
+             
+                    for pointId in listOfEdgePointIds[i]:
+                         
+                        nw.setPointWidthById(pointId, fminus_value)
             
             # queue update
             
-            queue_value     = ze_data[time_id,key]        
+            queue_value = ze_data[time_id,key]        
             
-            qPointsIDs   = edges_dict[(e[0],e[1],edge_id)][2]
-            qPoints      = edges_dict[(e[0],e[1],edge_id)][3]
-            q_max_h      = edges_dict[(e[0],e[1],edge_id)][4]
-            q_u          = edges_dict[(e[0],e[1],edge_id)][5]
-            q_max_qvalue = edges_dict[(e[0],e[1],edge_id)][6]
-            qBoxID       = edges_dict[(e[0],e[1],edge_id)][7]
-            qID          = edges_dict[(e[0],e[1],edge_id)][8]
+            qPointsIDs = edge_animation_data.queuePointIds
+            qPoints = edge_animation_data.queueRefPoints
+            q_max_h = edge_animation_data.queueMaxHeight
+            q_u = edge_animation_data.queueRefDirection
+            q_max_qvalue = edge_animation_data.queueMaxQValue
+            qBoxID = edge_animation_data.queueBoxCellId
+            qID = edge_animation_data.queueCellId
 
-            
             if (queue_value > 0 and q_max_qvalue > 0):
                 
-                h = max( q_max_h*(queue_value/q_max_qvalue) , 1E-5 )
+                h = max(q_max_h*(queue_value/q_max_qvalue), 1E-5)
                 
                 newPoint = qPoints[0] + q_u*h
                     
-                nw.vtkQPoints.SetPoint(qPointsIDs[1],newPoint)
+                nw.vtkQPoints.SetPoint(qPointsIDs[1], newPoint)
                 
             else:
                 
                 newPoint = qPoints[0] + q_u*0.001
-                
-                nw.vtkQPoints.SetPoint(qPointsIDs[1],newPoint)
+                nw.vtkQPoints.SetPoint(qPointsIDs[1], newPoint)
             
-            nw.setQBoxCellColorByID(qBoxID,queue_value)
-            nw.setQCellColorByID(qID,queue_value)
+            nw.setQBoxCellColorById(qBoxID, queue_value)
+            nw.setQCellColorById(qID, queue_value)
             
             edge_id = edge_id + 1
-
-            
         
     return None
 

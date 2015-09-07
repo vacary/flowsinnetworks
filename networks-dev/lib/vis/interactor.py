@@ -3,7 +3,7 @@ import sys, os
 import vtk
 import json
 
-class CustomInteractorStyle(vtk.vtkInteractorStyleRubberBand3D):#(vtk.vtkInteractorStyleImage):
+class CustomInteractorStyle(vtk.vtkInteractorStyleImage):
     
     def __init__(self):
         
@@ -72,7 +72,7 @@ class CustomInteractorStyle(vtk.vtkInteractorStyleRubberBand3D):#(vtk.vtkInterac
                     f.close()
                      
                 except:
-                    print (sys.exc_info())
+                    #print (sys.exc_info())
                     pass
              
             else:
@@ -84,10 +84,21 @@ class CustomInteractorStyle(vtk.vtkInteractorStyleRubberBand3D):#(vtk.vtkInterac
                     f.close()
                      
                 except:
-                    print (sys.exc_info())
+                    #print (sys.exc_info())
                     pass
         
+        else:
 
+            try:
+                    
+                f = open(os.path.join('.','temp','data.txt'),"w")
+                f.write(json.dumps({}))
+                f.close()
+                 
+            except:
+                #print (sys.exc_info())
+                pass
+            
         self.OnLeftButtonDown()
         return
     

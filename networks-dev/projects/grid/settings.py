@@ -13,7 +13,7 @@ from numpy import *
 # Parameters 
 
 NETWORK_NAME = "grid"
-TYPE = "interactor" 
+TYPE = "network" 
 
 TIME_OF_EVENT = [0.0,70.0]
 INPUT_FLOW = [200.0]

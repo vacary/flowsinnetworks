@@ -82,17 +82,17 @@ def get_graphFromGMLFile(network_gml_file_path):
         f_e_plus_overtime   = ''
         
         try:
-            edge_key        = data['edge_key']
+            edge_key = data['edge_key']
         except:
             pass
         
         try:
-            geometry        = data['geometry']
+            geometry = data['geometry']
         except:
             pass
         
         try:
-            geometry_keys   = data['geometry_keys']
+            geometry_keys = data['geometry_keys']
         except:
             pass
         

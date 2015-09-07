@@ -31,16 +31,16 @@ lib_path = os.path.abspath(os.path.join('..','..','..','lib'))
 sys.path.append(lib_path)
 
 import lib.vis.util as util
-import lib.vis.colormaps as cmap
+import lib.vis.VTK.rsc.colormaps as cmap
 
 # INTERACTOR LAYER
  
-class VtkNetworkEdgesInteractorLayer:
+class VtkNetworkInteractorLayer:
      
     """Class defined to build a vtkActor to get the simulation data by edge using a VTK interactor
     """
      
-    def __init__(self, G, z_index=5):
+    def __init__(self, G, z_index=1):
  
         # Main layer attributes 
         self.vtkPoints = vtk.vtkPoints()
@@ -61,12 +61,19 @@ class VtkNetworkEdgesInteractorLayer:
         # Network data is processed using the information for each edge.
          
         # Process graph data and set the vtkCells for each edge 
+                 
+        edges_id_log = {} 
          
-        for edge in list(G.edges(keys=True)):
+        for edge in G.edges_iter():
+             
+            if edge not in edges_id_log:
+                edges_id_log[edge] = 0
+            else:
+                edges_id_log[edge] = edges_id_log[edge] + 1
              
             edge_tail   = G.node[edge[0]]
             edge_head   = G.node[edge[1]]
-            edge_id     = edge[2]
+            edge_id     = edges_id_log[edge]
              
             # Available access to graph attributes with the format: 
             # G.edge[edge[0]][edge[1]][edge_id]['attr']
@@ -191,7 +198,7 @@ class EdgeAnimationData:
         self.queueBoxCellId = None
         self.queueCellId = None
     
-class VtkNetworkAnimationLayer:
+class AnimationLayer:
     
     """Class to set the animation actor
 
@@ -201,7 +208,7 @@ class VtkNetworkAnimationLayer:
     edge travel time.
     """
 
-    def __init__(self, G, sim_data_pars, z_index=1):
+    def __init__(self, G, sim_data_pars, z_index=0.5):
         
         # VTK Elements 
         
@@ -247,32 +254,20 @@ class VtkNetworkAnimationLayer:
         
         self.edges_dict = {} # dictionary to store point ids and cell ids associated to each edge
         
-        self.edges_max_capacity = 0
-        self.edges_max_width = 1.0
-        self.edges_max_f_e_minus = 0.0
+        self.edges_max_capacity = 1
+        self.edges_max_width = 1
 
         self.edges_queues_qratio = 0.22 # qbox distance from reference point
         self.edges_queues_widthFactor = 0.075*0.5 # qbox width
         self.edges_queues_distanceFactor = 0.0 # qbox distance from edge
         self.edges_queues_h = 1.25*self.edges_queues_widthFactor # qbox height
-         
-        self.lut = vtk.vtkLookupTable()
-        self.vtkColorBarActor = vtk.vtkScalarBarActor()
         
+        self.vtkColorBar = vtk.vtkScalarBarActor()
+        self.lut = vtk.vtkLookupTable()
+       
         self._initialize(G, sim_data_pars, z_index)
     
     def _initialize(self, G, sim_data_pars, z_index):
-
-        # Set max capacity 
-                
-        for edge in list(G.edges(keys=True)):
-            
-            capacity = G.edge[edge[0]][edge[1]][edge[2]]['capacity']
-            self.edges_max_capacity = max(self.edges_max_capacity, capacity)
-
-        # Set max flow rate
-        
-        self.edges_max_f_e_minus = sim_data_pars['max_f_e_minus']
 
         # Data array setup
         
@@ -289,11 +284,18 @@ class VtkNetworkAnimationLayer:
         # Network data process
         # The network data is processed using the information of each edge
         
-        for edge in list(G.edges(keys=True)):
-             
-            edge_tail   = G.node[edge[0]]
-            edge_head   = G.node[edge[1]]
-            edge_id     = edge[2]
+        edges_id_log = {} # to recognize multiple edges that connects a pair of nodes 
+        
+        for edge in G.edges_iter():
+            
+            if (edge not in edges_id_log):
+                edges_id_log[edge] = 0
+            else:
+                edges_id_log[edge] = edges_id_log[edge] + 1 
+            
+            edge_tail = G.node[edge[0]]
+            edge_head = G.node[edge[1]]
+            edge_id = edges_id_log[edge]
             
             # Available access to edge attributes using the format: 
             # G.edge[edge[0]][edge[1]][edge_id]['attr']
@@ -306,11 +308,13 @@ class VtkNetworkAnimationLayer:
             edge_geometry = util.get_points_from_string_list(current_edge['geometry']) 
             
             # list of references to recognize time divisions for each edge
-            edge_keys = util.get_int_array_from_string_list(current_edge['geometry_keys'])
+            edge_keys = util.get_int_array_from_string_list(current_edge['geometry_keys']) 
+            
+            # update edges max capacity
+            edge_capacity = current_edge['capacity']
+            self.edges_max_capacity = max(self.edges_max_capacity, edge_capacity) 
             
             # Use VTK cells to store the edge information and setup queues geometry and topology
-            
-            edge_capacity = current_edge['capacity'] 
             
             edge_cells_pointIds = self.set_edge_vtk_cells(edge_geometry, edge_keys, z_index)
             self.set_edge_vtk_cells_radius_data(edge_cells_pointIds, edge_capacity)
@@ -389,40 +393,8 @@ class VtkNetworkAnimationLayer:
         
         self.vtkQActor.SetMapper(self.vtkQMapper)
         
-        # ScalarBar
+        print self.vtkPoints.GetNumberOfPoints()
         
-        max_color = 1.0
-        min_color = 0.55
-        
-        numberOfTuples = 20
-        self.lut.SetNumberOfTableValues(numberOfTuples)
-        
-        delta_color = (max_color - min_color)/(1.0*numberOfTuples)
-        
-        for i in xrange(numberOfTuples+1):
-            color = (0,0,min_color + i*delta_color,1)
-            self.lut.SetTableValue(i,color[0],color[1],color[2],color[3])
-            
-        self.vtkMapper.SetScalarRange(0,self.edges_max_f_e_minus)
-        self.vtkMapper.SetLookupTable(self.lut)
-
-        self.vtkColorBarActor.SetLookupTable(self.vtkMapper.GetLookupTable())
-        self.vtkColorBarActor.SetTitle("Flow rate")
-        self.vtkColorBarActor.SetMaximumWidthInPixels(80)
-        self.vtkColorBarActor.SetMaximumHeightInPixels(500)
-        self.vtkColorBarActor.SetOrientationToVertical()
-        self.vtkColorBarActor.GetTitleTextProperty().SetFontSize(100)
-        self.vtkColorBarActor.GetTitleTextProperty().SetLineOffset(25)
-        self.vtkColorBarActor.SetLabelFormat('%.1f')
-        self.vtkColorBarActor.SetNumberOfLabels(5)
-        self.vtkColorBarActor.UseOpacityOn()
-
-        self.vtkColorBarActor.GetProperty().SetOpacity(1)
-        self.vtkColorBarActor.GetTitleTextProperty().SetOpacity(1)
-
-        self.vtkColorBarActor.SetLookupTable(self.lut)
-        
-
     def set_edge_vtk_cells(self, edge_geometry, edge_keys, z_index):
         
         """ From the edge geometry (list of points for the edge) creates a set of
@@ -462,7 +434,7 @@ class VtkNetworkAnimationLayer:
             self.vtkCells.InsertNextCell(polyline)
 
             # Add the color tuple for the cell
-            color = [int(255*random.random()),int(255*random.random()),int(255*random.random()),int(255*0)]
+            color = [int(255*random.random()),int(255*random.random()),int(255*random.random()),int(255*1)]
             self.vtkColors.InsertNextTupleValue(color)
             
             # Save animation data
@@ -487,7 +459,10 @@ class VtkNetworkAnimationLayer:
             
             self.vtkRadiusFactors.InsertNextValue(0.0) # increase number of components
             
-            defaultWidth_multiplier = edge_capacity/self.edges_max_capacity # temporal factor  
+            defaultWidth_multiplier = edge_capacity/self.edges_max_capacity
+            
+            if (defaultWidth_multiplier > 1):
+                print defaultWidth_multiplier
             
             self.vtkRadiusFactors.SetTuple1(pointId, defaultWidth_multiplier) # assign radius factor to point
         
@@ -553,7 +528,7 @@ class VtkNetworkAnimationLayer:
     
         ### add color associated to this cell
         
-        color = [int(255*0),int(255*1),int(255*0),int(255)]
+        color = [int(255*0.0),int(255*0.8),int(255*0.0),255]
         self.vtkQBoxesCellsColors.InsertNextTupleValue(color)
 
         # Queue
@@ -578,7 +553,7 @@ class VtkNetworkAnimationLayer:
         
         ### add color associated to this cell
         
-        color = [int(255*0.25),int(255*0.25),int(255*0.25),int(255*0)]
+        color = [int(255*(random.random())),int(255*(random.random())),int(255*(random.random())),255]
         self.vtkQCellsColors.InsertNextTupleValue(color)
         
         # Animation data
@@ -604,12 +579,9 @@ class VtkNetworkAnimationLayer:
 
     def setCellColorById(self, cell_id, flow_value):
         
+        color = [0,0,0]
         color = [0,0,1]
-        
-        self.lut.GetColor(flow_value,color)
-        
-        ref_value = flow_value/self.edges_max_f_e_minus
-        
+        #self.lut.GetColor(flow_value,color)
         if (flow_value < 1E-8):
             alpha = int(255*0)
             color_tuple = [int(1*255),int(0*255),int(0*255),alpha]
@@ -651,15 +623,17 @@ class VtkNetworkAnimationLayer:
         self.vtkQPolyData.GetCellData().GetArray('QColors').SetTuple(cell_id, color_tuple)
 
 
-# STATIC LAYER
+# BACKGROUND LAYER
 
-class VtkNetworkStaticLayer:
+class BackgroundLayer:
     
-    """ Superclass. This layer displays the edges of the network with different
+    """Class defined for the background layer.
+     
+    Static layer. This layer displays the edges of the network with different
     widths according to the capacity of each edge.
     """    
     
-    def __init__(self, G, z_index=0):
+    def __init__(self, G, z_index=0.0):
         
         # main VTK elements 
         
@@ -673,45 +647,33 @@ class VtkNetworkStaticLayer:
         # Data arrays
         
         self.vtkRadiusFactors = vtk.vtkDoubleArray()
-        self.vtkColors = vtk.vtkUnsignedCharArray()
-                
+        
         # Others
         
-        self.edge_to_cell_dict ={}
-        self.edges_max_capacity = 0.0 # to set the width of the edges according to the network capacities 
+        self.edges_max_capacity = 1.0 # to set the width of the edges according to the network capacities 
         self.edges_max_width = 1.0
-        self.edges_max_time = 0.0
         
         # initialize
         
         self._initialize(G, z_index)
         
     def _initialize(self, G, z_index):
-
-        # Set max capacity and time
-                
-        for edge in list(G.edges(keys=True)):
-            
-            capacity = G.edge[edge[0]][edge[1]][edge[2]]['capacity']
-            time = G.edge[edge[0]][edge[1]][edge[2]]['time']
-            
-            self.edges_max_capacity = max(self.edges_max_capacity, capacity)
-            self.edges_max_time = max(self.edges_max_time, time)
-
-        # Data array setup
-        
-        self.vtkRadiusFactors.SetName('Radius')
-        self.vtkColors.SetName('Colors')
-        self.vtkColors.SetNumberOfComponents(4)
                                             
         # Network data process
         # The network data is processed using the information of each edge
         
-        for edge in list(G.edges(keys=True)):
-             
-            edge_tail   = G.node[edge[0]]
-            edge_head   = G.node[edge[1]]
-            edge_id     = edge[2]
+        edges_id_log = {} # to recognize multiple edges that connects a pair of nodes 
+        
+        for edge in G.edges_iter():
+            
+            if (edge not in edges_id_log):
+                edges_id_log[edge] = 0
+            else:
+                edges_id_log[edge] = edges_id_log[edge] + 1 
+            
+            edge_tail = G.node[edge[0]]
+            edge_head = G.node[edge[1]]
+            edge_id = edges_id_log[edge]
             
             # Available access to edge attributes using the format: 
             # G.edge[edge[0]][edge[1]][edge_id]['attr']
@@ -722,27 +684,24 @@ class VtkNetworkStaticLayer:
 
             edge_geometry = util.get_points_from_string_list(current_edge['geometry']) # full list of points for the edge
             edge_capacity = current_edge['capacity']
-            edge_time = current_edge['time']
             
             self.edges_max_capacity = max(self.edges_max_capacity, edge_capacity) # update edges max capacity
-            self.edges_max_time = max(self.edges_max_time, edge_time) # update edges max time
             
             # Use VTK cells to store the edge information
             
             edge_cell_pointIds = self.set_edge_vtk_cells(edge_geometry, z_index)
-            self.set_edge_vtk_cells_radius_and_color_data(edge_cell_pointIds, edge_capacity)
-     
-            # Store cell id
-            
-            self.edge_to_cell_dict[(edge[0],edge[1],edge_id)] = self.vtkCells.GetNumberOfCells() - 1
-     
+            self.set_edge_vtk_cells_radius_data(edge_cell_pointIds, edge_capacity)
+
+        # Data array setup
+        
+        self.vtkRadiusFactors.SetName('Radius')
+        
         # PolyData setup
         
         self.vtkPolyData.SetPoints(self.vtkPoints)
         self.vtkPolyData.SetLines(self.vtkCells)
         self.vtkPolyData.GetPointData().AddArray(self.vtkRadiusFactors)
         self.vtkPolyData.GetPointData().SetActiveScalars('Radius')
-        self.vtkPolyData.GetCellData().AddArray(self.vtkColors)
         
         # Apply RibbonFilter
         
@@ -757,16 +716,14 @@ class VtkNetworkStaticLayer:
         self.vtkFilter.SetVaryWidth(1)
         
         # Mapper setup
-        
+
         self.vtkMapper.SetInputConnection(self.vtkFilter.GetOutputPort())
-        self.vtkMapper.ScalarVisibilityOn()
-        self.vtkMapper.SetScalarModeToUseCellFieldData()
-        self.vtkMapper.SelectColorArray('Colors')
+        self.vtkMapper.ScalarVisibilityOff()
         
-        # Actor
+        # Actor 
         
         self.vtkActor.SetMapper(self.vtkMapper)        
-        #self.vtkActor.GetProperty().SetColor(0.35, 0.35, 0.35)
+        self.vtkActor.GetProperty().SetColor(0.35, 0.35, 0.35)
         self.vtkActor.GetProperty().SetOpacity(1)
         
     def set_edge_vtk_cells(self, edge_geometry, z_index):
@@ -802,7 +759,7 @@ class VtkNetworkStaticLayer:
         
         return cellPointIds
 
-    def set_edge_vtk_cells_radius_and_color_data(self, edge_cell_pointIds, edge_capacity):
+    def set_edge_vtk_cells_radius_data(self, edge_cell_pointIds, edge_capacity):
         
         for pointId in edge_cell_pointIds:
             
@@ -811,146 +768,15 @@ class VtkNetworkStaticLayer:
             default_width_multiplier = edge_capacity/self.edges_max_capacity
             self.vtkRadiusFactors.SetTuple1(pointId, default_width_multiplier) # assign radius factor to point
 
-        color = [int(0.35*255),int(0.35*255),int(0.35*255),int(255)]
-        self.vtkColors.InsertNextTupleValue(color)
-
-    def setCellColorById(self, cell_id, color_tuple):
-        
-        self.vtkPolyData.GetCellData().GetArray('Colors').SetTuple(cell_id, color_tuple)
-
-### BACKGROUND AND DATA LAYERS
-
-class VtkNetworkBackgroundLayer(VtkNetworkStaticLayer):
-    
-    def __init__(self, G, z_index=0):
-        
-        VtkNetworkStaticLayer.__init__(self, G, z_index)
-
-class VtkNetworkDataTimesLayer(VtkNetworkStaticLayer):
-    
-    def __init__(self, G, z_index=3):
-        
-        VtkNetworkStaticLayer.__init__(self, G, z_index)
-        
-        self.lut = vtk.vtkLookupTable()
-        self.vtkColorBarActor = vtk.vtkScalarBarActor()
-        self.set_lut_and_colorbar()
-        self.vtkColorBarActor.GetProperty().SetOpacity(0)
-        self.vtkColorBarActor.GetTitleTextProperty().SetOpacity(0)
-        
-        self.G = G
-        self.displayEdgeTimes()
-        self.vtkActor.GetProperty().SetOpacity(0)
-
-    def set_lut_and_colorbar(self):
-
-        lut_colors = cmap.get_color_map('autumn')
-        lut_colors.reverse()
-        self.lut.SetNumberOfTableValues(len(lut_colors))
-        
-        i = 0
-        for color in lut_colors:
-            self.lut.SetTableValue(i,color[0],color[1],color[2],color[3])
-            i = i + 1
-        
-        self.vtkMapper.SetScalarRange(0,self.edges_max_capacity)
-        self.vtkMapper.SetLookupTable(self.lut)
-
-        self.vtkColorBarActor.SetLookupTable(self.vtkMapper.GetLookupTable())
-        self.vtkColorBarActor.SetTitle("Time    ")
-        self.vtkColorBarActor.SetMaximumWidthInPixels(60)
-        self.vtkColorBarActor.SetMaximumHeightInPixels(500)
-        self.vtkColorBarActor.SetOrientationToVertical()
-        self.vtkColorBarActor.GetTitleTextProperty().SetFontSize(100)
-        self.vtkColorBarActor.GetTitleTextProperty().SetLineOffset(25)
-        self.vtkColorBarActor.SetLabelFormat('%.1f')
-        self.vtkColorBarActor.SetNumberOfLabels(5)
-        self.vtkColorBarActor.UseOpacityOn()
-
-        self.vtkColorBarActor.SetLookupTable(self.lut)
-                        
-    def displayEdgeTimes(self):
-        
-        for edge in list(self.G.edges(keys=True)):
-
-            cell_id = self.edge_to_cell_dict[edge]
-            edge_time = self.G.edge[edge[0]][edge[1]][edge[2]]['time']
-            aux_value = edge_time/self.edges_max_time
-            #color_tuple = [0,int(255*aux_value),0,255]
-            color = [0,0,0]
-            self.lut.GetColor(aux_value, color)
-            color_tuple = [int(255*color[0]),int(255*color[1]),int(255*color[2]),255]
-            
-            self.setCellColorById(cell_id, color_tuple)
-
-class VtkNetworkDataCapacitiesLayer(VtkNetworkStaticLayer):
-    
-    def __init__(self, G, z_index=2):
-        
-        VtkNetworkStaticLayer.__init__(self, G, z_index)
-
-        self.lut = vtk.vtkLookupTable()
-        self.vtkColorBarActor = vtk.vtkScalarBarActor()
-        self.set_lut_and_colorbar()
-        self.vtkColorBarActor.GetProperty().SetOpacity(0)
-        self.vtkColorBarActor.GetTitleTextProperty().SetOpacity(0)    
-        
-        self.G = G
-        self.displayEdgeCapacities()
-        self.vtkActor.GetProperty().SetOpacity(0)
-
-    def set_lut_and_colorbar(self):
-
-        lut_colors = cmap.get_color_map('autumn')
-        #lut_colors.reverse()
-        self.lut.SetNumberOfTableValues(len(lut_colors))
-        
-        i = 0
-        for color in lut_colors:
-            self.lut.SetTableValue(i,color[0],color[1],color[2],color[3])
-            i = i + 1
-        
-        self.vtkMapper.SetScalarRange(0,self.edges_max_capacity)
-        self.vtkMapper.SetLookupTable(self.lut)
-
-        self.vtkColorBarActor.SetLookupTable(self.vtkMapper.GetLookupTable())
-        self.vtkColorBarActor.SetTitle("Capacity")
-        self.vtkColorBarActor.SetMaximumWidthInPixels(80)
-        self.vtkColorBarActor.SetMaximumHeightInPixels(500)
-        self.vtkColorBarActor.SetOrientationToVertical()
-        self.vtkColorBarActor.GetTitleTextProperty().SetFontSize(100)
-        self.vtkColorBarActor.GetTitleTextProperty().SetLineOffset(25)
-        self.vtkColorBarActor.SetLabelFormat('%.1f')
-        self.vtkColorBarActor.SetNumberOfLabels(5)
-        self.vtkColorBarActor.UseOpacityOn()
-
-        self.vtkColorBarActor.SetLookupTable(self.lut)
-
-
-    def displayEdgeCapacities(self):
-
-        for edge in list(self.G.edges(keys=True)):
-
-            cell_id = self.edge_to_cell_dict[edge]
-            edge_capacity = self.G.edge[edge[0]][edge[1]][edge[2]]['capacity']
-            aux_value = edge_capacity/self.edges_max_capacity
-            #color_tuple = [0,int(255*aux_value),0,255]
-
-            color = [0,0,0]
-            self.lut.GetColor(aux_value, color)
-            color_tuple = [int(255*color[0]),int(255*color[1]),int(255*color[2]),255]
-            
-            self.setCellColorById(cell_id, color_tuple)
-
 # NODES        
     
-class VtkNetworkNodesLayer:
+class NodesLayer:
     
     """Class with the vtk elements to display flat polygons as the nodes of the
     current network
     """
     
-    def __init__(self, G, node_source_label, node_sink_label, nodes_size, z_index=5):
+    def __init__(self, G, node_source_label, node_sink_label, nodes_size, z_index=1.0):
         
         # main VTK elements
         
@@ -964,16 +790,6 @@ class VtkNetworkNodesLayer:
         # Data arrays
         
         self.vtkColors = vtk.vtkUnsignedCharArray()
-        
-        # Elements for labels
-
-        self.vtkActor_st_labels = vtk.vtkActor2D() # labels for nodes in {source, sink}
-        self.vtkActor_non_st_labels = vtk.vtkActor2D() # labels for nodes not {source, sink}
-        
-        # Others
-        
-        self.node_source_id = None
-        self.node_sink_id = None
         
         # initialize
         
@@ -1001,12 +817,10 @@ class VtkNetworkNodesLayer:
              
             if (G.node[i]['nlabel'] == node_source_label):
                 
-                self.node_source_id = i
                 color = [255,0,0,255]
                 
             elif (G.node[i]['nlabel'] == node_sink_label):
                 
-                self.node_sink_id = i
                 color = [0,50,255,255]
                 
             else:
@@ -1054,142 +868,4 @@ class VtkNetworkNodesLayer:
         self.vtkActor.GetProperty().SetDiffuse(0.5)
         self.vtkActor.GetProperty().SetOpacity(1)
         
-        self.set_st_labels(G, node_source_label, node_sink_label, z_index)
-        self.set_non_st_labels(G, node_source_label, node_sink_label, z_index)
-        
-    def set_st_labels(self, G, node_source_label, node_sink_label, z_index):
-        
-        # Source and sink nodes labels
-        
-        ### Geometry
-        st_labels_vtkPoints = vtk.vtkPoints()
-        st_labels_vtkPoints.SetNumberOfPoints(2)
-        
-        # // source position 
-        posX = G.node[self.node_source_id]['pos'][0]
-        posY = G.node[self.node_source_id]['pos'][1]
-        posZ = z_index
-        st_labels_vtkPoints.SetPoint(0,[posX,posY,posZ])
-        
-        # // sink position
-        posX = G.node[self.node_sink_id]['pos'][0]
-        posY = G.node[self.node_sink_id]['pos'][1]
-        posZ = z_index
-        st_labels_vtkPoints.SetPoint(1,[posX,posY,posZ])
-        
-        
-        ### Topology
-        st_labels_vtkVerts = vtk.vtkCellArray()
-        st_labels_vtkVerts.InsertNextCell(1)
-        st_labels_vtkVerts.InsertCellPoint(0)
-        st_labels_vtkVerts.InsertNextCell(1)
-        st_labels_vtkVerts.InsertCellPoint(1)
-
-        ### Data Array
-        
-        st_labels = vtk.vtkStringArray() 
-        st_labels.SetNumberOfValues(2)
-        st_labels.SetValue(0,'s')#node_source_label)
-        st_labels.SetValue(1,'t')#node_sink_label)
-        
-        ### PolyData
-        st_labels_vtkPolyData = vtk.vtkPolyData()
-        st_labels_vtkPolyData.SetPoints(st_labels_vtkPoints)
-        st_labels_vtkPolyData.SetVerts(st_labels_vtkVerts)
-        st_labels_vtkPolyData.GetPointData().AddArray(st_labels)
-        
-        ### Mapper
-        st_labels_vtkMapper = vtk.vtkPolyDataMapper()
-        if (vtk.VTK_MAJOR_VERSION <= 5):
-            st_labels_vtkMapper.SetInput(st_labels_vtkPolyData)
-        else:
-            st_labels_vtkMapper.SetInputData(st_labels_vtkPolyData)
-                  
-        ### Labeled Mapper
-        st_labels_vtkLabeledDataMapper = vtk.vtkLabeledDataMapper()
-        st_labels_vtkLabeledDataMapper.SetInputData(st_labels_vtkPolyData)
-        st_labels_vtkLabeledDataMapper.SetLabelModeToLabelFieldData()
-        
-        ### Text Properties
-        tprop = st_labels_vtkLabeledDataMapper.GetLabelTextProperty()
-        tprop.SetColor(1,1,1)
-        tprop.SetOpacity(1)
-        tprop.SetFontSize(12)
-        tprop.SetBold(1)
-        tprop.SetItalic(0)
-        tprop.SetShadow(0)
-        tprop.SetJustificationToCentered()
-        tprop.SetVerticalJustificationToCentered()
-        
-        ### Set actor 
-        self.vtkActor_st_labels.SetMapper(st_labels_vtkLabeledDataMapper)
-        
-    def set_non_st_labels(self, G, node_source_label, node_sink_label, z_index):
-
-        # Non source and sink nodes labels
-
-        if (G.number_of_nodes() <= 2):
-            
-            pass
-        
-        else:
-        
-            ### Geometry, topology and label array
-            
-            non_st_labels_vtkPoints = vtk.vtkPoints()
-            non_st_labels_vtkVerts = vtk.vtkCellArray()
-            
-            non_st_labels = vtk.vtkStringArray()
-            non_st_labels.SetNumberOfValues(G.number_of_nodes()-2)
-            
-            for i in G.nodes_iter():
-                
-                if (G.node[i]['nlabel'] not in [node_source_label,node_sink_label]):
-                    
-                    label = str(G.node[i]['nlabel'])
-                    
-                    posX = G.node[i]['pos'][0]
-                    posY = G.node[i]['pos'][1]
-                    posZ = z_index
-                    
-                    non_st_labels_vtkPoints.InsertNextPoint(posX,posY,posZ)
-                    non_st_labels_vtkVerts.InsertNextCell(1)
-                    
-                    point_id = non_st_labels_vtkPoints.GetNumberOfPoints()-1
-                    non_st_labels_vtkVerts.InsertCellPoint(point_id)
-                    non_st_labels.SetValue(point_id,label)
-
-            ### PolyData
-            non_st_labels_vtkPolyData = vtk.vtkPolyData()
-            non_st_labels_vtkPolyData.SetPoints(non_st_labels_vtkPoints)
-            non_st_labels_vtkPolyData.SetVerts(non_st_labels_vtkVerts)
-            non_st_labels_vtkPolyData.GetPointData().AddArray(non_st_labels)
-            
-            ### Mapper
-            non_st_labels_vtkMapper = vtk.vtkPolyDataMapper()
-            if (vtk.VTK_MAJOR_VERSION <= 5):
-                non_st_labels_vtkMapper.SetInput(non_st_labels_vtkPolyData)
-            else:
-                non_st_labels_vtkMapper.SetInputData(non_st_labels_vtkPolyData)
-                      
-            ### Labeled Mapper
-            non_st_labels_vtkLabeledDataMapper = vtk.vtkLabeledDataMapper()
-            non_st_labels_vtkLabeledDataMapper.SetInputData(non_st_labels_vtkPolyData)
-            non_st_labels_vtkLabeledDataMapper.SetLabelModeToLabelFieldData()
-            
-            ### Text Properties
-            tprop = non_st_labels_vtkLabeledDataMapper.GetLabelTextProperty()
-            tprop.SetColor(1,1,1)
-            tprop.SetOpacity(0)
-            tprop.SetFontSize(12)
-            tprop.SetBold(1)
-            tprop.SetItalic(0)
-            tprop.SetShadow(0)
-            tprop.SetJustificationToCentered()
-            tprop.SetVerticalJustificationToCentered()
-            
-            ### Set actor 
-            self.vtkActor_non_st_labels.SetMapper(non_st_labels_vtkLabeledDataMapper)                    
-            
-            
         

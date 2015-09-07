@@ -13,12 +13,12 @@ from numpy import *
 # Parameters 
 
 NETWORK_NAME = "Larre"
-TYPE = "interactor"
+TYPE = "network"
 
 TIME_OF_EVENT = [0.0,40.0]
 INPUT_FLOW = [4.0] 
 
-TIME_STEP = 0.05
+TIME_STEP = 0.1
 T_MAX_VIS = 20.0
 FPS = 24 
 
