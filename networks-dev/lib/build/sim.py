@@ -30,7 +30,12 @@ def graphFilter(G,node_source,node_sink):
         H.node[n]['label_thin_flow_overtime'] = str(G.node[n]['label_thin_flow_overtime'])
         H.node[n]['label_overtime'] = str(G.node[n]['label_overtime'])
         H.node[n]['nlabel'] = str(n)
-
+        
+        try:
+            H.node[n]['pos'] = str(G.node[n]['pos'])
+        except:
+            H.node[n]['pos'] = '' 
+            
     # edges data
         
     for u,v,data in G.edges_iter(data=True):
@@ -42,8 +47,18 @@ def graphFilter(G,node_source,node_sink):
         z_e_time    = str(data['z_e_overtime'])
         f_e_plus    = str(data['f_e_plus_overtime'])
         f_e_minus   = str(data['f_e_minus_overtime'])
+        
+        try: 
+            geometry = str(data['geometry'])
+        except:
+            geometry = '[]'
+        
+        try:
+            name = str(data['name'])
+        except:
+            name = '[]'
                 
-        H.add_edge(u,v, time = time, capacity = capacity, switching_times = sw_time, z_e_overtime = z_e_time, f_e_plus_overtime = f_e_plus, f_e_minus_overtime = f_e_minus)
+        H.add_edge(u,v, time = time, capacity = capacity, switching_times = sw_time, z_e_overtime = z_e_time, f_e_plus_overtime = f_e_plus, f_e_minus_overtime = f_e_minus, geometry=geometry, name=name)
 
     return H
 
@@ -112,11 +127,11 @@ if __name__ == "__main__":
                     
                     print "Running simulation ... [This might take several minutes]"
                     
-                    sys.stdout = open(os.devnull,"w") # to avoid print
+                    #sys.stdout = open(os.devnull,"w") # to avoid print
                     
                     ftest.general_test_dev(G,node_source,node_sink,TIME_OF_EVENT,INPUT_FLOW,network_gml_file_path) # add simulation data to graph
                     
-                    sys.stdout = sys.__stdout__
+                    #sys.stdout = sys.__stdout__
 
                     ###################
                     

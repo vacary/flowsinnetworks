@@ -116,7 +116,12 @@ def get_graphFromGMLFile(network_gml_file_path):
         except:
             pass
         
-        G.add_edge(u,v,edge_key=edge_key,time=time,capacity=capacity,geometry=geometry,geometry_keys=geometry_keys,switching_times=switching_times,z_e_overtime=z_e_overtime,f_e_minus_overtime=f_e_minus_overtime,f_e_plus_overtime=f_e_plus_overtime)
+        try: 
+            name = data['name']
+        except:
+            pass
+        
+        G.add_edge(u,v,edge_key=edge_key,time=time,capacity=capacity,geometry=geometry,geometry_keys=geometry_keys,switching_times=switching_times,z_e_overtime=z_e_overtime,f_e_minus_overtime=f_e_minus_overtime,f_e_plus_overtime=f_e_plus_overtime,name=name)
         
     return G
 

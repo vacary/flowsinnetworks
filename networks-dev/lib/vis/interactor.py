@@ -62,6 +62,8 @@ class CustomInteractorStyle(vtk.vtkInteractorStyleImage):
                     
                     if (interactorAnnotation != None):
                         msg = 'Selected edge : %s' %(aux_dict['selected_edge'])
+                        if (aux_dict['name'] not in {'',' '}):
+                            msg = 'Selected :'+aux_dict['name']
                         interactorAnnotation.SetInput(msg)
                         interactorAnnotation.SetPosition(clickPos[0],clickPos[1])
                         interactorAnnotation.GetProperty().SetOpacity(1)

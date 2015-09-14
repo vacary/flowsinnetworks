@@ -255,7 +255,12 @@ class PlotDialog(QtGui.QDialog):
             ax.plot([0,max(x_data)],[edge_capacity,edge_capacity],'g')
             ax.set_title('f_e_minus_overtime')
   
-            self.fig.suptitle("Simulation results for edge "+str(edge_dict['selected_edge']))
+            title = "Simulation results for edge "+str(edge_dict['selected_edge'])
+            
+            if (edge_dict['name'] != ''):
+                title = title +" -"+str(edge_dict['name'])
+  
+            self.fig.suptitle(title)
                         
             self.fig.subplots_adjust(bottom=0.1,left=0.1,right=0.9,top=0.90,hspace=0.3)   
         

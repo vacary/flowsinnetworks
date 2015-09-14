@@ -165,7 +165,12 @@ class VtkNetworkEdgesInteractorLayer:
         aux_dict['z_e_overtime']            = z_e_overtime
         aux_dict['time']                    = G.edge[ntail_id][nhead_id][edge_id]['time']
         aux_dict['capacity']                = G.edge[ntail_id][nhead_id][edge_id]['capacity']
-         
+        
+        try:
+            aux_dict['name'] = G.edge[ntail_id][nhead_id][edge_id]['name']
+        except:
+            aux_dict['name'] = ''
+            
         data = json.dumps(aux_dict)
          
         j = self.vtkCells.GetNumberOfCells() - 1
