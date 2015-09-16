@@ -55,6 +55,8 @@ class VtkNetworkEdgesInteractorLayer:
         self.vtkData.SetName('CellData')
      
         self._initialize(G, z_index)
+        
+        self.vtkMapper.ImmediateModeRenderingOff()
      
     def _initialize(self, G, z_index):
          
@@ -265,6 +267,10 @@ class VtkNetworkAnimationLayer:
         self.vtkColorBarActor = vtk.vtkScalarBarActor()
         
         self._initialize(G, sim_data_pars, z_index)
+    
+        self.vtkMapper.ImmediateModeRenderingOff()
+        self.vtkQBoxesMapper.ImmediateModeRenderingOff()
+        self.vtkQMapper.ImmediateModeRenderingOff()
     
     def _initialize(self, G, sim_data_pars, z_index):
 
@@ -691,6 +697,8 @@ class VtkNetworkStaticLayer:
         
         self._initialize(G, z_index)
         
+        self.vtkMapper.ImmediateModeRenderingOff()
+        
     def _initialize(self, G, z_index):
 
         # Set max capacity and time
@@ -983,7 +991,9 @@ class VtkNetworkNodesLayer:
         # initialize
         
         self._initialize(G, node_source_label, node_sink_label, nodes_size, z_index)
-        
+
+        self.vtkMapper.ImmediateModeRenderingOff()
+    
     def _initialize(self, G, node_source_label, node_sink_label, nodes_size, z_index):
         
         # Data array setup
@@ -1181,11 +1191,12 @@ class VtkNetworkNodesLayer:
             non_st_labels_vtkLabeledDataMapper = vtk.vtkLabeledDataMapper()
             non_st_labels_vtkLabeledDataMapper.SetInputData(non_st_labels_vtkPolyData)
             non_st_labels_vtkLabeledDataMapper.SetLabelModeToLabelFieldData()
+            #non_st_labels_vtkLabeledDataMapper.SetStatic(1)
             
             ### Text Properties
             tprop = non_st_labels_vtkLabeledDataMapper.GetLabelTextProperty()
             tprop.SetColor(1,1,1)
-            tprop.SetOpacity(0)
+            tprop.SetOpacity(1)
             tprop.SetFontSize(12)
             tprop.SetBold(1)
             tprop.SetItalic(0)

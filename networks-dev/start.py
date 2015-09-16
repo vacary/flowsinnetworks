@@ -22,12 +22,10 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import (FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 import matplotlib.pyplot as plt
 from numpy import *
-import time
+import time as tm
 
 import vtk
-output = vtk.vtkFileOutputWindow()
-output.SetFileName("log.txt")
-vtk.vtkOutputWindow().SetInstance(output)
+vtk.vtkOutputWindow().GlobalWarningDisplayOff()
 
 from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor # QT Gui
 
@@ -360,8 +358,12 @@ class MainWindow(QtGui.QMainWindow):
 #         self.writer.SetFileName("test.avi")        
         
     def updateVTKWidget(self, time_id):
+        
+
         self.viz.update(time_id)
         self.renderWindowInteractor.GetRenderWindow().Render()
+
+        #print 1/self.viz.renderer.GetLastRenderTimeInSeconds()
         
     def playAnimation(self):
         self.animation  = True
@@ -526,7 +528,7 @@ class MainWindow(QtGui.QMainWindow):
         self.viz.nw_data_capacities.vtkActor.GetProperty().SetOpacity(0)
         self.viz.nw_data_capacities.vtkColorBarActor.GetProperty().SetOpacity(0)
         self.viz.nw_data_capacities.vtkColorBarActor.GetTitleTextProperty().SetOpacity(0)
-        self.viz.nw_data_capacities.vtkColorBarActor.GetPositionCoordinate().SetValue(0.0,0.0)        
+        self.viz.nw_data_capacities.vtkColorBarActor.GetPositionCoordinate().SetValue(0.0,0.0)
 
         self.viz.nw.vtkColorBarActor.GetProperty().SetOpacity(0)
         self.viz.nw.vtkColorBarActor.GetTitleTextProperty().SetOpacity(0)
@@ -535,13 +537,16 @@ class MainWindow(QtGui.QMainWindow):
     def show_hide_non_st_labels(self):
             
         self.viz.show_nodes_non_st_labels = not(self.viz.show_nodes_non_st_labels)
-               
-        if (self.viz.show_nodes_non_st_labels):
-            opacity = 1
-        else:
-            opacity = 0
 
-        self.viz.nw_nodes.vtkActor_non_st_labels.GetMapper().GetLabelTextProperty().SetOpacity(opacity)
+        renderer = self.viz.renderer
+        actor = self.viz.nw_nodes.vtkActor_non_st_labels
+
+        if (self.viz.show_nodes_non_st_labels):
+            renderer.AddActor2D(actor)
+        else:
+            print 'remove'
+            renderer.RemoveActor(actor)
+
         self.renderWindowInteractor.GetRenderWindow().Render()
         
     def show_hide_st_labels(self):

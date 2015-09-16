@@ -7,6 +7,7 @@ import vtk
 import os, sys
 import networkx as nx
 import random
+import time as tm
 
 from numpy import *
 
@@ -110,7 +111,7 @@ def scene_setup(G, renderer, pars, sim_data_pars):
     
     ## labels
     renderer.AddActor2D(nw_nodes.vtkActor_st_labels)
-    renderer.AddActor2D(nw_nodes.vtkActor_non_st_labels)
+    #renderer.AddActor2D(nw_nodes.vtkActor_non_st_labels)
     
     annotation_info_nw, annotation_info_iren = util.infoAnnotations(G,renderer,pars)
     
@@ -144,63 +145,68 @@ def update(time_id, G, nw, fminus_data, ze_data, pars, globalNumberOfSteps):
         edge_id = 0
          
         while (edge_id < len(edges)):
-         
-            edge_animation_data = nw.edges_dict[(e[0],e[1],edge_id)]
-         
-            key = edges[edge_id]['edge_key']    
-            time = edges[edge_id]['time']
             
-            listOfEdgeCellIds = edge_animation_data.edgeCellIds 
-            listOfEdgePointIds = edge_animation_data.edgeCellPointIds
-               
-            numberOfDivisions = int(floor(time/time_step))
-
-            for i in xrange(numberOfDivisions):
-
-                fminus_value = 0.0
-
-                if (time_id > 0):
-                                     
-                    if (time_id-1 - i >= 0):
-                         
-                        fminus_value = fminus_data[time_id-i-1,key]
+            key = edges[edge_id]['edge_key']
+            
+            max_edge_fminus_value = fminus_data[:,key].max()
+            
+            if (max_edge_fminus_value > 0):
+            
+                edge_animation_data = nw.edges_dict[(e[0],e[1],edge_id)]
                     
-                cell_id = listOfEdgeCellIds[i]
-                nw.setCellColorById(cell_id, fminus_value)
-            
-                if (DYNAMIC_WIDTH):
-             
-                    for pointId in listOfEdgePointIds[i]:
-                         
-                        nw.setPointWidthById(pointId, fminus_value)
-            
-            # queue update
-            
-            queue_value = ze_data[time_id,key]        
-            
-            qPointsIDs = edge_animation_data.queuePointIds
-            qPoints = edge_animation_data.queueRefPoints
-            q_max_h = edge_animation_data.queueMaxHeight
-            q_u = edge_animation_data.queueRefDirection
-            q_max_qvalue = edge_animation_data.queueMaxQValue
-            qBoxID = edge_animation_data.queueBoxCellId
-            qID = edge_animation_data.queueCellId
-
-            if (queue_value > 0 and q_max_qvalue > 0):
+                time = edges[edge_id]['time']
                 
-                h = max(q_max_h*(queue_value/q_max_qvalue), 1E-5)
+                listOfEdgeCellIds = edge_animation_data.edgeCellIds 
+                listOfEdgePointIds = edge_animation_data.edgeCellPointIds
+                   
+                numberOfDivisions = int(floor(time/time_step))
+    
+                for i in xrange(numberOfDivisions):
+    
+                    fminus_value = 0.0
+    
+                    if (time_id > 0):
+                                         
+                        if (time_id-1 - i >= 0):
+                             
+                            fminus_value = fminus_data[time_id-i-1,key]
+                        
+                    cell_id = listOfEdgeCellIds[i]
+                    nw.setCellColorById(cell_id, fminus_value)
                 
-                newPoint = qPoints[0] + q_u*h
+                    if (DYNAMIC_WIDTH):
+                 
+                        for pointId in listOfEdgePointIds[i]:
+                             
+                            nw.setPointWidthById(pointId, fminus_value)
+                
+                # queue update
+                
+                queue_value = ze_data[time_id,key]        
+                
+                qPointsIDs = edge_animation_data.queuePointIds
+                qPoints = edge_animation_data.queueRefPoints
+                q_max_h = edge_animation_data.queueMaxHeight
+                q_u = edge_animation_data.queueRefDirection
+                q_max_qvalue = edge_animation_data.queueMaxQValue
+                qBoxID = edge_animation_data.queueBoxCellId
+                qID = edge_animation_data.queueCellId
+    
+                if (queue_value > 0 and q_max_qvalue > 0):
                     
-                nw.vtkQPoints.SetPoint(qPointsIDs[1], newPoint)
+                    h = max(q_max_h*(queue_value/q_max_qvalue), 1E-5)
+                    
+                    newPoint = qPoints[0] + q_u*h
+                        
+                    nw.vtkQPoints.SetPoint(qPointsIDs[1], newPoint)
+                    
+                else:
+                    
+                    newPoint = qPoints[0] + q_u*0.001
+                    nw.vtkQPoints.SetPoint(qPointsIDs[1], newPoint)
                 
-            else:
-                
-                newPoint = qPoints[0] + q_u*0.001
-                nw.vtkQPoints.SetPoint(qPointsIDs[1], newPoint)
-            
-            nw.setQBoxCellColorById(qBoxID, queue_value)
-            nw.setQCellColorById(qID, queue_value)
+                nw.setQBoxCellColorById(qBoxID, queue_value)
+                nw.setQCellColorById(qID, queue_value)
             
             edge_id = edge_id + 1
         

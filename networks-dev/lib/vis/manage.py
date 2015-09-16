@@ -80,6 +80,7 @@ def get_graphFromGMLFile(network_gml_file_path):
         z_e_overtime        = ''
         f_e_minus_overtime  = ''
         f_e_plus_overtime   = ''
+        name                = ''
         
         try:
             edge_key = data['edge_key']
