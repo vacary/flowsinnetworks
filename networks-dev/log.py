@@ -1,22 +1,20 @@
-'''
+# Standard library imports
+import os
+import sys
 
-Flows In Networks - List of available networks for visualization
-
-'''
-
-import os, sys
-
-print "[ Flows In Networks ] List of available networks for visualization" 
-
-listOfAvailableNetworks = os.walk('./projects').next()[1]
-
-if (len(listOfAvailableNetworks)  == 0):
+if __name__ == "__main__":
     
-    print '[MSG] Empty list'
+    """ Print a list with the available network visualization projects. """
 
-else:
-
-    for network in listOfAvailableNetworks:
-        
-        print '+ '+network
-
+    print '[ Flows In Networks ] List of available network visualization projects' 
+    
+    listOfAvailableNetworks = os.walk('./projects').next()[1]
+    
+    if (len(listOfAvailableNetworks)  == 0):
+    
+        print '[MSG] Empty list'
+    
+    else:
+    
+        for network in listOfAvailableNetworks:
+            print '+ %s' %( network )

@@ -16,9 +16,9 @@ NETWORK_NAME = "tobalaba_min"
 TYPE = "network" 
 
 TIME_OF_EVENT = [0.0,500.0]
-INPUT_FLOW = [5] 
+INPUT_FLOW = [50] 
 
-TIME_STEP = 1
+TIME_STEP = 0.5
 T_MAX_VIS = 100
 FPS = 24 
 

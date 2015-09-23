@@ -1,6 +1,6 @@
 """
 
-Event-driven parsing of a .osm file
+Event-driven parsing for osm files
 
 """
 
@@ -103,7 +103,9 @@ class OsmNetwork:
             # all the edges associated with a way share
             # capacity and name parameters
             capacity = self.get_edge_capacity(event, element)
-            name = self.get_edge_name(event, element)
+            name = unicode(self.get_edge_name(event, element))
+            
+            #name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
             
             # edges associated with a way does not have the same geometry or time
             geometry = []
@@ -114,7 +116,7 @@ class OsmNetwork:
                 #--- node processing ---
                 osm_node_id = elm.attrib['ref']
                 
-                #add node and add position to edge geometry
+                #add position to edge geometry
                 pos_x = self.merc_x(self.osm_nodes[osm_node_id].lon)
                 pos_y = self.merc_y(self.osm_nodes[osm_node_id].lat)
                 pos_z = 0.0
@@ -137,6 +139,7 @@ class OsmNetwork:
                         
                         geometry = [geometry[-1]]
                         edge_tail = edge_head
+                
                 
     def get_edge_time(self, event, element):
         

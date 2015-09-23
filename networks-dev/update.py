@@ -1,105 +1,97 @@
-"""
-
-Call to simulation program
-
-"""
-
-options_list    = ['-b','-s','-l','-data']
-
-import os, sys
-
-def check_empty_entries(arg_lst):
-    
-    valid_entries       = True
-    entry_filename      = arg_lst[0]
-    entry_network_name  = arg_lst[1]
-    entry_update_option = arg_lst[2]
-    
-    if (entry_network_name == ''):
-        valid_entries = False
-        print '[MSG] Required network name'
-    
-    if (entry_update_option == ''):
-        valid_entries = False
-        print '[MSG] Required update option'
-    
-    return valid_entries
+# Standard library imports
+import os
+import sys
     
 if __name__ == "__main__":
-
-    entry_filename      = ''
-    entry_network_name  = ''
-    entry_update_option = ''
-
-    arg_lst             = [entry_filename,entry_network_name,entry_update_option]
     
-    c = 0
-    for arg in sys.argv:
-        arg_lst[c] = sys.argv[c]
-        c = c + 1
-        
-    valid_entries = check_empty_entries(arg_lst)
+    """ Visualization data generator.
+    
+    Generate (or update) visualization data according to the following available options:
+    
+    -b : build the visualization data running the simulation, layout and data programs 
+    (equivalent result as running the -s, -l and -data options, in this order)
+    -s : generate simulation source data (compute and save the inflow/outflow rates by edge 
+    and associated queue levels)
+    -l : compute and save the network geometry according to spatial or temporal requirements
+    according to a required time step
+    -data : generate visualization data from the simulation source data, sampling this information 
+    according to a required time step
 
-    if (valid_entries == True):
+    Examples
+    --------
+    >>> python update.py PROJECT_NAME -b
+    >>> python update.py PROJECT_NAME -s
+    >>> python update.py PROJECT_NAME -l
+    >>> python update.py PROJECT_NAME -data
+    
+    """
 
-        NETWORK_NAME        = str(arg_lst[1]).replace('.','')
-        update_option       = str(arg_lst[2]).replace('.','')
+    # List of available options
+
+    options_list    = ['-b','-s','-l','-data']
+
+    # Check if sys.argv values are valid entries
+
+    is_valid_entry = True
+
+    try:
+        entry_filename = sys.argv[0]
+        entry_network_name = sys.argv[1]
+        entry_update_option = sys.argv[2]
+    except:
+        is_valid_entry = False
+    
+    if (is_valid_entry):
+
+        NETWORK_NAME = entry_network_name.replace('.','')
+        update_option = entry_update_option.replace('.','')
+        network_src_path = os.path.join('.','projects',NETWORK_NAME,'__init__.py')
+        is_valid_name = os.path.isfile(network_src_path)
+        is_valid_option = update_option in options_list
         
-        network_src_path    = os.path.join('.','projects',NETWORK_NAME,'__init__.py')
-        
-        valid_name          = os.path.isfile(network_src_path)
-        valid_option        = update_option in options_list
-        
-        if (valid_name == True):    
+        if (is_valid_name):    
+
+            print '[FlowsInNetworks]'
+            print 'Loading...'
             
-            if (valid_option == True):
-                
+            if (is_valid_option):
                 if (update_option == '-b'):
                     try:
-                    
                         sys.argv = ['build.py',NETWORK_NAME,'1']
                         execfile(os.path.join('.','lib','build','build.py'))
-                    
                     except:
                         print(sys.exc_info())
                         print '[MSG] update.py -build error'
-
                 if (update_option == '-s'):
                     try:
-
                         sys.argv = ['sim.py',NETWORK_NAME,'1']
                         execfile(os.path.join('.','lib','build','sim.py'))
-
                     except:
                         print(sys.exc_info())
                         print '[MSG] update.py -sim error'
-                
                 if (update_option == '-l'):
                     try:
-
                         sys.argv = ['set.py',NETWORK_NAME,'1']
                         execfile(os.path.join('.','lib','layouts','set.py'))
-
                     except:
                         print(sys.exc_info())
                         print '[MSG] update.py -layout error'
-
                 if (update_option == '-data'):
                     try:
-
                         sys.argv = ['gen.py',NETWORK_NAME,'1']
                         execfile(os.path.join('.','lib','build','gen.py'))
-
                     except:
                         print(sys.exc_info())
-                        print '[MSG] gen.py -data generator error'                        
-    
+                        print '[MSG] gen.py -data generator error'
             else: 
-                
-                print '[MSG] Non-valid option'  
-                print 'Available options:\n'+'\n'.join([str(opt) for opt in options_list])
-                          
+                print '[MSG] Entered option is not valid. Consider one of the following options: \n'
+                print '\n'.join([str(opt) for opt in options_list])
+                print '\n'
         else:
-            
             print '[MSG] Network not found'
-    
+    else:
+        if (entry_network_name == ''):
+            print '[MSG] Required network name'
+        if (entry_update_option == ''):
+            print '[MSG] Required update option'
+        

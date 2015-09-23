@@ -54,7 +54,7 @@ def graphFilter(G,node_source,node_sink):
             geometry = '[]'
         
         try:
-            name = str(data['name'])
+            name = data['name']
         except:
             name = '[]'
                 
