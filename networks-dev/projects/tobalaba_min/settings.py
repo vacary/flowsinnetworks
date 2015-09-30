@@ -53,7 +53,7 @@ def network_graph_data():
     #filename = 'heroes.osm'
 
     osm_file_path = os.path.abspath(os.path.join(dir_path,'rsc','osm',filename))
-    nw = osm.OsmNetwork(osm_file_file)
+    nw = osm.OsmNetwork(osm_file_path)
      
     G, source, sink = nw.get_network_graph_data()
     
