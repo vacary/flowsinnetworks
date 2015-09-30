@@ -29,8 +29,7 @@ import src.display.GUI.actions.actors as actions_actors
 import src.display.GUI.actions.animation as actions_animation
 import src.display.GUI.actions.plot as actions_plot
 
-# Visualization Class
-from src.display.vis.visualization import *
+from src.display.vis.visualization import * # Visualization Class
 
 class PlotDialog(QtGui.QDialog):
 
@@ -129,7 +128,6 @@ class MainWindow(QtGui.QMainWindow):
         self.renderWindow = self.vtkWidget.GetRenderWindow()
         self.renderWindowInteractor = self.renderWindow.GetInteractor()
         self.viz.setInteractor(self.renderWindowInteractor)
-        self.viz.setInteractorStyle(self.renderWindowInteractor)
         self.viz.renderer.GetActiveCamera().ParallelProjectionOn()
         self.viz.renderer.ResetCamera()
         self.show()
@@ -199,7 +197,7 @@ class MainWindow(QtGui.QMainWindow):
         actions_actors.display_colorbar(self.viz)
 
     def closeEvent(self,event):
-        # Clean temp file with the interactor annotation info
+        # Clear temp file with the interactor annotation info
         f = open(os.path.join('.','temp','data.txt'),"w")
         f.write(json.dumps({}))
         f.close()
@@ -210,14 +208,12 @@ if __name__ == "__main__":
 
     """Run the visualization GUI after get the visualization project data."""
 
-    visualization_settings_dir_path = os.path.join('.','projects',NETWORK_NAME)
-    pars = vis_mn.get_vparameters(visualization_settings_dir_path) # visualization settings
-
     # Run application
 
     app = QtGui.QApplication(sys.argv)
-    viz = Visualization(pars)
+    
+    viz = Visualization(NETWORK_NAME)
+    
     ex  = MainWindow(viz)
-
     ex.show()
     sys.exit(app.exec_())

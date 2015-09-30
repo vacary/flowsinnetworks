@@ -1,21 +1,20 @@
-"""
-VISUALIZATION NETWORK SETTINGS
+# Visualization network settings
+    
+# Standard library imports
+import os
+import sys
 
-"""
-
-import os, sys
-path = os.path.abspath(__file__)
-dir_path = os.path.dirname(path)
-
+# Non standard library imports
 import networkx as nx
-from numpy import *
 
-# Parameters 
+#####################################################
+# Network settings
+#####################################################
 
 NETWORK_NAME = "Larre"
 TYPE = "network"
 
-TIME_OF_EVENT = [0.0,40.0]
+TIME_OF_EVENT = [0.0,50.0]
 INPUT_FLOW = [4.0] 
 
 TIME_STEP = 0.1
@@ -27,70 +26,63 @@ SIMULATION_DATA_AVAILABLE = 1
 
 CUSTOM_LAYOUT = 1
 
-# Required modules / packages 
+#####################################################
 
-# { begin required modules }
+# Required library imports
 
-### Required instructions to get a network graph from Flows/examples.py 
+# Current directory path
 
-lib_path_flows = os.path.abspath(os.path.join(dir_path,'..','..','..'))
-sys.path.append(lib_path_flows)
+current_dir_path = os.path.dirname(os.path.abspath(__file__))
+
+# Library imports from root path
+root_dir_path = os.path.abspath(os.path.join(current_dir_path,'..','..','..'))
+sys.path.append(root_dir_path)
+
 import Flows.examples as exa
 
-lib_path = os.path.abspath(os.path.join(dir_path,'..','..'))
-sys.path.append(lib_path)
-import lib.layouts.graph as graph_layouts
+# Library imports from the visualization worskpace folder
+vroot_dir_path = os.path.abspath(os.path.join(current_dir_path,'..','..'))
+sys.path.append(vroot_dir_path)
 
-lib_path = os.path.abspath(os.path.join(dir_path,'..','..'))
-sys.path.append(lib_path)
-import lib.layouts.gviz as gviz_layouts 
-
-###
-
-lib_path_flows_graphs = os.path.abspath(os.path.join(dir_path,'..','..','..','Flows','graphs'))
-
-# { end required modules }
+import src.build.layouts.utils.gviz as gviz_layouts
 
 def network_graph_data():
 
     G = nx.MultiDiGraph()
-
+    
     source = 's'
-    sink = 't' 
-
+    sink = 't'
+    
     # { begin graph definition } [ Example: G = exa.example_Larre() ]
-
+    
     G = exa.example_Larre()
-
+    
     # { end graph definition }
 
-    return [G,source,sink]
+    return [G, source, sink]
+    
+def network_custom_layout (G):
 
-def network_custom_layout(G):
-
-    # This method is applied only if CUSTOM_LAYOUT = 1
-
-    # { begin custom layout method } 
-
-    # Example: 
+    # Important: This method is applied only if CUSTOM_LAYOUT = 1
+    
+    # Example:
     
     # [ Set graphviz layout parameters ]
     graphviz_prog = 'dot'
     graphviz_args = '-Gnodesep=1.0 -Grankdir=LR -Gsplines=ortho'
-
-    # [ Create file with the layout information ]
     
-    gviz_file_path  = os.path.abspath(os.path.join(dir_path,'rsc','gviz',NETWORK_NAME+'_custom.txt'))
+    #[ Create file with layout information ]
+    
+    gviz_file_path = os.path.abspath(os.path.join(current_dir_path, 'rsc', 'gviz', ''.join((NETWORK_NAME,'_custom.txt'))))
     
     A = nx.to_agraph(G)
-    A.draw(gviz_file_path,format='plain', prog = graphviz_prog, args=graphviz_args)
-    A.draw(gviz_file_path.replace('.','')+'.png',format='png', prog = graphviz_prog, args=graphviz_args) # graphviz image
+    A.draw(gviz_file_path, format='plain', prog=graphviz_prog, args=graphviz_args)
+    
+    # Generate graph image with graphviz (optional)
+    # A.draw(gviz_file_path.replace('.','')+'.png', format='png', prog=graphviz_prog, args=graphviz_args)
     
     # [ Load the file with the layout information ]
+    gviz_file_path = os.path.abspath(os.path.join(current_dir_path, 'rsc', 'gviz',''.join((NETWORK_NAME, '_custom.txt'))))
+    gviz_layouts.addGeometryFromGVizFile(G, gviz_file_path, 4) # important!
     
-    gviz_file_path  = os.path.abspath(os.path.join(dir_path,'rsc','gviz',NETWORK_NAME+'_custom.txt'))
-    gviz_layouts.addGeometryFromGVizFile(G,gviz_file_path,4) # !important
-
-
-    return G 
-
+    return None 

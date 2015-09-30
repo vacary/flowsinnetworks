@@ -1,7 +1,5 @@
-"""
-Map crop bounds 
-
-"""
+#
+# Map crop bounds
 
 W = 0.0
 S = 0.0

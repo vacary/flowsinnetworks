@@ -12,25 +12,24 @@
 # Each layer is associated with one of the following classes and the
 # respective VTK actor.
 
+# Standard library imports
 import sys
 import os
-
-import networkx as nx
 import random
-
-from numpy import *
-
 import math
-import copy
 import json
+from copy import deepcopy
 
+# Custom library imports
+display_dirpath = os.path.abspath(os.path.join('.','src','display'))
+sys.path.append(display_dirpath)
+import vis.util.data as util
+import vis.util.colormaps as cmap
+
+#Non standard library imports
+import networkx as nx
+from numpy import *
 import vtk
-
-lib_path = os.path.abspath(os.path.join('..','..','..','lib'))
-sys.path.append(lib_path)
-
-import src.display.vis.util as util
-import src.display.vis.colormaps as cmap
 
 # INTERACTOR LAYER
  
@@ -322,7 +321,7 @@ class VtkNetworkAnimationLayer:
         
             # Store the animation data created with the previous methods in the edges' dictionary
             
-            aux = copy.deepcopy(self.edge_animation_temp_data)
+            aux = deepcopy(self.edge_animation_temp_data)
             self.edges_dict[(edge[0],edge[1],edge_id)] = aux 
         
             self.edge_counter = self.edge_counter + 1

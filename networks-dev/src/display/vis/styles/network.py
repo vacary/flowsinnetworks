@@ -1,25 +1,27 @@
-"""Setup and update functions for 'network' style.
-"""
+#
+# Setup and update functions for 'network' style.
 
+# Standard library imports
+import os
+import sys
+import random
+
+# Non standard library imports
+import networkx as nx
+from numpy import *
 import vtk
 
-import os, sys
-import networkx as nx
-import random
-import time as tm
-
-from numpy import *
-
-# import visualization modules
-lib_path = os.path.abspath(os.path.join('..','..','..','lib'))
-sys.path.append(lib_path)
-
-import src.display.vis.util as util
-import src.display.vis.VTK.network as VTK
+# Custom library imports
+display_dirpath = os.path.abspath(os.path.join('.','src','display'))
+sys.path.append(display_dirpath)
+import vis.util as util
+import vis.util.annotations as vtk_info
+import vis.util.background as set_bck
+import vis.VTK.network as VTK
 
 def scene_setup(G, renderer, pars, sim_data_pars):
     
-    """Set the elements for the visualization style
+    """ Set the elements for the visualization style
     """
     
     scene_edges_layers = []
@@ -112,7 +114,17 @@ def scene_setup(G, renderer, pars, sim_data_pars):
     renderer.AddActor2D(nw_nodes.vtkActor_st_labels)
     #renderer.AddActor2D(nw_nodes.vtkActor_non_st_labels)
     
-    annotation_info_nw, annotation_info_iren = util.infoAnnotations(G,renderer,pars)
+    # -----------
+    
+    # Network and interactor annotations
+    
+    annotation_info_nw, annotation_info_iren = vtk_info.infoAnnotations(G,renderer,pars)
+    
+    # Set background color
+    
+    set_bck.setBackground(renderer)
+    
+    # Set vtk elements to be considered in the visualization
     
     vtkElements = {}
     vtkElements['nw'] = nw

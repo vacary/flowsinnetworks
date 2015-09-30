@@ -1,6 +1,11 @@
 # Standard library imports
 import os
 import sys
+
+# Custom library imports
+src_path = os.path.abspath(os.path.join('src'))
+sys.path.append(src_path)
+from dirs import *
     
 if __name__ == "__main__":
     
@@ -8,13 +13,13 @@ if __name__ == "__main__":
     
     Generate (or update) visualization data according to the following available options:
     
-    -b : build the visualization data running the simulation, layout and data programs 
+    -b : build the visualization data running the simulation, layout and data programs
     (equivalent result as running the -s, -l and -data options, in this order)
-    -s : generate simulation source data (compute and save the inflow/outflow rates by edge 
+    -s : generate simulation source data (compute and save the inflow/outflow rates by edge
     and associated queue levels)
     -l : compute and save the network geometry according to spatial or temporal requirements
     according to a required time step
-    -data : generate visualization data from the simulation source data, sampling this information 
+    -data : generate visualization data from the simulation source data, sampling this information
     according to a required time step
 
     Examples
@@ -58,28 +63,28 @@ if __name__ == "__main__":
                 if (update_option == '-b'):
                     try:
                         sys.argv = ['build.py',NETWORK_NAME,'1']
-                        execfile(os.path.join('.','lib','build','build.py'))
+                        execfile(file_path_build)
                     except:
                         print(sys.exc_info())
                         print '[MSG] update.py -build error'
                 if (update_option == '-s'):
                     try:
                         sys.argv = ['sim.py',NETWORK_NAME,'1']
-                        execfile(os.path.join('.','lib','build','sim.py'))
+                        execfile(file_path_sim)
                     except:
                         print(sys.exc_info())
                         print '[MSG] update.py -sim error'
                 if (update_option == '-l'):
                     try:
                         sys.argv = ['set.py',NETWORK_NAME,'1']
-                        execfile(os.path.join('.','lib','layouts','set.py'))
+                        execfile(file_path_set)
                     except:
                         print(sys.exc_info())
                         print '[MSG] update.py -layout error'
                 if (update_option == '-data'):
                     try:
                         sys.argv = ['gen.py',NETWORK_NAME,'1']
-                        execfile(os.path.join('.','lib','build','gen.py'))
+                        execfile(file_path_sampler)
                     except:
                         print(sys.exc_info())
                         print '[MSG] gen.py -data generator error'
