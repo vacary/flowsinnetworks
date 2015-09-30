@@ -413,6 +413,8 @@ def test13(pars):
 
     #timeofevent=[0.0,1.0,2.0,3.0,4.0,5.0,7.0,8.0,15.0]
     #inputflow=[3.0,0.0,3.0,0.0,3.0,0.0,1.0,0.0]
+    timeofevent=[0.0,1.0,2.0,3.0,10.0]
+    inputflow=[0.9,0.9,0.9,0.9]
 
 
     flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow)
@@ -852,6 +854,13 @@ def test22(pars):
         plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
         flows.plot_flows_queues_cumulativeflows(G)
 
+
+    if with_draw :
+        plt.figure("Flows, Extra values", figsize = [8,10])
+        flows.postprocess_extravalues(G, source, 't')
+        flows.plot_extravalues(G)
+
+
     ###############################
     # for visualization
     #
@@ -867,7 +876,7 @@ def test22(pars):
 
     print( '################ end test 22 ###############')
 
-def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=[2.0]):
+def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=[2.0], with_draw=False):
     print( '################ start test 23 ###############')
 
 
@@ -895,8 +904,6 @@ def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=[2.0]):
     flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow,param)
     print("timeofevent=",timeofevent)
     print("inputflow=",inputflow)
-
-    with_draw=False
 
     if with_draw :
         plt.ion()
@@ -935,7 +942,10 @@ def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=[2.0]):
     ###############################
 
     G.name['isF_Xbar_minus_increasing']=flows.isF_Xbar_minus_increasing(G, param.tol_thin_flow)
+    G.name['isF_Xbar_minus_inE_increasing']=flows.isF_Xbar_minus_inE_increasing(G, param.tol_thin_flow)
     G.name['isF_sink_minus_increasing']=flows.isF_sink_minus_increasing(G, param.tol_thin_flow)
+    G.name['isTotalTravelTime_increasing']= flows.is_TotalTravelTime_increasing(G,param.tol_thin_flow,source,sink)
+    G.name['isDerTotalTravelTime_decreasing']= flows.is_DerTotalTravelTime_decreasing(G,param.tol_thin_flow,source,sink)
     print(flows.drepr(G.name))
 
 
@@ -1001,7 +1011,7 @@ if __name__ == '__main__':
 
     #test13([])
     #test14()
-    #test15([])
+    test15([])
     #test16()
     #test17()
 
@@ -1030,7 +1040,9 @@ if __name__ == '__main__':
     #print(test_file([],'./graphs/G_d6_n600_gen.gml'))
 
     #print(test_file([],'./graphs/G3_gen.gml'))
-    print(test_file([],'./graphs/G_gen_infinite.gml'))
+    #print(test_file([],'./graphs/G_gen_infinite.gml'))
+
+
 
 
     # Time-stepping examples.

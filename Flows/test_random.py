@@ -28,12 +28,22 @@ def test_random_varyingdn():
             #    (not G.name['isF_sink_minus_increasing'][0]):
             #     print(filename, ": the flow trough the cut and the sink is not increasing")
             #     raw_input()
+            #if (not G.name['isF_Xbar_minus_inE_increasing'][0]):
+            #    print(filename, ": the flow trough the cut and the sink is not increasing")
+            #    raw_input()
             # if not G.name['isF_Xbar_minus_increasing'][0]:
             #     print(filename, ": the flow trough the cut is not increasing")
             #     #raw_input()
             # if not G.name['isF_sink_minus_increasing'][0]:
             #     print(filename, ":the flow at sink is not increasing")
             #     raw_input()
+            if not G.name['isTotalTravelTime_increasing'][0]:
+                  print(filename, ": the total travel time is not increasing")
+                  raw_input()
+            if not G.name['isDerTotalTravelTime_decreasing'][0]:
+                print(filename, ": the total travel time is not increasing")
+                raw_input()
+
             kk=kk+1
             print('############################################################')
             print('#################### End random test',k, kk, '###############')
