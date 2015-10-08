@@ -116,7 +116,6 @@ def example_Fig1_Cominetti():
     # print(G['r']['t'][0]['time'])
     # print(G['r']['t'][1]['time'])
 
-
     return G
 
 def example_Fig1_Cominetti_variant1():
@@ -226,4 +225,31 @@ def example_doubleparallelpath():
     G.add_edge('r','t',time= 2., capacity=0.9, flow =0)
     G.add_edge('r','t',time= 3., capacity=1., flow =0)
     G.add_edge('r','t',time= 4., capacity=1.1, flow =0)
+    return G
+
+def example_roberto():
+    G=nx.MultiDiGraph()
+    G.add_nodes_from("sit")
+
+    G.node['s']['label'] = 0
+    G.node['i']['label'] = 0
+    G.node['t']['label'] = 0
+    G.add_edge('s','t',time= 2.0, capacity=1/3.0, flow =0)
+    G.add_edge('s','i',time= 0., capacity=3/4.0, flow =0)
+    G.add_edge('i','t',time= 0.0, capacity=1/3.0, flow =0)
+    G.add_edge('i','t',time= 2.0, capacity=1.0, flow =0)
+    return G
+
+
+def example_roberto2():
+    G=nx.MultiDiGraph()
+    G.add_nodes_from("sit")
+
+    G.node['s']['label'] = 0
+    G.node['i']['label'] = 0
+    G.node['t']['label'] = 0
+    G.add_edge('s','t',time= 3.0, capacity=1.0, flow =0)
+    G.add_edge('s','i',time= 0.5, capacity=3/2.0, flow =0)
+    G.add_edge('i','t',time= 0.5, capacity=1/3.0, flow =0)
+    G.add_edge('i','t',time= 2.5, capacity=1.0, flow =0)
     return G

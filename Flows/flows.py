@@ -2242,7 +2242,8 @@ def feasible_time_extension_by_LP(G,E,E_star,E_comp):
 def feasible_time_extension(G,E,E_star,E_comp):
 
     alpha = float('inf')
-
+    global debug_print
+    debug_print = False
     for e in E_comp.edges(keys=True):
         denominator = E.node[e[1]]['label_thin_flow']-E.node[e[0]]['label_thin_flow']
         numerator = E_comp[e[0]][e[1]][e[2]]['time'] - (E.node[e[1]]['label']-E.node[e[0]]['label'])
@@ -2263,6 +2264,7 @@ def feasible_time_extension(G,E,E_star,E_comp):
 
     print_debug("alpha (after inequality on E_star) = ", alpha)
     assert(alpha>0)
+    debug_print = False
     return alpha
 
 

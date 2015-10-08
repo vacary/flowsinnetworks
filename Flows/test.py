@@ -983,6 +983,54 @@ def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=[2.0], with_dra
 
     print( '################ end test 23 ###############')
 
+def test24(pars):
+    print( '################ start test 24 ###############')
+    G=examples.example_roberto2()
+    source = 's'
+    sink = 't'
+    #Original values
+    timeofevent=[0.0,5.0]
+    inputflow=[1.0,1.0]
+
+    flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow)
+    flows.display_graph(G)
+    print("timeofevent=",timeofevent)
+    print("inputflow=",inputflow)
+
+    # plot floas and labels
+    with_draw=True
+    if with_draw :
+        plt.ion()
+        plt.close('all')
+        plt.figure("Thin flows and associated labels", figsize = [8,10])
+        flows.plot_thin_flows_and_labels(G,timeofevent)
+
+
+    # post processing
+    flows.postprocess_flows_queues_cumulativeflows(G)
+
+    plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
+    flows.plot_flows_queues_cumulativeflows(G)
+
+    plt.figure("Flows, Cumulative flows and queues for edge =('s','t'), key =0 ", figsize = [18,14])
+    flows.plot_flows_queues_cumulativeflows(G,('s','t'),0)
+
+
+    ###############################
+    # for visualization
+    #
+    try:
+        if (pars[0] == True):
+            vdata.genVData(G,pars[1],pars[2],pars[3])
+    except:
+        #import sys
+        #print(sys.exc_info())
+        print('[ MSG ] test.py')
+    #
+    ###############################
+
+
+    print( '################ end test 24 ###############')
 
 
 if __name__ == '__main__':
@@ -1011,7 +1059,7 @@ if __name__ == '__main__':
 
     #test13([])
     #test14()
-    test15([])
+    #test15([])
     #test16()
     #test17()
 
@@ -1048,3 +1096,5 @@ if __name__ == '__main__':
     # Time-stepping examples.
     #test_TS1() #Similar to test13
     #test_TS2() #Similar to test15
+    
+    test24([])
