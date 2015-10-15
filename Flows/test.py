@@ -876,10 +876,10 @@ def test22(pars):
 
     print( '################ end test 22 ###############')
 
-def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=[2.0], with_draw=False):
+def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=None, with_draw=False):
     print( '################ start test 23 ###############')
 
-
+    
 
     G=nx.read_gml(graph_file)
     G=nx.MultiDiGraph(G)
@@ -887,6 +887,11 @@ def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=[2.0], with_dra
     source = G.nodes()[0]
     sink = G.nodes()[-1]
 
+    if inputflow == None:
+        cut_value, X, Xbar = flows.compute_maxflow_mincut(G, source, sink)
+        input_value= 0.99*cut_value
+        inputflow=[input_value]
+    
     #len(list(nx.connected_components(nx.MultiGraph(G))))==1
     #l = list( nx.simple_paths.all_simple_paths(G,0,17))
     #print(l)
@@ -903,7 +908,7 @@ def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=[2.0], with_dra
 
     flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow,param)
     print("timeofevent=",timeofevent)
-    print("inputflow=",inputflow)
+    print("inputflow[0]=",inputflow[0])
 
     if with_draw :
         plt.ion()
@@ -911,22 +916,26 @@ def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=[2.0], with_dra
         plt.figure("Thin flows and associated labels", figsize = [8,10])
         flows.plot_thin_flows_and_labels(G,timeofevent)
 
-
+    print("compute flows and queues ...")
     flows.postprocess_flows_queues_cumulativeflows(G)
-    flows.display_graph(G)
+    #flows.display_graph(G)
 
 
     if with_draw :
         plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
         flows.plot_flows_queues_cumulativeflows(G)
 
-    flows.postprocess_extravalues(G, source, sink)
+    #print("compute extra values ...")
+    #flows.postprocess_extravalues(G, source, sink)
 
     if with_draw :
         plt.figure("Flows, Extra values", figsize = [8,10])
 
         flows.plot_extravalues(G)
 
+    print("compute der_phi ...")
+
+    flows.postprocess_extravalues_der_phi(G, source, sink, inputflow)
 
     ###############################
     # for visualization
@@ -941,14 +950,15 @@ def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=[2.0], with_dra
     #
     ###############################
 
-    G.name['isF_Xbar_minus_increasing']=flows.isF_Xbar_minus_increasing(G, param.tol_thin_flow)
-    G.name['isF_Xbar_minus_inE_increasing']=flows.isF_Xbar_minus_inE_increasing(G, param.tol_thin_flow)
-    G.name['isF_sink_minus_increasing']=flows.isF_sink_minus_increasing(G, param.tol_thin_flow)
-    G.name['isTotalTravelTime_increasing']= flows.is_TotalTravelTime_increasing(G,param.tol_thin_flow,source,sink)
-    G.name['isDerTotalTravelTime_decreasing']= flows.is_DerTotalTravelTime_decreasing(G,param.tol_thin_flow,source,sink)
-    print(flows.drepr(G.name))
-
-
+    #G.name['isF_Xbar_minus_increasing']=flows.isF_Xbar_minus_increasing(G, param.tol_thin_flow)
+    #G.name['isF_Xbar_minus_inE_increasing']=flows.isF_Xbar_minus_inE_increasing(G, param.tol_thin_flow)
+    #G.name['isF_sink_minus_increasing']=flows.isF_sink_minus_increasing(G, param.tol_thin_flow)
+    #G.name['isTotalTravelTime_increasing']= flows.is_TotalTravelTime_increasing(G,param.tol_thin_flow,source,sink)
+    #G.name['isDerTotalTravelTime_decreasing']= flows.is_DerTotalTravelTime_decreasing(G,param.tol_thin_flow,source,sink)
+    G.name['is_der_phi_positive']= flows.is_der_phi_positive(G,param.tol_thin_flow,source,sink)
+    G.name['is_der_phi_increasing']= flows.is_der_phi_increasing(G,param.tol_thin_flow,source,sink)
+    #raw_input()
+    
     if False:
         # clean up useless edges to simplify
         G_simplified=nx.MultiDiGraph()
@@ -991,30 +1001,56 @@ def test24(pars):
     #Original values
     timeofevent=[0.0,5.0]
     inputflow=[1.0,1.0]
+    param=flows.parameters()
+    param.tol_thin_flow=1e-10
+    param.tol_lp=1e-12
+    param.tol_cut=1e-12
 
-    flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow)
-    flows.display_graph(G)
+    param.nmax =500
+    flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow,param)
     print("timeofevent=",timeofevent)
     print("inputflow=",inputflow)
 
-    # plot floas and labels
-    with_draw=True
-    if with_draw :
-        plt.ion()
-        plt.close('all')
-        plt.figure("Thin flows and associated labels", figsize = [8,10])
-        flows.plot_thin_flows_and_labels(G,timeofevent)
 
 
     # post processing
     flows.postprocess_flows_queues_cumulativeflows(G)
 
-    plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
-    flows.plot_flows_queues_cumulativeflows(G)
+    flows.postprocess_extravalues(G, source, sink)
+    flows.display_graph(G)
+    print("assertion=",flows.is_TotalTravelTime_increasing(G,param.tol_thin_flow,source,sink))
+    # plot floas and labels
+    with_draw=True
+    if with_draw :
+        plt.ion()
+        plt.close('all')
+        
+        plt.figure("Thin flows and associated labels", figsize = [8,10])
+        flows.plot_thin_flows_and_labels(G,timeofevent)
 
-    plt.figure("Flows, Cumulative flows and queues for edge =('s','t'), key =0 ", figsize = [18,14])
-    flows.plot_flows_queues_cumulativeflows(G,('s','t'),0)
+        plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
+        flows.plot_flows_queues_cumulativeflows(G)
 
+    if with_draw :
+        plt.figure("Flows, Extra values", figsize = [8,10])
+
+        flows.plot_extravalues(G)
+
+    flows.postprocess_extravalues_der_phi(G, source, sink, inputflow)
+    G.name['is_der_phi_positive']= flows.is_der_phi_positive(G,param.tol_thin_flow,source,sink)
+    G.name['is_der_phi_increasing']= flows.is_der_phi_increasing(G,param.tol_thin_flow,source,sink)
+    print("G.name['max_flow']",G.name['max_flow'])
+    print("G.name['is_der_phi_positive']",G.name['is_der_phi_positive'][0])
+    print("G.name['is_der_phi_increasing']",G.name['is_der_phi_increasing'][0])
+    
+
+    assert(flows.is_TotalTravelTime_increasing(G,param.tol_thin_flow,source,sink)[0])
+    assert(flows.is_DerTotalTravelTime_decreasing(G,param.tol_thin_flow,source,sink)[0])
+    
+    
+ 
+
+    
 
     ###############################
     # for visualization

@@ -27,8 +27,8 @@ def generate_graph(d,n,graph_file):
         G.remove_edge(*e)
 
     for e in G.edges(keys=True):
-        G[e[0]][e[1]][e[2]]['time']=random.randint(10,20)*0.1
-        G[e[0]][e[1]][e[2]]['capacity']=random.randint(5,15)*0.1
+        G[e[0]][e[1]][e[2]]['time']=random.randint(1,30)*0.1
+        G[e[0]][e[1]][e[2]]['capacity']=random.randint(1,30)*0.1
 
     if (len(list(nx.connected_components(nx.MultiGraph(G))))==1):
         nx.write_gml(G, graph_file)

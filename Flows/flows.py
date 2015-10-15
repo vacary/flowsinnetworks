@@ -120,6 +120,9 @@ def display_graph(G, print_function = print):
         print_function("Graph display : the graph is a multigraph")
     else :
         print_function("Graph display")
+
+    if (G.name != None):
+        print_function("G.name\n",drepr(G.name))
     print_function (" #nodes : ", G.number_of_nodes())
     for v in G.nodes():
         print_function (" node :", v, drepr(G.node[v]))
@@ -3149,12 +3152,41 @@ def f_e_plus(G, e, time):
 
     return float('Inf')
 
+def z_e(G, e, time):
+    ntail = e[0]
+    nhead = e[1]
+    key = e[2]
+    #print ("time=", time)
+    if time < G[ntail][nhead][key]['switching_times'][0]:
+        return 0.0
+    for j in range(len(G[ntail][nhead][key]['switching_times'])-1):
+        if ((G[ntail][nhead][key]['switching_times'][j] <= time) and (time < (G[ntail][nhead][key]['switching_times'][j+1]))):
+            #print("interval = ",G[ntail][nhead][key]['switching_times'][j],G[ntail][nhead][key]['switching_times'][j+1] )
+            h = 1.0-(G[ntail][nhead][key]['switching_times'][j+1]-time)/(G[ntail][nhead][key]['switching_times'][j+1]-G[ntail][nhead][key]['switching_times'][j])
+            #print ("h=",h)
+            return (1-h)*G[ntail][nhead][key]['z_e_overtime'][j]+ h* G[ntail][nhead][key]['z_e_overtime'][j+1]
+    if (time == G[ntail][nhead][key]['switching_times'][j+1]):
+        return G[ntail][nhead][key]['z_e_overtime'][j]
+    #print("Warning: time =",time, "is out of range of definition of z_e for edges", e)
+
+    return float('Inf')
+
+def TotalTraveltime(G, source, sink, time):
+
+    initial_value =  G.node[sink]['label_overtime'][0] - G.node[source]['label_overtime'][0]
+    if time < G[ntail][nhead][k]['switching_times']:
+        return initial_value
+    for j in range(len(G.node[source]['label_thin_flow_overtime'])-1):
+        if ((G.node[source]['label_thin_flow_overtime'] <= time) and (time < G.node[source]['label_thin_flow_overtime'])):
+            return G.node[sink]['label_overtime'][j] - G.node[source]['label_overtime'][j]
+    if (time == G.node[source]['label_thin_flow_overtime'][j+1]):
+        return G.node[sink]['label_overtime'][j] - G.node[source]['label_overtime'][j]
+
+    return float('Inf')
 
 
-def postprocess_extravalues(G, source, sink):
 
-    print_debug("Start postprocess_extravalues(G, source, sink) ")
-
+def compute_maxflow_mincut(G, source, sink):
     simpleG = nx.DiGraph()
     simpleG.add_nodes_from(G.nodes())
     for e in G.edges(keys=True):
@@ -3167,18 +3199,32 @@ def postprocess_extravalues(G, source, sink):
     cut_value, partition = nx.minimum_cut(simpleG, source, sink)
     X, Xbar = partition
     print_debug(cut_value, partition)
-    G.name=dict([])
-    G.name['max_flow']= cut_value
+    
+    return cut_value, X, Xbar
 
+
+def postprocess_extravalues(G, source, sink):
+
+    print_debug("Start postprocess_extravalues(G, source, sink) ")
+    
+    # Compute mincut maxflow
+    cut_value, X, Xbar = compute_maxflow_mincut(G, source, sink)
+
+    # store values
+    if (G.name == None) :
+        G.name=dict([])
+    G.name['max_flow']= cut_value
     G.name['X']= X
     G.name['Xbar']= Xbar
 
 
     edges_cut =set.intersection(set(G.out_edges(X,keys=True)),set(G.in_edges(Xbar,keys=True)))
     G.name['edges_cut']= edges_cut
-
     print_debug(edges_cut)
 
+    # -------------------------------------------------------------------
+    # compute  flows f_e_minus and f_e_plus in the min cut w.r.t to time
+    # -------------------------------------------------------------------
     switch_time_f_e_minus=[]
     Tmax_minus=1e+24
     for e  in edges_cut:
@@ -3194,8 +3240,6 @@ def postprocess_extravalues(G, source, sink):
         switch_time_f_e_minus.sort()
     print_debug("switch_time_f_e_minus",switch_time_f_e_minus)
     G.name['switching_times_f_Xbar_minus']= [switch_time_f_e_minus[i][0] for i in range(len(switch_time_f_e_minus))]
-
-
 
     Tmax_plus=1e+24
     for e  in edges_cut:
@@ -3230,6 +3274,10 @@ def postprocess_extravalues(G, source, sink):
 
     G.name['f_Xbar_plus'] = f_Xbar_plus
 
+    # -------------------------------------------------------------------
+    # compute  flows f_e_minus and f_e_plus in the cut (X,sink) w.r.t to time
+    # -------------------------------------------------------------------
+ 
     switch_time_f_e_minus_sink=[]
     for e in G.in_edges(sink,keys=True):
         for titi in G.node[e[1]]['label_overtime']:
@@ -3237,7 +3285,7 @@ def postprocess_extravalues(G, source, sink):
     switch_time_f_e_minus_sink.sort()
     print_debug("switch_time_f_e_minus_sink",switch_time_f_e_minus_sink)
     G.name['switching_times_f_sink_minus']= switch_time_f_e_minus_sink
-
+    
     f_sink_minus=[]
     for t in switch_time_f_e_minus_sink:
         flow =0.0
@@ -3246,6 +3294,11 @@ def postprocess_extravalues(G, source, sink):
         f_sink_minus.append(flow)
 
     G.name['f_sink_minus']= f_sink_minus
+
+    # -------------------------------------------------------------------
+    # compute  flows f_e_minus and f_e_plus in the min cut of E (not G)  w.r.t to time
+    # -------------------------------------------------------------------
+ 
     G.node[source]['max_flow_E']=[]
 
     f_Xbar_inE_minus = []
@@ -3283,11 +3336,61 @@ def postprocess_extravalues(G, source, sink):
         #    flow = flow + f_e_minus(G, e, t)
         f_Xbar_inE_minus.append(flow)
 
-
     G.name['f_Xbar_inE_minus'] = f_Xbar_inE_minus
+    
+    # -------------------------------------------------------------------
+    # compute  the sum of the queue  w.r.t to time
+    # -------------------------------------------------------------------
+    switch_time_z_e_sum=[]
+    for e  in G.edges(keys=True):
+        
+        for titi in G[e[0]][e[1]][e[2]]['switching_times']:
+           switch_time_z_e_sum.append(titi)
+    switch_time_z_e_sum = list(set(switch_time_z_e_sum))
+    switch_time_z_e_sum.sort()
+    #print("switch_time_z_e_sum",switch_time_z_e_sum)
+    G.name['switching_times_z_e_sum']= switch_time_z_e_sum
 
+    z_e_sum=[]
+    for tt in switch_time_z_e_sum:
+        #print(tt)
+        z_e_sum_var=0.0
+        for  e  in G.edges(keys=True):
+            #print(" z_e(G,", e,",",tt,")", z_e(G, e, tt))
+            z_e_sum_var =   z_e_sum_var  +  z_e(G, e, tt)
+        z_e_sum.append(z_e_sum_var)
+        
+    #print("z_e_sum", z_e_sum)
+    G.name['z_e_sum'] =  z_e_sum
 
+def postprocess_extravalues_der_phi(G, source, sink, inputflow):
 
+    # -------------------------------------------------------------------
+    # compute  the derivative  sum of the queue + u_o(l't-1) w.r.t to time
+    # -------------------------------------------------------------------
+    G.name['der_phi']=[]
+    for i in range(len(G.node[source]['label_thin_flow_overtime'])):
+        time = G.node[source]['label_thin_flow_overtime'][i]
+        sum_phi =0.0
+        
+        # u0* (l't-1)
+        u0 = inputflow[i]
+        #print("G.node[sink]['label_thin_flow_overtime'][i]",G.node[sink]['label_thin_flow_overtime'][i])
+        sum_phi= sum_phi   + u0 *(G.node[sink]['label_thin_flow_overtime'][i]-1.0)
+        # 
+        for e in G.node[source]['Estar'][i].edges(keys=True):
+             sum_phi = sum_phi - G[e[0]][e[1]][e[2]]['capacity']*(G.node[e[1]]['label_thin_flow_overtime'][i]
+                                                                  -G.node[e[0]]['label_thin_flow_overtime'][i])
+             #print("G.node[e[0]]['label_thin_flow_overtime'][i]",G.node[e[0]]['label_thin_flow_overtime'][i])
+             #print("G.node[e[1]]['label_thin_flow_overtime'][i]",G.node[e[1]]['label_thin_flow_overtime'][i])
+        #       
+        for e in G.node[source]['E'][i].edges(keys=True):
+            if e not in  G.node[source]['Estar'][i].edges(keys=True):
+                sum_phi = sum_phi - G[e[0]][e[1]][e[2]]['capacity']*max(0,(G.node[e[1]]['label_thin_flow_overtime'][i]
+                                                                           -G.node[e[0]]['label_thin_flow_overtime'][i]))
+            
+        G.name['der_phi'].append(sum_phi)
+    print("G.name[der_phi]", G.name['der_phi'])
 
 def isF_Xbar_minus_increasing(G,tol):
     current_value =  G.name['f_Xbar_minus'][0]
@@ -3334,6 +3437,36 @@ def is_TotalTravelTime_increasing(G,tol,source,sink):
             return False, tk
     return True,  G.node[source]['label_thin_flow_overtime'][tk-1]
 
+def is_der_phi_positive(G,tol,source,sink):
+    for v in G.name['der_phi']:
+        #print("v",v)
+        #print("tol",tol)
+        if (v <  -tol):
+            return False, v
+    return True, v
+
+def is_der_phi_increasing(G,tol,source,sink):
+    init_value=G.name['der_phi'][0]
+    for v in G.name['der_phi']:
+        #print("v",v)
+        #print("tol",tol)
+        if (v < init_value  +tol):
+            return False, v
+        init_value = v
+    return True, v 
+
+def is_TotalTravelTimeplusqueues_increasing(G,tol,source,sink):
+    current_value =  G.node[sink]['label_overtime'][0] - G.node[source]['label_overtime'][0]
+    tk=0
+
+    for i in range(len(G.name['switching_times_z_e_sum'])-1):
+        time = G.name['switching_times_z_e_sum'][i]
+        tt = TotalTraveltime(G, source, sink, time) - G.name['z_e_sum'][i]
+        print("tt=",tt)
+        if (tt < current_value-tol):
+            return False,tt
+        return True,  G.node[source]['label_thin_flow_overtime'][tk-1]
+
 
 def is_DerTotalTravelTime_decreasing(G,tol,source,sink):
     current_value =  G.node[sink]['label_thin_flow_overtime'][0]
@@ -3343,6 +3476,7 @@ def is_DerTotalTravelTime_decreasing(G,tol,source,sink):
         if (f > current_value+tol):
             return False, tk
     return True,  G.node[source]['label_thin_flow_overtime'][tk-1]
+
 
 def plot_extravalues(G):
 
@@ -3370,33 +3504,48 @@ def plot_extravalues(G):
     min_y,max_y=plt.ylim()
     plt.ylim([-0.1,max_y+0.1])
 
-    plt.subplot(412)
+    # plt.subplot(412)
+    # plt.grid()
+    # plt.title('f_Xbar_plus')
+    # x_plot_data = []
+    # y_plot_data = []
+    # for i in range(len(G.name['switching_times_f_Xbar_plus'])-1):
+    #     x_plot_data.append(G.name['switching_times_f_Xbar_plus'][i])
+    #     y_plot_data.append(G.name['f_Xbar_plus'][i+1])
+    #     x_plot_data.append(G.name['switching_times_f_Xbar_plus'][i+1])
+    #     y_plot_data.append(G.name['f_Xbar_plus'][i+1])
+    # plt.plot(x_plot_data[:],y_plot_data[:])
+
+    # plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
+    # plt.xlim([min_x,max_x])
+    # min_y,max_y=plt.ylim()
+    # plt.ylim([-0.1,max_y+0.1])
+
+    # plt.subplot(413)
+    # plt.grid()
+    # plt.title('f_Xbar_InE_minus')
+    # x_plot_data = []
+    # y_plot_data = []
+    # for i in range(len(G.name['switching_times_f_Xbar_minus'])-1):
+    #     x_plot_data.append(G.name['switching_times_f_Xbar_minus'][i])
+    #     y_plot_data.append(G.name['f_Xbar_inE_minus'][i+1])
+    #     x_plot_data.append(G.name['switching_times_f_Xbar_minus'][i+1])
+    #     y_plot_data.append(G.name['f_Xbar_inE_minus'][i+1])
+    # plt.plot(x_plot_data[:],y_plot_data[:])
+
+    # plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
+    # plt.xlim([min_x,max_x])
+    # min_y,max_y=plt.ylim()
+    # plt.ylim([-0.1,max_y+0.1])
+    
+    plt.subplot(414)
     plt.grid()
-    plt.title('f_Xbar_plus')
+    plt.title('z_e_sum')
     x_plot_data = []
     y_plot_data = []
-    for i in range(len(G.name['switching_times_f_Xbar_plus'])-1):
-        x_plot_data.append(G.name['switching_times_f_Xbar_plus'][i])
-        y_plot_data.append(G.name['f_Xbar_plus'][i+1])
-        x_plot_data.append(G.name['switching_times_f_Xbar_plus'][i+1])
-        y_plot_data.append(G.name['f_Xbar_plus'][i+1])
-    plt.plot(x_plot_data[:],y_plot_data[:])
-
-    plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)
-    plt.xlim([min_x,max_x])
-    min_y,max_y=plt.ylim()
-    plt.ylim([-0.1,max_y+0.1])
-
-    plt.subplot(413)
-    plt.grid()
-    plt.title('f_Xbar_InE_minus')
-    x_plot_data = []
-    y_plot_data = []
-    for i in range(len(G.name['switching_times_f_Xbar_minus'])-1):
-        x_plot_data.append(G.name['switching_times_f_Xbar_minus'][i])
-        y_plot_data.append(G.name['f_Xbar_inE_minus'][i+1])
-        x_plot_data.append(G.name['switching_times_f_Xbar_minus'][i+1])
-        y_plot_data.append(G.name['f_Xbar_inE_minus'][i+1])
+    for i in range(len(G.name['switching_times_z_e_sum'])-1):
+        x_plot_data.append(G.name['switching_times_z_e_sum'][i])
+        y_plot_data.append(G.name['z_e_sum'][i])
     plt.plot(x_plot_data[:],y_plot_data[:])
 
     plt.legend(bbox_to_anchor=(1.0, 1), loc=1, borderaxespad=0.)

@@ -1,6 +1,7 @@
 import gen_graph
 import test
 import sys
+
 def test_random_varyingdn():
     degree = 5
     number_nodes_init=50
@@ -23,7 +24,8 @@ def test_random_varyingdn():
                 gen_graph.generate_graph(degree,number_nodes+1,filename)
             else:
                 gen_graph.generate_graph(degree,number_nodes,filename)
-            G= test.test_file([],filename,timeofevent=[0.0,100.0], inputflow=[20.0])
+            
+            G= test.test_file([],filename,timeofevent=[0.0,100.0], inputflow=None)
             # if (not G.name['isF_Xbar_minus_increasing'][0]) and\
             #    (not G.name['isF_sink_minus_increasing'][0]):
             #     print(filename, ": the flow trough the cut and the sink is not increasing")
@@ -37,11 +39,20 @@ def test_random_varyingdn():
             # if not G.name['isF_sink_minus_increasing'][0]:
             #     print(filename, ":the flow at sink is not increasing")
             #     raw_input()
-            if not G.name['isTotalTravelTime_increasing'][0]:
-                  print(filename, ": the total travel time is not increasing")
-                  raw_input()
-            if not G.name['isDerTotalTravelTime_decreasing'][0]:
-                print(filename, ": the total travel time is not increasing")
+            # if not G.name['isTotalTravelTime_increasing'][0]:
+            #       print(filename, ": the total travel time is not increasing")
+            #       raw_input()
+            # if not G.name['isDerTotalTravelTime_decreasing'][0]:
+            #     print(filename, ": the total travel time is not increasing")
+            #     raw_input()
+            print(" G.name['is_der_phi_positive'][0]",  G.name['is_der_phi_positive'][0])
+            if not G.name['is_der_phi_positive'][0]:
+                print(filename, ":der phi is not positive")
+                raw_input()
+
+            print(" G.name['is_der_phi_increasing'][0]",  G.name['is_der_phi_increasing'][0])
+            if  G.name['is_der_phi_increasing'][0]:
+                print(filename, ":der phi is increasing")
                 raw_input()
 
             kk=kk+1
@@ -79,4 +90,5 @@ def test_random():
 
 
 if __name__ == '__main__':
-    test_random()
+    #test_random()
+    test_random_varyingdn()

@@ -248,8 +248,10 @@ def example_roberto2():
     G.node['s']['label'] = 0
     G.node['i']['label'] = 0
     G.node['t']['label'] = 0
-    G.add_edge('s','t',time= 3.0, capacity=1.0, flow =0)
-    G.add_edge('s','i',time= 0.5, capacity=3/2.0, flow =0)
+    G.add_edge('s','t',time= 3.0, capacity=1/3.0, flow =0)
+    G.add_edge('s','i',time= 0.5, capacity=3/4.0, flow =0)
     G.add_edge('i','t',time= 0.5, capacity=1/3.0, flow =0)
     G.add_edge('i','t',time= 2.5, capacity=1.0, flow =0)
+   
     return G
+ 
