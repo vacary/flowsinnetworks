@@ -121,7 +121,7 @@ def display_graph(G, print_function = print):
     else :
         print_function("Graph display")
 
-    if (G.name != None):
+    if (type(G.name) == type(dict())):
         print_function("G.name\n",drepr(G.name))
     print_function (" #nodes : ", G.number_of_nodes())
     for v in G.nodes():
@@ -3211,7 +3211,7 @@ def postprocess_extravalues(G, source, sink):
     cut_value, X, Xbar = compute_maxflow_mincut(G, source, sink)
 
     # store values
-    if (G.name == None) :
+    if (type(G.name) != type(dict([]))) :
         G.name=dict([])
     G.name['max_flow']= cut_value
     G.name['X']= X
@@ -3368,6 +3368,8 @@ def postprocess_extravalues_der_phi(G, source, sink, inputflow):
     # -------------------------------------------------------------------
     # compute  the derivative  sum of the queue + u_o(l't-1) w.r.t to time
     # -------------------------------------------------------------------
+    if (type(G.name)!= type(dict())):
+        G.name=dict()
     G.name['der_phi']=[]
     for i in range(len(G.node[source]['label_thin_flow_overtime'])):
         time = G.node[source]['label_thin_flow_overtime'][i]
@@ -3445,14 +3447,16 @@ def is_der_phi_positive(G,tol,source,sink):
             return False, v
     return True, v
 
-def is_der_phi_increasing(G,tol,source,sink):
-    init_value=G.name['der_phi'][0]
+def is_der_phi_decreasing(G,tol,source,sink):
+    previous_value=G.name['der_phi'][0]
+    print (G.name['der_phi'])
     for v in G.name['der_phi']:
-        #print("v",v)
-        #print("tol",tol)
-        if (v < init_value  +tol):
+        print("v",v)
+        print("tol",tol)
+        print("previous_value",previous_value)
+        if (v > previous_value):
             return False, v
-        init_value = v
+        previous_value = v
     return True, v 
 
 def is_TotalTravelTimeplusqueues_increasing(G,tol,source,sink):

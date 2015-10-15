@@ -254,4 +254,35 @@ def example_roberto2():
     G.add_edge('i','t',time= 2.5, capacity=1.0, flow =0)
    
     return G
- 
+def example_neil():
+    G=nx.MultiDiGraph()
+    G.add_nodes_from("stuvwxy")
+
+    G.node['s']['label'] = 0
+    G.node['t']['label'] = 0
+    G.node['u']['label'] = 0
+    G.node['v']['label'] = 0
+    G.node['s']['label'] = 0
+    G.node['x']['label'] = 0
+    G.node['y']['label'] = 0
+    G.add_edge('s','u',time= 0.0, capacity=1/4.0, flow =0)
+    G.add_edge('s','v',time= 0.0, capacity=1/4.0, flow =0)
+    G.add_edge('s','t',time= 1e+3, capacity=1e+2, flow =0)
+
+    G.add_edge('u','v',time= 0.0, capacity=1/8.0, flow =0)
+    G.add_edge('u','v',time= 4.0+0.01, capacity=1/16.0, flow =0)
+    G.add_edge('u','x',time= 44,  capacity=1e+3, flow =0)
+
+    G.add_edge('v','y',time= 0.0, capacity=1/8.0, flow =0)
+
+    G.add_edge('w','t',time= 0.0, capacity=1.0, flow =0)
+
+    G.add_edge('x','w',time= 0.0, capacity=1.0/32.0, flow =0)
+
+    G.add_edge('y','w',time= 72.0, capacity=1.e+3, flow =0)
+    G.add_edge('y','w',time= 0.0,  capacity=1/16.0, flow =0)
+
+    
+
+    
+    return G

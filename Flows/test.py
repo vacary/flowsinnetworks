@@ -956,7 +956,7 @@ def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=None, with_draw
     #G.name['isTotalTravelTime_increasing']= flows.is_TotalTravelTime_increasing(G,param.tol_thin_flow,source,sink)
     #G.name['isDerTotalTravelTime_decreasing']= flows.is_DerTotalTravelTime_decreasing(G,param.tol_thin_flow,source,sink)
     G.name['is_der_phi_positive']= flows.is_der_phi_positive(G,param.tol_thin_flow,source,sink)
-    G.name['is_der_phi_increasing']= flows.is_der_phi_increasing(G,param.tol_thin_flow,source,sink)
+    G.name['is_der_phi_decreasing']= flows.is_der_phi_decreasing(G,param.tol_thin_flow,source,sink)
     #raw_input()
     
     if False:
@@ -995,11 +995,12 @@ def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=None, with_draw
 
 def test24(pars):
     print( '################ start test 24 ###############')
-    G=examples.example_roberto2()
+    #G=examples.example_roberto2()
+    G=examples.example_neil()
     source = 's'
     sink = 't'
     #Original values
-    timeofevent=[0.0,5.0]
+    timeofevent=[0.0,172.0]
     inputflow=[1.0,1.0]
     param=flows.parameters()
     param.tol_thin_flow=1e-10
@@ -1038,10 +1039,12 @@ def test24(pars):
 
     flows.postprocess_extravalues_der_phi(G, source, sink, inputflow)
     G.name['is_der_phi_positive']= flows.is_der_phi_positive(G,param.tol_thin_flow,source,sink)
-    G.name['is_der_phi_increasing']= flows.is_der_phi_increasing(G,param.tol_thin_flow,source,sink)
+    G.name['is_der_phi_decreasing']= flows.is_der_phi_decreasing(G,param.tol_thin_flow,source,sink)
+
+    
     print("G.name['max_flow']",G.name['max_flow'])
     print("G.name['is_der_phi_positive']",G.name['is_der_phi_positive'][0])
-    print("G.name['is_der_phi_increasing']",G.name['is_der_phi_increasing'][0])
+    print("G.name['is_der_phi_decreasing']",G.name['is_der_phi_decreasing'][0])
     
 
     assert(flows.is_TotalTravelTime_increasing(G,param.tol_thin_flow,source,sink)[0])

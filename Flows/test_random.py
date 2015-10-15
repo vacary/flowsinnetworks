@@ -25,7 +25,7 @@ def test_random_varyingdn():
             else:
                 gen_graph.generate_graph(degree,number_nodes,filename)
             
-            G= test.test_file([],filename,timeofevent=[0.0,100.0], inputflow=None)
+            G= test.test_file([],filename,timeofevent=[0.0,1000.0], inputflow=None)
             # if (not G.name['isF_Xbar_minus_increasing'][0]) and\
             #    (not G.name['isF_sink_minus_increasing'][0]):
             #     print(filename, ": the flow trough the cut and the sink is not increasing")
@@ -49,11 +49,14 @@ def test_random_varyingdn():
             if not G.name['is_der_phi_positive'][0]:
                 print(filename, ":der phi is not positive")
                 raw_input()
+            if abs(G.name['der_phi'][-1]) >= 1e-12 :
+                 print(filename, ":der phi is zero at equilibrium")
+                 raw_input()
 
-            print(" G.name['is_der_phi_increasing'][0]",  G.name['is_der_phi_increasing'][0])
-            if  G.name['is_der_phi_increasing'][0]:
-                print(filename, ":der phi is increasing")
-                raw_input()
+            print(" G.name['is_der_phi_decreasing'][0]",  G.name['is_der_phi_decreasing'][0])
+            if  not G.name['is_der_phi_decreasing'][0]:
+                print(filename, ":der phi is not decreasing")
+                #raw_input()
 
             kk=kk+1
             print('############################################################')
