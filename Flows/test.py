@@ -1018,7 +1018,7 @@ def test24(pars):
     flows.postprocess_flows_queues_cumulativeflows(G)
 
     flows.postprocess_extravalues(G, source, sink)
-    flows.display_graph(G)
+    #flows.display_graph(G)
     print("assertion=",flows.is_TotalTravelTime_increasing(G,param.tol_thin_flow,source,sink))
     # plot floas and labels
     with_draw=True
@@ -1043,6 +1043,7 @@ def test24(pars):
 
     
     print("G.name['max_flow']",G.name['max_flow'])
+    print("G.name['der_phi']",G.name['der_phi'])
     print("G.name['is_der_phi_positive']",G.name['is_der_phi_positive'][0])
     print("G.name['is_der_phi_decreasing']",G.name['is_der_phi_decreasing'][0])
     

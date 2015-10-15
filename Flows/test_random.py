@@ -45,7 +45,11 @@ def test_random_varyingdn():
             # if not G.name['isDerTotalTravelTime_decreasing'][0]:
             #     print(filename, ": the total travel time is not increasing")
             #     raw_input()
-            print(" G.name['is_der_phi_positive'][0]",  G.name['is_der_phi_positive'][0])
+            print("G.name['der_phi']",G.name['der_phi'])
+            print("G.name['is_der_phi_positive']",G.name['is_der_phi_positive'][0])
+            print("G.name['is_der_phi_decreasing']",G.name['is_der_phi_decreasing'][0])
+ 
+           
             if not G.name['is_der_phi_positive'][0]:
                 print(filename, ":der phi is not positive")
                 raw_input()

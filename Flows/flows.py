@@ -1919,7 +1919,7 @@ def compute_thin_flow_short_circuit(G, source, b, E1, demand=None, param = None)
     continue_while=True
     err=float('Inf')
 
-
+    short_circuit=False
     while (continue_while and k < param.nmax):
         print_debug( '#################################################################################')
  
@@ -1978,26 +1978,30 @@ def compute_thin_flow_short_circuit(G, source, b, E1, demand=None, param = None)
 
         continue_while = err >= param.tol_thin_flow and k < param.nmax
         #err= err/G.number_of_nodes()
+        print( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
 
         if P_current==P_previous:
             if I_current==I_previous:
-                print ("  Fixed point short attempt to short circuit")
+                print ("  Fixed point. Attempt to short circuit")
                 if solve_lp_for_shortcircuit(G,E1.edges(keys=True),P_current,I_current,bsave,oldsource):
-                    print ("  Fixed point short circuited")
+                    #print ("  Fixed point short circuited")
                     continue_while=False
+                    short_circuit=True
 
-
-        print( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
 
         k =k+1
 
 
     if (k < param.nmax) :
-        print( "  Fixed point suceeded. number of iterations :", k-1, 'erreur :', err, '<=', param.tol_thin_flow)
+        if short_circuit:
+            print( "  Fixed point short-circuited after", k-1, "iterations")
+        else:
+            print( "  Fixed point suceeded. number of iterations :", k-1, 'erreur :', err, '<=', param.tol_thin_flow)
     else:
         print( "  Fixed point number of iterations max reached :", k-1, 'erreur :', err, '>', param.tol_thin_flow)
 
 
+        
     print_debug("I=", I_current)
     print_debug("E_star=",E1.edges(keys=True))
     print_debug("Nombre d'iterations :", k)
@@ -2013,7 +2017,7 @@ def compute_thin_flow_short_circuit(G, source, b, E1, demand=None, param = None)
         b['s0']=None
 
 
-    print('################ end compute_thin_flow ###############')
+    print_debug('################ end compute_thin_flow ###############')
 
 
 def compute_thin_flow_ofzerosize(G, source, b, E1):
@@ -3392,8 +3396,7 @@ def postprocess_extravalues_der_phi(G, source, sink, inputflow):
                                                                            -G.node[e[0]]['label_thin_flow_overtime'][i]))
             
         G.name['der_phi'].append(sum_phi)
-    print("G.name[der_phi]", G.name['der_phi'])
-
+        
 def isF_Xbar_minus_increasing(G,tol):
     current_value =  G.name['f_Xbar_minus'][0]
     tk=0
@@ -3439,6 +3442,16 @@ def is_TotalTravelTime_increasing(G,tol,source,sink):
             return False, tk
     return True,  G.node[source]['label_thin_flow_overtime'][tk-1]
 
+def is_DerTotalTravelTime_decreasing(G,tol,source,sink):
+    current_value =  G.node[sink]['label_thin_flow_overtime'][0]
+    tk=0
+    for f in G.node[sink]['label_thin_flow_overtime']:
+        tk=tk+1
+        if (f > current_value+tol):
+            return False, tk
+        current_value=f
+    return True,  G.node[source]['label_thin_flow_overtime'][tk-1]
+
 def is_der_phi_positive(G,tol,source,sink):
     for v in G.name['der_phi']:
         #print("v",v)
@@ -3449,37 +3462,13 @@ def is_der_phi_positive(G,tol,source,sink):
 
 def is_der_phi_decreasing(G,tol,source,sink):
     previous_value=G.name['der_phi'][0]
-    print (G.name['der_phi'])
+    #print (G.name['der_phi'])
     for v in G.name['der_phi']:
-        print("v",v)
-        print("tol",tol)
-        print("previous_value",previous_value)
         if (v > previous_value):
             return False, v
         previous_value = v
     return True, v 
 
-def is_TotalTravelTimeplusqueues_increasing(G,tol,source,sink):
-    current_value =  G.node[sink]['label_overtime'][0] - G.node[source]['label_overtime'][0]
-    tk=0
-
-    for i in range(len(G.name['switching_times_z_e_sum'])-1):
-        time = G.name['switching_times_z_e_sum'][i]
-        tt = TotalTraveltime(G, source, sink, time) - G.name['z_e_sum'][i]
-        print("tt=",tt)
-        if (tt < current_value-tol):
-            return False,tt
-        return True,  G.node[source]['label_thin_flow_overtime'][tk-1]
-
-
-def is_DerTotalTravelTime_decreasing(G,tol,source,sink):
-    current_value =  G.node[sink]['label_thin_flow_overtime'][0]
-    tk=0
-    for f in G.node[sink]['label_thin_flow_overtime']:
-        tk=tk+1
-        if (f > current_value+tol):
-            return False, tk
-    return True,  G.node[source]['label_thin_flow_overtime'][tk-1]
 
 
 def plot_extravalues(G):
