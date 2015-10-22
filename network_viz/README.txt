@@ -45,9 +45,9 @@ be removed manually.
 
 To test this version:
 
-- Create a folder examples/:
+- Create a folder projects/:
 
-~ $ mkdir examples
+~ $ mkdir projects
 
 - Create a new project in the examples/ folder with the instruction:
 
