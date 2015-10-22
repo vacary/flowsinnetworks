@@ -401,7 +401,7 @@ class VtkNetworkAnimationLayer:
         delta_color = (max_color - min_color)/(1.0*numberOfTuples)
         
         for i in xrange(numberOfTuples+1):
-            color = (0,min_color + i*delta_color,min_color + i*delta_color,1)
+            color = (0,0*min_color + 0*i*delta_color,min_color + i*delta_color,1)
             self.lut.SetTableValue(i,color[0],color[1],color[2],color[3])
             
         self.vtkMapper.SetScalarRange(0,self.edges_max_f_e_minus)
