@@ -23,6 +23,8 @@ def check_required_packages():
         
         except ImportError, e:
             available_packages = False
+            if (package=='PIL'):
+                package = "PIL (from 'Pillow' Fork)"
             print ''.join(['[x]', ' ', package, ' : ', str(e)])
     
     return available_packages

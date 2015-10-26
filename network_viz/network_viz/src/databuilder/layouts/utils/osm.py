@@ -5,13 +5,15 @@
 import sys
 import os
 import random
-
-from databuilder.layouts.utils.mercator import merc_x
-from databuilder.layouts.utils.mercator import merc_y
+import unicodedata
 
 #Non standard library imports
 from lxml import etree
 import networkx as nx
+
+from databuilder.layouts.utils.mercator import merc_x
+from databuilder.layouts.utils.mercator import merc_y
+
 #import matplotlib.pyplot as plt
 
 class Node:
@@ -132,7 +134,7 @@ class OsmNetwork:
                     
                         time = self.get_edge_time(event, element)
                     
-                        self.G.add_edge(edge_tail, edge_head, time=time, capacity=capacity, geometry=str(geometry), name=name)
+                        self.G.add_edge(edge_tail, edge_head, time=time, capacity=capacity, geometry=str(geometry), osm_geometry=str(geometry), name=name)
                         self.G.add_node(edge_tail, pos = str(geometry[0]), nlabel= str(edge_tail))                        
                         self.G.add_node(edge_head, pos = str(geometry[-1]), nlabel= str(edge_head))
                         
@@ -188,6 +190,7 @@ class OsmNetwork:
         
         if ('name' in attr):
             name = attr['name']
+            name = unicodedata.normalize('NFKD', unicode(name)).encode('ascii', 'ignore')
         else:
             name = default_name
                 
@@ -205,7 +208,7 @@ class OsmNetwork:
 
         if ('highway' in attr):
             
-            if (attr['highway'] in ['primary','secondary','tertiary','residential','motorway','primary_link','motorway_link']):
+            if (attr['highway'] in ['primary', 'secondary', 'tertiary', 'residential', 'motorway', 'primary_link', 'motorway_link']):
 
                 ans = True
 
@@ -270,4 +273,25 @@ class OsmNetwork:
         
         for node in nodesToRemove:
             self.G.remove_node(node)        
+        
+        
+def reset_osm_geometry(G):
+    
+    for edge in list(G.edges(keys=True)):
+         
+        edge_tail   = G.node[edge[0]]
+        edge_head   = G.node[edge[1]]
+        edge_id     = edge[2]
+        
+        # Available access to edge attributes using the format: 
+        # G.edge[edge[0]][edge[1]][edge_id]['attr']
+
+        current_edge = G.edge[edge[0]][edge[1]][edge_id]
+        
+        current_edge['geometry'] = current_edge['osm_geometry']
+        
+    return None    
+            
+                        
+
         

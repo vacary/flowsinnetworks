@@ -25,20 +25,6 @@ def check_empty_entries(arg_lst):
     
     return valid_entries    
 
-def appendAndGetRequiredPaths(callFromUpdate,NETWORK_NAME):
-    
-    if (callFromUpdate == '1'):
-        network_path = os.path.abspath(os.path.join('.','projects',NETWORK_NAME))
-        layouts_path = os.path.abspath(os.path.join('.','src','build','layouts'))
-    else:
-        network_path = os.path.abspath(os.path.join('..','..','projects',NETWORK_NAME))
-        layouts_path = os.path.abspath(os.path.join('..','..','src','build','layouts'))
-
-    sys.path.append(network_path)
-    sys.path.append(layouts_path)
-
-    return network_path
-
 if __name__ == "__main__":
 
     """ Network visualization layout 
@@ -74,7 +60,6 @@ if __name__ == "__main__":
                 import databuilder.layouts.utils.gviz as gviz_layouts # to be used when custom_layout = 0
                 import databuilder.layouts.utils.geometry as gvtk
                 
-                graph_data = ns.network_graph_data()
                 data_path = os.path.join(PROJECT_DIR_PATH,'data')
                 rsc_path = os.path.join(PROJECT_DIR_PATH,'rsc')
                 
@@ -89,8 +74,7 @@ if __name__ == "__main__":
                 try:
                     network_gml_file_path = os.path.join(data_path,NETWORK_NAME+'.gml')     
                     
-                    G = nx.read_gml(network_gml_file_path)
-                    G = nx.MultiDiGraph(G)
+                    G = nx.MultiDiGraph(nx.read_gml(network_gml_file_path))
                         
                 except:
 

@@ -26,6 +26,19 @@ def check_empty_entries(arg_lst):
     
     return valid_entries
 
+def remove_non_reachable_G_nodes_from_source(G, source):
+    
+    reachablesFromSource = nx.descendants(G, source)
+    nodesToRemove = []
+    
+    for node in G.nodes_iter():
+        if (node not in reachablesFromSource):
+            if (node != source):
+                nodesToRemove.append(node)
+    
+    for node in nodesToRemove:
+        G.remove_node(node)
+
 def graphFilter(G,node_source,node_sink):
     
     H = nx.MultiDiGraph()
@@ -64,8 +77,22 @@ def graphFilter(G,node_source,node_sink):
             name = data['name']
         except:
             name = '[]'
-                
-        H.add_edge(u,v, time = time, capacity = capacity, switching_times = sw_time, z_e_overtime = z_e_time, f_e_plus_overtime = f_e_plus, f_e_minus_overtime = f_e_minus, geometry=geometry, name=name)
+    
+        try:
+            osm_geometry = data['osm_geometry']
+        except:
+            osm_geometry = '[]'    
+        
+        H.add_edge(u, v,
+                    time=time,
+                    capacity=capacity, 
+                    switching_times=sw_time, 
+                    z_e_overtime=z_e_time, 
+                    f_e_plus_overtime=f_e_plus, 
+                    f_e_minus_overtime=f_e_minus, 
+                    geometry=geometry, 
+                    osm_geometry=osm_geometry,
+                    name=name)
 
     return H
 
@@ -107,11 +134,13 @@ if __name__ == "__main__":
             graph_data      = ns.network_graph_data()
             data_path       = os.path.join(PROJECT_DIR_PATH,'data')
             
-            G               = graph_data[0]
+            G               = nx.MultiDiGraph(graph_data[0])
             node_source     = graph_data[1]
             node_sink       = graph_data[2]
             TIME_OF_EVENT   = ns.TIME_OF_EVENT
             INPUT_FLOW      = ns.INPUT_FLOW
+        
+            remove_non_reachable_G_nodes_from_source(G, node_source) #important!
             
             if (len(G.nodes())) > 0:
                         

@@ -26,6 +26,10 @@ def setBackground(renderer):
     
     """
     
+    # Default v.0.1
+    
+    renderer.SetBackground(17/255.0, 17/255.0, 17/255.0)
+    
     # Black to gray
     
     #renderer.GradientBackgroundOn()

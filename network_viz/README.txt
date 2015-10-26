@@ -24,7 +24,7 @@ Written in Python, this program needs the following packages:
 - matplotlib	/ '1.3.1'
 - pygraphviz 
 - lxml 
-- Pillow (Python Imaging Library) >= 2.0.0
+- PIL (From Pillow Fork, Pillow >= 2.0.0)
 
 * Python Version : 2.7.6
 
@@ -45,9 +45,9 @@ be removed manually.
 
 To test this version:
 
-- Create a folder projects/:
+- Create a folder examples/:
 
-~ $ mkdir projects
+~ $ mkdir examples
 
 - Create a new project in the examples/ folder with the instruction:
 

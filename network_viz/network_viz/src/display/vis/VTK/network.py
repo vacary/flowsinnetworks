@@ -401,7 +401,7 @@ class VtkNetworkAnimationLayer:
         delta_color = (max_color - min_color)/(1.0*numberOfTuples)
         
         for i in xrange(numberOfTuples+1):
-            color = (0,0*min_color + 0*i*delta_color,min_color + i*delta_color,1)
+            color = (0, min_color + i*delta_color, min_color + i*delta_color, 1)
             self.lut.SetTableValue(i,color[0],color[1],color[2],color[3])
             
         self.vtkMapper.SetScalarRange(0,self.edges_max_f_e_minus)
@@ -812,7 +812,8 @@ class VtkNetworkStaticLayer:
             default_width_multiplier = edge_capacity/self.edges_max_capacity
             self.vtkRadiusFactors.SetTuple1(pointId, default_width_multiplier) # assign radius factor to point
 
-        color = [int(0.35*255),int(0.35*255),int(0.35*255),int(255)]
+        #color = [int(0.35*255),int(0.35*255),int(0.35*255),int(255)]
+        color = [int(65),int(65),int(65),int(255)]
         self.vtkColors.InsertNextTupleValue(color)
 
     def setCellColorById(self, cell_id, color_tuple):
@@ -1012,7 +1013,8 @@ class VtkNetworkNodesLayer:
                 
             else:
                 
-                color = [85,85,85,255]
+                #color = [85,85,85,255]
+                color = [60,60,60,255]
                 
             self.vtkColors.InsertNextTupleValue(color)
             

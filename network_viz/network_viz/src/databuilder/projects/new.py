@@ -2,7 +2,7 @@
 import os
 import sys
 
-def set_vis_content(file,vname):
+def set_vis_content(file, vname):
     
     content = '''# Visualization network settings
     
@@ -34,6 +34,7 @@ CUSTOM_LAYOUT = 0
 
 #####################################################
 
+project_dir_path = os.path.abspath(os.path.join(os.getcwd(), NETWORK_NAME))
 
 def network_graph_data():
 
@@ -72,7 +73,7 @@ def network_custom_layout (G):
     
     #[ Create file with layout information ]
     
-    gviz_file_path = os.path.abspath(os.path.join(current_dir_path, 'rsc', 'gviz', ''.join((NETWORK_NAME,'_custom.txt'))))
+    gviz_file_path = os.path.join(project_dir_path, 'rsc', 'gviz', ''.join((NETWORK_NAME,'_custom.txt')))
     
     A = nx.to_agraph(G)
     A.draw(gviz_file_path, format='plain', prog=graphviz_prog, args=graphviz_args)
@@ -81,7 +82,7 @@ def network_custom_layout (G):
     # A.draw(gviz_file_path.replace('.','')+'.png', format='png', prog=graphviz_prog, args=graphviz_args)
     
     # [ Load the file with the layout information ]
-    gviz_file_path = os.path.abspath(os.path.join(current_dir_path, 'rsc', 'gviz',''.join((NETWORK_NAME, '_custom.txt'))))
+    gviz_file_path = os.path.abspath(os.path.join(project_dir_path, 'rsc', 'gviz',''.join((NETWORK_NAME, '_custom.txt'))))
     gviz_layouts.addGeometryFromGVizFile(G, gviz_file_path, splines_degree=3, number_of_points=50) # important!
     
     return None ''' % ( vname )

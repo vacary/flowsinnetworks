@@ -15,7 +15,7 @@ import vtk
 # Requires temp file to store the temporal edge information
 temp_file_path =  os.path.join(os.path.dirname(__file__),'..','..','..','..','temp','data.txt')
 
-class CustomInteractorStyle(vtk.vtkInteractorStyleRubberBand3D):
+class CustomInteractorStyle(vtk.vtkInteractorStyleImage):
     
     """ Custom interactor style
     

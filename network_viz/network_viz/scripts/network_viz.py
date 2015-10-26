@@ -3,6 +3,7 @@
 # Standard library imports
 import os
 import sys
+import argparse
 
 # Paths
 
@@ -19,6 +20,8 @@ sys.path.append(root_dir_path)
 sys.path.append(vroot_dir_path)
 sys.path.append(src_dir_path)
 
+CURRENT_DIR_PATH = os.getcwd()
+
 ## Auxiliary paths
 
 #---
@@ -30,51 +33,57 @@ file_path_build         = os.path.join(src_dir_path,'databuilder','build.py') ##
 file_path_start         = os.path.join(src_dir_path,'display','main.py') ## Program to run the visualization GUI
 #---
 
-if __name__ == "__main__":
+# Argument Parser
+
+parser = argparse.ArgumentParser(description="[FlowsInNetworks] - Visualization software prototype 'network_viz'")
+parser.add_argument('--new', metavar=('PROJECT_NAME'), help='Creates a new visualization project in the current working folder.', nargs=1, type=str)
+parser.add_argument('--update', metavar=('PROJECT_NAME'), help='Full update for a visualization project.', nargs=1, type=str)
+parser.add_argument('--update-layout', metavar=('PROJECT_NAME'), help='Layout data update.', nargs=1, type=str)
+parser.add_argument('--update-sample', metavar=('PROJECT_NAME'), help='Simulation data sample update.', nargs=1, type=str)
+parser.add_argument('--start', metavar=('PROJECT_NAME'), help='Start the visualization GUI for an updated project.', nargs=1, type=str)
+
+args = parser.parse_args()
+
+if args.new is not None:
     
-    # List of available options
+    NETWORK_NAME = args.new.pop()
+    sys.argv = ['new.py', NETWORK_NAME]
+    execfile(file_path_new_project)
 
-    options_list    = ['--start', '--update', '--new']
+if args.update is not None:
 
-    # Check if sys.argv values are valid entries
-
-    is_valid_entry = True
-
-    try:
-        entry_filename = sys.argv[0]
-        entry_option = sys.argv[1]
-        entry_network_name = sys.argv[2]
-    except:
-        is_valid_entry = False
+    NETWORK_NAME = args.update.pop()    
+    PROJECT_DIR_PATH = os.path.abspath(os.path.join(CURRENT_DIR_PATH, NETWORK_NAME))
+    sys.path.append(os.path.abspath(os.path.join('.')))
+    sys.argv = ['build.py', NETWORK_NAME, PROJECT_DIR_PATH]
+    execfile(file_path_build)
     
-    if (is_valid_entry):
-        
-        NETWORK_NAME = entry_network_name.replace('.','')
-        
-        CURRENT_DIR_PATH = os.getcwd()
-        
-        PROJECT_DIR_PATH = os.path.abspath(os.path.join(CURRENT_DIR_PATH, NETWORK_NAME))
-        sys.path.append(os.path.abspath(os.path.join('.')))
+if args.update_layout is not None:
+    
+    NETWORK_NAME = args.update_layout.pop()    
+    PROJECT_DIR_PATH = os.path.abspath(os.path.join(CURRENT_DIR_PATH, NETWORK_NAME))
+    sys.path.append(os.path.abspath(os.path.join('.')))
+    sys.argv = ['set.py', NETWORK_NAME, PROJECT_DIR_PATH]
+    execfile(file_path_set)
+    
+if args.update_sample is not None:
+    
+    NETWORK_NAME = args.update_sample.pop()    
+    PROJECT_DIR_PATH = os.path.abspath(os.path.join(CURRENT_DIR_PATH, NETWORK_NAME))
+    sys.path.append(os.path.abspath(os.path.join('.')))
+    
+    sys.argv = ['gen.py', NETWORK_NAME, PROJECT_DIR_PATH]
+    execfile(file_path_sampler)
+    sys.argv = ['set.py', NETWORK_NAME, PROJECT_DIR_PATH]
+    execfile(file_path_set)
+    
+    
+if args.start is not None:
 
-        is_valid_option = entry_option in options_list
+    NETWORK_NAME = args.start.pop()
+    PROJECT_DIR_PATH = os.path.abspath(os.path.join(CURRENT_DIR_PATH, NETWORK_NAME))
+    sys.path.append(os.path.abspath(os.path.join('.')))
+    sys.argv = ['main.py', NETWORK_NAME, PROJECT_DIR_PATH]
+    execfile(file_path_start)
 
-        if (is_valid_option):
-            
-            if (entry_option == '--new'):
-                sys.argv = ['new.py', NETWORK_NAME]
-                execfile(file_path_new_project)
-                
-            if (entry_option == '--update'):
-                sys.argv = ['build.py', NETWORK_NAME, PROJECT_DIR_PATH]
-                execfile(file_path_build)
-                
-            if (entry_option == '--start'):
-                sys.argv = ['main.py', NETWORK_NAME, PROJECT_DIR_PATH]
-                execfile(file_path_start)
-                
-    else:
-        
-        print '[MSG] Non valid options'
-        
-        
-        
+
