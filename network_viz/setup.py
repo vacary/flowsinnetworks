@@ -1,4 +1,5 @@
 from setuptools import setup
+import os
 
 # Provisory setup
 
@@ -31,11 +32,12 @@ def check_required_packages():
 
 
 if (check_required_packages()):
-
-    setup(version='0.1',
-        name='network_viz',
-        description='Flowsinnetworks visualization prototype',
-        scripts=['./network_viz/scripts/network_viz.py'],
-    )
+    with open('./network_viz/scripts/network_viz.py', "wt") as fout:
+        with open('./network_viz/scripts/network_viz.py.in', "rt") as fin:
+            for line in fin:
+                fout.write(line.replace('@ROOT_DIR_PATH','\"'+ str(os.path.join(os.getcwd(),"../")+'\"')))
+                
+    
+    setup(version='0.1', name='network_viz', description='Flowsinnetworks visualization prototype', scripts=['./network_viz/scripts/network_viz.py'],)
 else:
     print 'Error: network_viz.py script was not installed'
