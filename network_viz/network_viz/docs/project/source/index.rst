@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome
-=======
+========
 
 The goal of this project is to design and develop software
 prototypes for the simulation and the visualization of dynamic flows in networks.
@@ -15,7 +15,8 @@ dynamic equilibria from time varying flows.
 A quick start guide to use this software, and general documentation,
 will be available in this website (currently under development).
 
-|
+Project Members
+---------------
 
 **Project Admin**:
 
@@ -23,8 +24,27 @@ will be available in this website (currently under development).
 
 **Members**:
 
+* Jean-Nicolas Roussel
 * Roberto Cominetti
 * Maximiliano Olivares <maximiliano.olivares@inria.cl>
 
+|
+
+Contents
+========
+
 .. toctree::
-   :maxdepth: 2
+  :maxdepth: 2
+
+  installing
+  start
+  examples
+  dev
+
+|
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+|
