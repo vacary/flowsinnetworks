@@ -20,7 +20,7 @@ Before install the network_viz.py script, is necessary to check if the following
 
 The program was developed under the Python version 2.7.6.
 
-How to install
+How to Install
 --------------
 
 After download the project folder *flowsinnetworks*, the software can be installed using the available file setup.py
@@ -36,7 +36,7 @@ Optionally, you can use::
 ~network_viz$ python setup.py install --user --record files.txt
 
 to record the files created from the installation. This information will be usefull to remove the script, if necessary,
-which requires delete the files listed in files.txt manually.
+which requires to delete the files listed in files.txt manually.
 
 After the setup.py execution, the script *network_viz.py* will be installed in the folder commented in the line::
 
