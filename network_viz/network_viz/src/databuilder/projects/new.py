@@ -20,7 +20,7 @@ import networkx as nx
 NETWORK_NAME = "%s"
 TYPE = "network"
 
-# Simulation parameter
+# Simulation parameters
 TIME_OF_EVENT = [0.0,50.0]
 INPUT_FLOW = [4.0]
 

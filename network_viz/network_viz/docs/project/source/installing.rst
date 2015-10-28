@@ -2,7 +2,7 @@ Installing network_viz
 =======================
 
 The network_viz software can be used after installing the script *network_viz.py*, using an available setup.py file.
-Before installing this script, is necessary verify a list of required libraries for its execution.
+Before installing this script, it is necessary verify the installation of some required libraries for its execution.
 
 Requirements
 --------------
@@ -26,12 +26,12 @@ How to Install
 After download the project folder *flowsinnetworks*, the software can be installed using the available file setup.py
 in the subfolder *network_viz*.
 
-The recommended way to install this program is using a local install, which do not require administrative privileges
+The recommended way to install this program is using a local installation, which do not require administrative privileges
 with the instruction::
 
 ~network_viz$ python setup.py install --user
 
-Optionally, you can use::
+Optionally, can be used::
 
 ~network_viz$ python setup.py install --user --record files.txt
 
@@ -42,7 +42,7 @@ After the setup.py execution, the script *network_viz.py* will be installed in t
 
   Installing network_viz.py script to /path/to/dir
 
-Check that the /path/to/dir is in the $PATH variable. If not, it can be added from the terminal with::
+Check that the /path/to/dir is in the $PATH variable. If not, it can be temporarily added from the terminal with::
 
 ~$ export PATH=/path/to/dir:$PATH
 
@@ -50,4 +50,4 @@ To confirm that the script was installed properly, after type::
 
 ~$ network_viz.py -h
 
-you will be able to see the script usage information, at any location.
+must be displayed the script usage information, at any location.

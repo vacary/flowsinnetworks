@@ -1,4 +1,4 @@
-Developers' guide
+Developers' Guide
 ===================
 
 [ Under development ]
