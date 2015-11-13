@@ -8,6 +8,8 @@ Subpackages
 
     databuilder.layouts
     databuilder.projects
+    databuilder.sampler
+    databuilder.sim
 
 Submodules
 ----------
