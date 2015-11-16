@@ -1160,6 +1160,452 @@ def maxflow_mincut_by_lp(G,source,sink) :
     return  vf.varValue,X, comp_X
 
 
+def steady_state_thin_flow_lp(G,b,source,tol) :
+
+    if (debug_print==False):
+        #swiglpk.glp_msg_lev(swiglpk.GLP_MSG_OFF)
+        #swiglpk.glp_smcp.msg_lev =0
+        swiglpk.glp_term_out(swiglpk.GLP_OFF)
+
+    global debug_print
+    debug_print=False
+
+    print_debug('################ start  steady_state_thin_flow_lp(G,b,source,tol) ###############')
+    display_graph(G,print_debug)
+
+    lp = swiglpk.glp_create_prob();
+    swiglpk.glp_set_prob_name(lp, "steady_state")
+    swiglpk.glp_set_obj_dir(lp, swiglpk.GLP_MIN);
+
+    ncol=G.number_of_edges()
+    nrow=G.number_of_nodes()
+
+    if (ncol ==0 or nrow ==0):
+        print('Warning: no edges in the problem of sparsest cut')
+        #quit()
+        return 0.0,[],[n for n in G.edges()]
+
+    swiglpk.glp_add_cols(lp, ncol);
+
+    # size of the sparse storage of A
+    nnz=2*G.number_of_edges()
+    for n in G.nodes():
+        for ee in G.out_edges(n):
+            nnz=nnz+1
+        for ee in G.in_edges(n):
+            nnz=nnz+1
+
+    nnz=nnz+1
+    #nnz=nnz+1
+
+    #print_debug('nnz=',nnz)
+    ia = swiglpk.intArray(nnz); ja = swiglpk.intArray(nnz); ar = swiglpk.doubleArray(nnz);
+
+    i=0
+    x_edge={}
+    for e in G.edges(keys=True):
+        i=i+1
+        name = 'x_' + str(e[0])+'_'+str(e[1])+'_'+str(e[2])
+        # if (e[0]==source and e[1]=='s'):
+        #     x_init=i
+        x_edge[e]=i
+        swiglpk.glp_set_col_name(lp, i, name);
+        swiglpk.glp_set_col_bnds(lp, i, swiglpk.GLP_DB, 0.0,  G[e[0]][e[1]][e[2]]['capacity']);
+        swiglpk.glp_set_obj_coef(lp, i, G[e[0]][e[1]][e[2]]['time']);
+
+    #print_debug("x_edge:", drepr(x_edge))
+
+    swiglpk.glp_add_rows(lp,nrow);
+    i=0
+    nz=0
+
+    for n in G.nodes():
+        i=i+1
+        name = 'balance_' + str(n)
+        swiglpk.glp_set_row_name(lp, i, name);
+        swiglpk.glp_set_row_bnds(lp, i, swiglpk.GLP_FX,b[n] ,b[n]);
+        for ee in G.out_edges(n,keys=True):
+            nz=nz+1
+            #print_debug("ia[",nz,"] = ",i,"; ja[",nz,"] = x_edge[",ee,"] = ", x_edge[ee] ,"; ar[",nz,"] = 1.0")
+            ia[nz] = i; ja[nz] = x_edge[ee]; ar[nz] = 1.0
+        for ee in G.in_edges(n,keys=True):
+            nz=nz+1
+            #print_debug("ia[",nz,"] = ",i,"; ja[",nz,"] = x_edge[",ee,"] = ", x_edge[ee] ,"; ar[",nz,"] = -1.0")
+            ia[nz] = i; ja[nz] = x_edge[ee]; ar[nz] = -1.0; # a[i,i+1] = -1.0
+
+    #for i in range(1,nz+1)    :
+    #    print_debug( ia[i], ja[i], ar[i])
+    #print_debug'nz =', nz)
+    #print_debug([ (ia[i], ja[i], ar[i]) for i in  range(1,nz) ] )
+
+    swiglpk.glp_load_matrix(lp, nz, ia, ja, ar);
+    swiglpk.glp_write_lp(lp, None, "steady_state.lp");
+    if debug_check:
+        global swiglpk_f_counter
+        swiglpk_f_counter +=1
+        if (swiglpk_f_counter >= 0):
+            s_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.lp'
+            print("s_filename", s_filename)
+            swiglpk.glp_write_lp(lp, None, s_filename);
+
+
+        if (swiglpk_f_counter < -1) : # >= 185):
+
+            fig = plt.figure()
+            #nx.draw_graphviz(G)
+
+            nx.draw_graphviz(G,node_color='#A0CBE2', with_labels=True, with_edge_labels=True)
+            #nx.draw_networkx_edge_labels(G,pos=nx.spring_layout(G))
+
+            fig_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.png'
+            plt.savefig(fig_filename)
+            plt.close(fig)
+            gml_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.gml'
+            GG = nx.MultiDiGraph()
+            GG.add_nodes_from(G.nodes())
+            GG.add_edges_from(G.edges())
+            for e in G.edges(keys=True):
+                GG[e[0]][e[1]][e[2]]['capacity']=  G[e[0]][e[1]][e[2]]['capacity']
+            nx.write_gml(GG,gml_filename)
+
+            b_numpy= np.zeros(len(b))
+            i=0
+            for n in G.nodes():
+                b_numpy[i]= b[n]
+                i=i+1
+            b_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'_b.npy'
+            np.save(b_filename,b_numpy)
+
+
+
+
+    parm = swiglpk.glp_smcp()
+    swiglpk.glp_init_smcp(parm)
+    parm.tol_bnd=tol
+
+    print_debug("parm.tol_bnd = ", parm.tol_bnd )
+
+    swiglpk.glp_simplex(lp, parm);
+
+    STATUS = swiglpk.glp_get_status(lp);
+    if STATUS != swiglpk.GLP_OPT:
+        raise RuntimeError("GLPK simplex failed !!!! \n")
+
+    cost = swiglpk.glp_get_obj_val(lp)
+    i=0
+    flow={}
+    for e in G.edges(keys=True):
+        i=i+1
+        name = 'x_' + str(e[0])+'_'+str(e[1])+'_'+str(e[2])
+        flow[e] = swiglpk.glp_get_col_prim(lp, i)
+        print_debug(name, '=', flow[e])
+
+    # for j  in range(1,ncol+1)  :
+    #     col_name = swiglpk.glp_get_col_name(lp,j)
+    #     col_stat = swiglpk.glp_get_col_stat(lp,j)
+    #     col_prim = swiglpk.glp_get_col_prim(lp,j)
+    #     col_dual = swiglpk.glp_get_col_dual(lp,j)
+    #     print_debug("status of col var:",col_name, '=', col_stat)
+    #     print_debug("col_prim of :",col_name, '=', col_prim)
+    #     print_debug("col_dual of :",col_name, '=', col_dual)
+
+    #     if col_stat==swiglpk.GLP_BS :
+    #         print_debug("The variable ",col_name, 'is a basic variable')
+    #     elif col_stat==swiglpk.GLP_NL :
+    #         print_debug("The variable ",col_name, 'is a non-basic variable on its lower bound')
+    #     elif col_stat==swiglpk.GLP_NU :
+    #         print_debug("The variable ",col_name, 'is a non-basic variable on its upper bound')
+    #     elif col_stat==swiglpk.GLP_NF :
+    #         print_debug("The variable ",col_name, 'is a non-basic free (unbounded) variable')
+    #     elif col_stat==swiglpk.GLP_NS :
+    #         print_debug("The variable ",col_name, 'is a non-basic fixed  variable')
+
+    # for i  in range(1,nrow+1)  :
+    #     row_name = swiglpk.glp_get_row_name(lp,i)
+    #     row_stat = swiglpk.glp_get_row_stat(lp,i)
+    #     row_prim = swiglpk.glp_get_row_prim(lp,i)
+    #     row_dual = swiglpk.glp_get_row_dual(lp,i)
+    #     print_debug("status of row var:",row_name, '=', row_stat)
+    #     print_debug("row_prim of :",row_name, '=', row_prim)
+    #     print_debug("row_dual of :",row_name, '=', row_dual)
+    #     if row_stat==swiglpk.GLP_BS :
+    #         print_debug("The variable ",row_name, 'is a basic variable')
+    #     elif row_stat==swiglpk.GLP_NL :
+    #         print_debug("The variable ",row_name, 'is a non-basic variable on its lower bound')
+    #     elif row_stat==swiglpk.GLP_NU :
+    #         print_debug("The variable ",row_name, 'is a non-basic variable on its upper bound')
+    #     elif row_stat==swiglpk.GLP_NF :
+    #         print_debug("The variable ",row_name, 'is a non-basic free (unbounded) variable')
+    #     elif row_stat==swiglpk.GLP_NS :
+    #         print_debug("The variable ",row_name, 'is a non-basic fixed  variable')
+
+
+    #for j in range(1,nrow)  :
+    #    print_debug'swiglpk.glp_get_row_dual(lp, ',j,')= ',swiglpk.glp_get_row_dual(lp, j) )
+
+    swiglpk.glp_delete_prob(lp);
+
+    if debug_check:
+        for n in G.nodes():
+            balance = b[n]
+            for ee in G.out_edges(n,keys=True):
+                balance = balance-flow[ee]
+            for ee in G.in_edges(n,keys=True):
+                balance =balance+flow[ee]
+            assert(abs(balance)<tol)
+
+    debug_print = False
+
+    return cost,flow
+
+
+
+def steady_state_queues_labels_lp(G,b,source,sink,tol, offset=None) :
+
+    if (debug_print==False):
+        #swiglpk.glp_msg_lev(swiglpk.GLP_MSG_OFF)
+        #swiglpk.glp_smcp.msg_lev =0
+        swiglpk.glp_term_out(swiglpk.GLP_OFF)
+
+    global debug_print
+    debug_print=False
+
+    print_debug('################ start  steady_state_queues_labels_lp(G,b,source,tol) ###############')
+    display_graph(G,print_debug)
+
+    lp = swiglpk.glp_create_prob();
+    swiglpk.glp_set_prob_name(lp, "steady_state_queuedelay")
+    swiglpk.glp_set_obj_dir(lp, swiglpk.GLP_MAX);
+
+    ncol=G.number_of_edges()+G.number_of_nodes()
+    nrow=G.number_of_edges()
+
+    if (ncol ==0 or nrow ==0):
+        print('Warning: no edges in the problem of sparsest cut')
+        #quit()
+        return 0.0,[],[n for n in G.edges()]
+
+    swiglpk.glp_add_cols(lp, ncol);
+
+    # size of the sparse storage of A
+    nnz=2*G.number_of_edges()
+    for n in G.nodes():
+        for ee in G.out_edges(n):
+            nnz=nnz+1
+        for ee in G.in_edges(n):
+            nnz=nnz+1
+
+    nnz=nnz+1
+    #nnz=nnz+1
+
+    #print_debug('nnz=',nnz)
+    ia = swiglpk.intArray(nnz); ja = swiglpk.intArray(nnz); ar = swiglpk.doubleArray(nnz);
+
+    i=0
+    q_edge={}
+    for e in G.edges(keys=True):
+        i=i+1
+        name = 'q_' + str(e[0])+'_'+str(e[1])+'_'+str(e[2])
+        # if (e[0]==source and e[1]=='s'):
+        #     x_init=i
+        q_edge[e]=i
+        swiglpk.glp_set_col_name(lp, i, name);
+        swiglpk.glp_set_col_bnds(lp, i, swiglpk.GLP_LO, 0.0,  0.0);
+        swiglpk.glp_set_obj_coef(lp, i, - G[e[0]][e[1]][e[2]]['capacity']);
+
+
+    l_node={}
+    for n in G.nodes():
+        i=i+1
+        name = 'l_' + str(n)
+        l_node[n]=i
+        swiglpk.glp_set_col_name(lp, i, name);
+        if n == source:
+            if offset == None:
+                swiglpk.glp_set_col_bnds(lp, i, swiglpk.GLP_FX, 0.0,  0.0);
+            else:
+                swiglpk.glp_set_col_bnds(lp, i, swiglpk.GLP_FX, offset,  offset);
+        else :
+            swiglpk.glp_set_col_bnds(lp, i, swiglpk.GLP_FR, 0.0,  0.0);
+
+        swiglpk.glp_set_obj_coef(lp, i, -b[n]);
+    #print_debug("x_edge:", drepr(x_edge))
+
+
+    swiglpk.glp_add_rows(lp,nrow);
+    i=0
+    nz=0
+
+    for e in G.edges(keys=True):
+       i=i+1
+       name = 'timedelay_' + str(e[0])+'_'+str(e[1])+'_'+str(e[2])+'_'+str(i)
+       swiglpk.glp_set_row_name(lp, i, name);
+       swiglpk.glp_set_row_bnds(lp, i, swiglpk.GLP_UP, 0.0, G[e[0]][e[1]][e[2]]['time'] );
+       nz=nz+1
+       ia[nz] = i; ja[nz] = q_edge[e]; ar[nz] = -1.0;
+
+       nz=nz+1
+       #print_debug("ia[",nz,"] = ",i,"; ja[",nz,"] = ",i+1 ,"; ar[",nz,"] = -1.0")
+       ia[nz] = i; ja[nz] = l_node[e[0]]; ar[nz] = -1.0; # a[i,i+1] = 1.0
+
+       nz=nz+1
+       #print_debug("ia[",nz,"] = ",i,"; ja[",nz,"] = ",i+1 ,"; ar[",nz,"] = -1.0")
+       ia[nz] = i; ja[nz] = l_node[e[1]]; ar[nz] = 1.0; # a[i,i+1] = 1.0
+
+
+    #for i in range(1,nz+1)    :
+    #    print_debug( ia[i], ja[i], ar[i])
+    #print_debug'nz =', nz)
+    #print_debug([ (ia[i], ja[i], ar[i]) for i in  range(1,nz) ] )
+
+    swiglpk.glp_load_matrix(lp, nz, ia, ja, ar);
+    swiglpk.glp_write_lp(lp, None, "steady_state_queues.lp");
+    if debug_check:
+        global swiglpk_f_counter
+        swiglpk_f_counter +=1
+        if (swiglpk_f_counter >= 0):
+            s_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.lp'
+            print("s_filename", s_filename)
+            swiglpk.glp_write_lp(lp, None, s_filename);
+
+
+        if (swiglpk_f_counter < -1) : # >= 185):
+
+            fig = plt.figure()
+            #nx.draw_graphviz(G)
+
+            nx.draw_graphviz(G,node_color='#A0CBE2', with_labels=True, with_edge_labels=True)
+            #nx.draw_networkx_edge_labels(G,pos=nx.spring_layout(G))
+
+            fig_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.png'
+            plt.savefig(fig_filename)
+            plt.close(fig)
+            gml_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'.gml'
+            GG = nx.MultiDiGraph()
+            GG.add_nodes_from(G.nodes())
+            GG.add_edges_from(G.edges())
+            for e in G.edges(keys=True):
+                GG[e[0]][e[1]][e[2]]['capacity']=  G[e[0]][e[1]][e[2]]['capacity']
+            nx.write_gml(GG,gml_filename)
+
+            b_numpy= np.zeros(len(b))
+            i=0
+            for n in G.nodes():
+                b_numpy[i]= b[n]
+                i=i+1
+            b_filename = flowstmpdir_directory + '/sparsest_glpk_'+str(swiglpk_f_counter).zfill(5)+'_b.npy'
+            np.save(b_filename,b_numpy)
+
+
+
+
+    parm = swiglpk.glp_smcp()
+    swiglpk.glp_init_smcp(parm)
+    parm.tol_bnd=tol
+
+    print_debug("parm.tol_bnd = ", parm.tol_bnd )
+
+    swiglpk.glp_simplex(lp, parm);
+
+    STATUS = swiglpk.glp_get_status(lp);
+    if STATUS != swiglpk.GLP_OPT:
+        raise RuntimeError("GLPK simplex failed !!!! \n")
+
+    cost = swiglpk.glp_get_obj_val(lp)
+    i=0
+    queue={}
+    for e in G.edges(keys=True):
+        i=i+1
+        name = 'z_' + str(e[0])+'_'+str(e[1])+'_'+str(e[2])
+        queue[e] = swiglpk.glp_get_col_prim(lp, i) * G[e[0]][e[1]][e[2]]['capacity']
+        print_debug(name, '=', queue[e])
+    label={}
+    for n in G.nodes():
+        i=i+1
+        name = 'l_' + str(n)
+        label[n] = swiglpk.glp_get_col_prim(lp, i)
+        print_debug(name, '=', label[n])
+
+    for j  in range(1,ncol+1)  :
+        col_name = swiglpk.glp_get_col_name(lp,j)
+        col_stat = swiglpk.glp_get_col_stat(lp,j)
+        col_prim = swiglpk.glp_get_col_prim(lp,j)
+        col_dual = swiglpk.glp_get_col_dual(lp,j)
+        print_debug("status of col var:",col_name, '=', col_stat)
+        print_debug("col_prim of :",col_name, '=', col_prim)
+        print_debug("col_dual of :",col_name, '=', col_dual)
+
+        if col_stat==swiglpk.GLP_BS :
+            print_debug("The variable ",col_name, 'is a basic variable')
+        elif col_stat==swiglpk.GLP_NL :
+            print_debug("The variable ",col_name, 'is a non-basic variable on its lower bound')
+        elif col_stat==swiglpk.GLP_NU :
+            print_debug("The variable ",col_name, 'is a non-basic variable on its upper bound')
+        elif col_stat==swiglpk.GLP_NF :
+            print_debug("The variable ",col_name, 'is a non-basic free (unbounded) variable')
+        elif col_stat==swiglpk.GLP_NS :
+            print_debug("The variable ",col_name, 'is a non-basic fixed  variable')
+
+    for i  in range(1,nrow+1)  :
+        row_name = swiglpk.glp_get_row_name(lp,i)
+        row_stat = swiglpk.glp_get_row_stat(lp,i)
+        row_prim = swiglpk.glp_get_row_prim(lp,i)
+        row_dual = swiglpk.glp_get_row_dual(lp,i)
+        print_debug("status of row var:",row_name, '=', row_stat)
+        print_debug("row_prim of :",row_name, '=', row_prim)
+        print_debug("row_dual of :",row_name, '=', row_dual)
+        if row_stat==swiglpk.GLP_BS :
+            print_debug("The variable ",row_name, 'is a basic variable')
+        elif row_stat==swiglpk.GLP_NL :
+            print_debug("The variable ",row_name, 'is a non-basic variable on its lower bound')
+        elif row_stat==swiglpk.GLP_NU :
+            print_debug("The variable ",row_name, 'is a non-basic variable on its upper bound')
+        elif row_stat==swiglpk.GLP_NF :
+            print_debug("The variable ",row_name, 'is a non-basic free (unbounded) variable')
+        elif row_stat==swiglpk.GLP_NS :
+            print_debug("The variable ",row_name, 'is a non-basic fixed  variable')
+
+
+    #for j in range(1,nrow)  :
+    #    print_debug'swiglpk.glp_get_row_dual(lp, ',j,')= ',swiglpk.glp_get_row_dual(lp, j) )
+
+    swiglpk.glp_delete_prob(lp);
+
+    if debug_check:
+        for n in G.nodes():
+            balance = b[n]
+            for ee in G.out_edges(n,keys=True):
+                balance = balance-flow[ee]
+            for ee in G.in_edges(n,keys=True):
+                balance =balance+flow[ee]
+            assert(abs(balance)<tol)
+
+    debug_print = False
+
+    return cost,queue,label
+
+def compare_steady_thin_flow(G, flow, tol):
+    for e in G.edges(keys=True):
+        name = 'x_' + str(e[0])+'_'+str(e[1])+'_'+str(e[2])
+        if (flow[e] - G[e[0]][e[1]][e[2]]['capacity'] > tol ):
+            return False
+        if (flow[e] < -tol ):
+            return False
+        if (abs(flow[e]- G[e[0]][e[1]][e[2]]['thin_flow']) >=  tol) :
+            return False
+    return True
+
+def compare_steady_queues_labels(G, queues, labels, tol):
+    for e in G.edges(keys=True):
+        name = 'z_' + str(e[0])+'_'+str(e[1])+'_'+str(e[2])
+        if (abs(queues[e] - G[e[0]][e[1]][e[2]]['z_e_overtime'][-1]) > tol ):
+            print("compare_steady_queues_labels: queue in ",e,"is wrong")
+            return False
+    for n in G.nodes():
+        if (abs(labels[n]- G.node[n]['label']) >= tol):
+            print("compare_steady_queues_labels: label in ",n,"is wrong")
+            return False
+    return True
 
 def compute_thin_flow_without_resetting(G,source,b, demand=None, param=None):
     """
