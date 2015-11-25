@@ -1,6 +1,131 @@
 Tutorial
 ===============
 
+Introduction
+--------------------------------
+
+The network_viz software prototype is organized according to the following main processes:
+
+- Data generation (flows over time data from simulation and layout data for the network).
+- The visualization of the generated data using the available software GUI.
+
+Before the presentation of the steps to create the required data, this tutorial will start with the presentation of the
+software GUI components which will be finally used to visualize the change of the network flows over time.
+
+Visualization GUI
+---------------------------------
+
+The available software GUI will show a graphical representation of the network with animation controls, among some other options,
+to display the change of the *flows* and *queue levels* over time. The queues associated to each edge are represented with
+a set of boxes near of the tail of each edge. The levels displayed in this boxes will change depending on the current *queue length*,
+i.e. the net flow that has entered the edge and has not yet left the queue.
+
+.. figure:: data_gui.png
+   :figwidth: 50%
+   :align: center
+
+.. |icon1| image:: icons/reset.png
+   :width: 22px
+
+.. |icon2| image:: icons/time.png
+   :width: 22px
+
+.. |icon3| image:: icons/capacity.png
+   :width: 22px
+
+.. |icon4| image:: icons/plot.png
+   :width: 22px
+
+.. |icon5| image:: icons/play.png
+   :width: 22px
+
+.. |icon6| image:: icons/pause.png
+   :width: 22px
+
+.. |icon7| image:: icons/stop.png
+   :width: 22px
+
+.. |icon8| image:: icons/first.png
+   :width: 22px
+
+.. |icon9| image:: icons/last.png
+   :width: 22px
+
+.. |icon10| image:: icons/back.png
+   :width: 22px
+
+.. |icon11| image:: icons/forward.png
+   :width: 22px
+
+.. |icon12| image:: icons/repeat.png
+   :width: 22px
+
+.. |icon13| image:: icons/labels1.png
+   :width: 22px
+
+.. |icon14| image:: icons/labels2.png
+   :width: 22px
+
+.. |icon15| image:: icons/bar.png
+   :width: 22px
+
+.. |icon16| image:: icons/info.png
+   :width: 22px
+
+.. |mplot| image:: icons/plot.png
+   :width: 18px
+
+Several options are available through the GUI toolbars, for instance, after the selection of one edge,
+use the button |mplot| to display a graph with the respective simulation data.
+
+.. figure:: sim_data.png
+   :figwidth: 75%
+   :align: center
+
+|
+
+The full list of options is presented in the following table.
+
+.. list-table::
+  :widths: 40 60
+  :header-rows: 1
+
+  * - Button
+    - Description
+  * - |icon1|
+    - Display the default network visualization scene (hide time and capacities layouts).
+  * - |icon2|
+    - Display edge times.
+  * - |icon3|
+    - Display edge capacities.
+  * - |icon4|
+    - Plot simulation data for the selected edge.
+  * - |icon5|
+    - Play.
+  * - |icon6|
+    - Pause.
+  * - |icon7|
+    - Stop.
+  * - |icon8|
+    - Go to the beginning of the visualization.
+  * - |icon9|
+    - Go to the visualization end.
+  * - |icon10|
+    - Back one time step.
+  * - |icon11|
+    - Forward one time step.
+  * - |icon12|
+    - Play and repeat animation.
+  * - |icon13|
+    - Show / hide source node and sink node labels.
+  * - |icon14|
+    - Show / hide non source / sink node labels.
+  * - |icon15|
+    - Show / hide scalar bar.
+  * - |icon16|
+    - Show / hide project info.
+
+|
 
 Fundamentals
 ---------------------------------
@@ -261,7 +386,7 @@ Finally, run the visualization using
 |
 
 .. figure:: fviz.jpeg
-  :scale: 90%
+  :width: 90%
   :alt: fviz project
   :align: center
   :figwidth: 581px
@@ -350,7 +475,7 @@ After set the CUSTOM_LAYOUT parameter equals to 1, and update the project, you w
 obtain a new layout for the newtork visualization.
 
 .. figure:: fvizly.jpeg
-  :scale: 90%
+  :width: 90%
   :alt: fviz project - new layout
   :align: center
   :figwidth: 581px
@@ -361,44 +486,51 @@ obtain a new layout for the newtork visualization.
 A street network
 ------------------
 
-[Work in progress]
-
 Another type of network which could be studied with this software corresponds to street networks,
-using OpenStreepMaps files (with extension .osm) as a source.
+using OpenStreetMap files (with extension .osm) as a source.
 
-Currently the time and capacity for this type of network is established as a random value.
+Currently, the time and capacity for this type of network is established as a random value.
 
-To create a visualization of this type, is necessary to have:
+To create a visualization of this type, are required:
 
-- An edited osm file, with two node with the extra attribute *type* with the associated values *source* and *sink* (to be explained in this section).
+- An edited osm file, with two nodes with the extra attribute *type* with the associated values *source* and *sink* (to be explained in this section).
 - A map image (jpeg file) to be used as background (optional), with its respective crop bounds.
 
+|
 
 .. figure:: tobalaba.jpeg
-  :scale: 90%
+  :figwidth: 50%
   :alt: fviz project - new layout
   :align: center
-  :figwidth: 800px
 
-.. figure:: tobalaba_josm.jpeg
-  :scale: 90%
+  Example of a street network visualization.
+
+Preparing the osm file
+^^^^^^^^^^^^^^^^^^^^^^
+
+After download a .osm file from the OpenStreetMap website, is necessary to import the data with an editor as
+JOSM (Java OpenStreetMap Editor) and select two nodes to be considered as the source and sink nodes. For each node, must be added
+a tag with the key "type" and the value "source" or "sink" in each case. Currently the software prototype build a network based
+in the information of component with the key "highway" and values "primary", "secondary", "tertiary", "residential", "motorway", "primary_link" and "motorway_link".
+
+.. figure:: josm_tobalaba.jpeg
+  :figwidth: 63%
   :alt: fviz project - new layout
   :align: center
-  :figwidth: 800px
 
-.. figure:: source.jpeg
-  :scale: 90%
+  tobalaba.osm file data
+
+.. figure:: josm_source_node.jpeg
+  :figwidth: 65%
   :alt: fviz project - new layout
   :align: center
-  :figwidth: 800px
-
-.. figure:: sink.jpeg
-  :scale: 90%
-  :alt: fviz project - new layout
-  :align: center
-  :figwidth: 800px
 
 
+The settings code and map background image associated to this visualization are available in the section "Examples", project 'Tobalaba'.
 
-GUI available options
-----------------------
+General comments about the software and the networks visualizations
+----------------------------------------------------------------------
+
+It is possible that the set of points generated for the network layout will cause that components from the visualization library (VTK) will not be displayed properly,
+for instance, when is detected a very small distance between some points. In this cases consider selecting a greater value for the time step in the visualization project settings.
+Under a custom layout for the network visualization, consider to change the degree of the splines or reduce the associated number of points.

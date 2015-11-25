@@ -609,7 +609,7 @@ class VtkNetworkAnimationLayer:
 
         self.lut.GetColor(flow_value,color)
 
-        ref_value = flow_value/self.edges_max_f_e_minus
+        ref_value = max(flow_value/self.edges_max_f_e_minus,0.0)
 
         if (flow_value < 1E-8):
             alpha = int(255*0)
@@ -813,7 +813,8 @@ class VtkNetworkStaticLayer:
             self.vtkRadiusFactors.SetTuple1(pointId, default_width_multiplier) # assign radius factor to point
 
         #color = [int(0.35*255),int(0.35*255),int(0.35*255),int(255)]
-        color = [int(65),int(65),int(65),int(255)]
+        #color = [int(65),int(65),int(65),int(255)]
+        color = [int(25),int(25),int(25),int(255)]
         self.vtkColors.InsertNextTupleValue(color)
 
     def setCellColorById(self, cell_id, color_tuple):
@@ -855,7 +856,7 @@ class VtkNetworkDataTimesLayer(VtkNetworkStaticLayer):
             self.lut.SetTableValue(i,color[0],color[1],color[2],color[3])
             i = i + 1
 
-        self.vtkMapper.SetScalarRange(0,self.edges_max_capacity)
+        self.vtkMapper.SetScalarRange(0,self.edges_max_time)
         self.vtkMapper.SetLookupTable(self.lut)
 
         self.vtkColorBarActor.SetLookupTable(self.vtkMapper.GetLookupTable())

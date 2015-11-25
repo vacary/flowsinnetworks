@@ -1,8 +1,8 @@
 Installing network_viz
 =======================
 
-The network_viz software can be used after installing the script *network_viz.py*, using an available setup.py file.
-Before installing this script, it is necessary verify the installation of some required libraries for its execution.
+The network_viz software can be used after installing the script *network_viz.py*, using the setup.py file available in the project repository.
+Before installing this script, it is necessary to verify the installation of some required libraries for its execution.
 
 Requirements
 --------------

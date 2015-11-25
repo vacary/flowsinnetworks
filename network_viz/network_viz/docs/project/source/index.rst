@@ -12,8 +12,16 @@ prototypes for the simulation and the visualization of dynamic flows in networks
 The software **network_viz** is a first software prototype developed for the visualization of
 dynamic equilibria from time varying flows.
 
-A quick start guide to use this software, and general documentation,
-will be available in this website (currently under development).
+A start guide and general documentation to use this software are available in this website.
+
+|
+|
+
+.. image:: index.jpg
+   :width: 100%
+
+|
+|
 
 Project Members
 ---------------
