@@ -7,7 +7,7 @@ Before installing this script, it is necessary to verify the installation of som
 Requirements
 --------------
 
-Before install the network_viz.py script, is necessary to check if the following libraries / packages are available:
+Before install the network_viz.py script, is necessary to verify if the following libraries / packages are available:
 
 - numpy       >= 1.8.2
 - vtk         >= 6.0.0
@@ -26,7 +26,7 @@ How to Install
 After download the project folder *flowsinnetworks*, the software can be installed using the available file setup.py
 in the subfolder *network_viz*.
 
-The recommended way to install this program is using a local installation, which do not require administrative privileges
+The recommended way to install this program is using a local installation, which do not require administrative privileges,
 with the instruction::
 
 ~network_viz$ python setup.py install --user

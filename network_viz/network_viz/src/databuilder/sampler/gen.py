@@ -17,23 +17,52 @@ import matplotlib.pyplot as plt
 def getArrayFromStrList(str_list):
 
     str_list    = str_list[1:-1]
-    output      = [float(elm) for elm in str_list.split(',')]
+    #clean data
+    output      = [float("{0:.16}".format(float(elm))) for elm in str_list.split(',')]
 
     return output
 
 def binarySearch(theta, xlist, vlist):
+
+    """ Modified binary search
+
+    Modified binary search employed to sample flow rate or queue level values
+    from simulation data.
+    This function is called by getSampledValue and getSampledQValue, used
+    respectively for flow rates and queue levels and returns the required
+    index k to use the associated component of vlist.
+
+    Important: This function returns the index according to a RC (right
+    continuous) definition for piecewise linear functions.
+
+    Args:
+
+        theta : time
+
+        xlist : time axis values
+
+        vlist : flow rate or queue values (for development purposes)
+
+    Returns:
+
+        k index associated to the required value of vlist to sample the
+        flow rate or queue levels data
+
+    """
 
     first   = 0
     last    = len(xlist)-1
 
     while (first < last):
         mid = int((first + last)/2)
-        if (xlist[mid] < theta):
+        if (xlist[mid] <= theta):
             first = mid + 1
         else:
             last = mid
 
-    return first
+    k = max(0,last-1)
+
+    return k
 
 def getArrayOfValuesOvertime(required_values, xArray, vArray, time_step, N):
 
@@ -71,21 +100,25 @@ def getArrayOfValuesOvertime(required_values, xArray, vArray, time_step, N):
 
 def getSampledValue(theta, xlist, vlist):
 
+    """ Sampler for flow rate data
+
+    Important: This function consider a RC (right continous) definition
+    for discontinuous piecewise linear functions implemented in the
+    modified binary search.
+
+    """
+
     if (theta < min(xlist)):
         value   = 0.0
     elif (theta > max(xlist)):
         value   = -1.0
     else:
-        # index from binary search
-        k = binarySearch(theta,xlist,vlist) - 1
-        # value
-        if (theta == xlist[0]):
-            value = vlist[0]
-        else:
-            if ( theta in xlist and k+1 < len(vlist)):
-                value = max(vlist[k], vlist[k+1])
-            else:
-                value = vlist[k]
+
+        # vlist index from modified binary search
+        k = binarySearch(theta,xlist,vlist)
+        value = vlist[k]
+
+        #
         value = max(value,0.0)
         if (value < 10**-10):
             value = 0.0
@@ -94,26 +127,26 @@ def getSampledValue(theta, xlist, vlist):
 
 def getSampledQValue(theta, xlist, vlist):
 
+    """ Sampler for queue levels data
+    """
+
     if (theta < min(xlist)):
         value   = 0.0
     elif (theta > max(xlist)):
         value   = -1.0
     else:
         # index from binary search
-        k = binarySearch(theta,xlist,vlist) - 1
-        # value
-        if (theta == xlist[0]):
-            value = vlist[0]
-        else:
-            if (xlist[k] != xlist[-1]):
-                if (xlist[k] != xlist[k+1]):
-                    p       = [xlist[k],vlist[k]]
-                    q       = [xlist[k+1],vlist[k+1]]
-                    value   = ((q[1]-p[1])/(q[0]-p[0]))*(theta - p[0]) + p[1]
-                else:
-                    value   = vlist[k]
+        k = binarySearch(theta,xlist,vlist)
+        # compute the sampled value
+        if (xlist[k] != xlist[-1]):
+            if (xlist[k] != xlist[k+1]):
+                p       = [xlist[k],vlist[k]]
+                q       = [xlist[k+1],vlist[k+1]]
+                value   = ((q[1]-p[1])/(q[0]-p[0]))*(theta - p[0]) + p[1]
             else:
                 value   = vlist[k]
+        else:
+            value   = vlist[k]
 
         value = max(value,0.0)
         if (value < 10**-10):

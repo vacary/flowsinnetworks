@@ -9,24 +9,26 @@ In this section are presented the settings and required files (if proceed) for t
 - grid
 - Tobalaba (road network example)
 
+|
+
 Note: You will be able to see a larger screenshot for each example, after make click on the respective image.
 
 |
 
 .. |exa1| image:: example_fviz.png
-   :width: 50%
+   :width: 55%
 
 .. |exa2| image:: example_parallel.png
-   :width: 50%
+   :width: 55%
 
 .. |exa3| image:: example_doubleparallel.png
-   :width: 50%
+   :width: 55%
 
 .. |exa4| image:: example_grid.png
-   :width: 50%
+   :width: 55%
 
 .. |exa5| image:: example_Tobalaba.png
-   :width: 50%
+   :width: 55%
 
 Example 1: *fviz*
 ------------------

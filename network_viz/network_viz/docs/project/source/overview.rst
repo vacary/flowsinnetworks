@@ -13,7 +13,7 @@ particle is interpreted as a *player* that seeks to complete its journey in the 
 
 |
 
-.. [1] Roberto Cominettu, José Correa, Omar Larré (2015). Dynamic Equilibria in Fluid Queueing Networks. Operations Research 63(1):21-34.
+.. [1] Roberto Cominetti, José Correa, Omar Larré (2015). Dynamic Equilibria in Fluid Queueing Networks. Operations Research 63(1):21-34.
 
 |
 
@@ -25,9 +25,22 @@ particle is interpreted as a *player* that seeks to complete its journey in the 
 
 About network_viz
 -----------------
+|
 
-Icons from "Material design icons" by Google.
+- Software prototype developed in *Inria Chile*.
 
-Material-design-icon github website:
+  http://www.inria.cl
 
-https://github.com/google/material-design-icons
+|
+
+- Contact:
+
+  Vincent Acary  <vincent.acary@inria.fr>
+
+|
+
+- Icons from "Material design icons" by Google.
+
+  Material-design-icon github website:
+
+  https://github.com/google/material-design-icons
