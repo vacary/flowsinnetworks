@@ -16,6 +16,20 @@ import matplotlib.pyplot as plt
 
 def getArrayFromStrList(str_list):
 
+    """
+
+    String to list converter
+
+    Simulation data stored as a string is used to generate a list with values
+    to be employed in the sampling data process.
+
+    .. warning::
+        Simulation values are used after the application of the *format* python function
+        to prevent issues on the sampling process from floating point numbers,
+        in particular over time labels.
+
+    """
+
     str_list    = str_list[1:-1]
     #clean data
     output      = [float("{0:.16}".format(float(elm))) for elm in str_list.split(',')]
