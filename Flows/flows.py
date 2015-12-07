@@ -1162,13 +1162,15 @@ def maxflow_mincut_by_lp(G,source,sink) :
 
 def steady_state_thin_flow_lp(G,b,source,tol) :
 
+
+    global debug_print
+    debug_print=False
+
     if (debug_print==False):
         #swiglpk.glp_msg_lev(swiglpk.GLP_MSG_OFF)
         #swiglpk.glp_smcp.msg_lev =0
         swiglpk.glp_term_out(swiglpk.GLP_OFF)
 
-    global debug_print
-    debug_print=False
 
     print_debug('################ start  steady_state_thin_flow_lp(G,b,source,tol) ###############')
     display_graph(G,print_debug)
@@ -1362,13 +1364,15 @@ def steady_state_thin_flow_lp(G,b,source,tol) :
 
 def steady_state_queues_labels_lp(G,b,source,sink,tol, offset=None) :
 
+
+    global debug_print
+    debug_print=False
+
     if (debug_print==False):
         #swiglpk.glp_msg_lev(swiglpk.GLP_MSG_OFF)
         #swiglpk.glp_smcp.msg_lev =0
         swiglpk.glp_term_out(swiglpk.GLP_OFF)
 
-    global debug_print
-    debug_print=False
 
     print_debug('################ start  steady_state_queues_labels_lp(G,b,source,tol) ###############')
     display_graph(G,print_debug)
@@ -3246,7 +3250,7 @@ def plot_flows_queues_cumulativeflows(G, edge=None, key=None):
 
     plt.subplot(511)
     plt.grid()
-    plt.title('f_e_plus in edges')
+    plt.title('f_e_plus(l_w(theta)) in edges')
 
     for ntail,nbrs in G_plot.adjacency_iter():
         for nhead,eattr in nbrs.items():
@@ -3267,7 +3271,7 @@ def plot_flows_queues_cumulativeflows(G, edge=None, key=None):
 
     plt.subplot(512)
     plt.grid()
-    plt.title('f_e_minus in edges')
+    plt.title('f_e_minus(l_v(theta)) in edges')
 
     for ntail,nbrs in G_plot.adjacency_iter():
         for nhead,eattr in nbrs.items():
@@ -3289,7 +3293,7 @@ def plot_flows_queues_cumulativeflows(G, edge=None, key=None):
 
     plt.subplot(513)
     plt.grid()
-    plt.title('F_e_plus in edges')
+    plt.title('F_e_plus(l_v(theta)) in edges ?? BUG')
     for ntail,nbrs in G_plot.adjacency_iter():
         for nhead,eattr in nbrs.items():
             for k,keydata in eattr.items():
@@ -3301,7 +3305,7 @@ def plot_flows_queues_cumulativeflows(G, edge=None, key=None):
 
     plt.subplot(514)
     plt.grid()
-    plt.title('F_e_minus in edges')
+    plt.title('F_e_minus(l_w(theta)) in edges ?? BUG')
     for ntail,nbrs in G_plot.adjacency_iter():
         for nhead,eattr in nbrs.items():
             for k,keydata in eattr.items():
@@ -3314,7 +3318,7 @@ def plot_flows_queues_cumulativeflows(G, edge=None, key=None):
 
     plt.subplot(515)
     plt.grid()
-    plt.title('z_e in edges')
+    plt.title('z_e(l_v(theta)) in edges')
     for ntail,nbrs in G_plot.adjacency_iter():
         for nhead,eattr in nbrs.items():
             for k,keydata in eattr.items():

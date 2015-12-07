@@ -418,7 +418,6 @@ def test13(pars):
 
 
     flows.compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeofevent, inputflow)
-    flows.display_graph(G)
     print("timeofevent=",timeofevent)
     print("inputflow=",inputflow)
 
@@ -433,6 +432,7 @@ def test13(pars):
 
     # post processing
     flows.postprocess_flows_queues_cumulativeflows(G)
+    flows.display_graph(G)
 
     plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
     flows.plot_flows_queues_cumulativeflows(G)
@@ -996,13 +996,23 @@ def test_file(pars,graph_file,timeofevent=[0.0,100.0], inputflow=None, with_draw
 def test24(pars):
     print( '################ start test 24 ###############')
     G=examples.example_roberto2()
+    G=examples.example_robertoplus()
+    timeofevent=[0.0,10.0]
+    inputflow=[1.0,1.0]
+
     #G=examples.example_neil()
-    G=examples.example_doubleparallelpath()
+    #timeofevent=[0.0,172.0]
+    #inputflow=[1.0,1.0]
+
+    # G=examples.example_doubleparallelpath()
+    # timeofevent=[0.0,15.0]
+    # inputflow=[3.0,3.0]
+
+
+
     source = 's'
     sink = 't'
     #Original values
-    timeofevent=[0.0,15.0]
-    inputflow=[3.0,3.0]
     param=flows.parameters()
     param.tol_thin_flow=1e-10
     param.tol_lp=1e-12
@@ -1025,15 +1035,16 @@ def test24(pars):
         u[n] =0.0
     u[source] = inputflow[-1]
     u[sink] = - inputflow[-1]
-
+    flows.display_graph(G)
     steady_cost, steady_thin_flow = flows.steady_state_thin_flow_lp(G, u, source, param.tol_lp)
     assert(flows.compare_steady_thin_flow(G, steady_thin_flow, param.tol_lp))
     print("steady_thin_flow by lp:",flows.drepr(steady_thin_flow))
 
     cost,queues,labels =flows.steady_state_queues_labels_lp(G,u,source,sink,param.tol_lp, offset=G.node[source]['label'])
-    assert(flows.compare_steady_queues_labels(G, queues, labels, param.tol_lp))
-    z=queues.copy()
-    print("steady_queues_labels by lp:",flows.drepr(queues),flows.drepr(labels))
+    print("steady_labels by lp:",flows.drepr(labels))
+    print("steady_queues by lp:",flows.drepr(queues))
+
+    #assert(flows.compare_steady_queues_labels(G, queues, labels, param.tol_lp))
 
 
 
@@ -1067,10 +1078,10 @@ def test24(pars):
     print("G.name['is_der_phi_positive']",G.name['is_der_phi_positive'][0])
     print("G.name['is_der_phi_decreasing']",G.name['is_der_phi_decreasing'][0])
     
-    #flows.display_graph(G)
+    #
 
-    assert(flows.is_TotalTravelTime_increasing(G,param.tol_thin_flow,source,sink)[0])
-    assert(flows.is_DerTotalTravelTime_decreasing(G,param.tol_thin_flow,source,sink)[0])
+    #assert(flows.is_TotalTravelTime_increasing(G,param.tol_thin_flow,source,sink)[0])
+    #assert(flows.is_DerTotalTravelTime_decreasing(G,param.tol_thin_flow,source,sink)[0])
     
 
 
