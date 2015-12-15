@@ -2,6 +2,7 @@ from __future__ import print_function
 import __builtin__
 import networkx as nx
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 withPulp=False
 withScipyOpt=False
@@ -1776,7 +1777,7 @@ def compute_thin_flow_without_resetting(G,source,b, demand=None, param=None):
     print_debug( '################ end compute_thin_flow_without_resetting ###############'    )
 
 
-def compute_thin_flow(G, source, b, E1, demand=None, param = None):
+def compute_thin_flow(G, source, b, E1, demand=None, param = None, echo=True):
     """
     compute_thin_flow(G,source,b, E1, tol=default_tol)
 
@@ -1933,14 +1934,14 @@ def compute_thin_flow(G, source, b, E1, demand=None, param = None):
             err = err + abs(bi[n]-biold[n])
         #err= err/G.number_of_nodes()
         #raw_input()
-        print( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
+        if echo: print( "  Fixed point iteration number :", k, 'erreur :', err, '>=', param.tol_thin_flow)
                
         k =k+1
 
     if (k < param.nmax) :
-        print( "  Fixed point suceeded. number of iterations :", k-1, 'erreur :', err, '<=', param.tol_thin_flow)
+         if echo:  print( "  Fixed point suceeded. number of iterations :", k-1, 'erreur :', err, '<=', param.tol_thin_flow)
     else:
-        print( "  Fixed point number of iterations max reached :", k, 'erreur :', err, '>', param.tol_thin_flow)
+         if echo:  print( "  Fixed point number of iterations max reached :", k, 'erreur :', err, '>', param.tol_thin_flow)
 
     for e in G.edges(keys=True):
         if e in  E1.edges(keys=True) :
@@ -2869,9 +2870,9 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeof
             N=N+1
         h = t_i - h
 
-
-
-
+        # Assert the thin flow and the label are right continuous on the timestep.
+        # check_continuity_thin_flow(G,E,Estar,source,sink,u,d,t_i,h,param)
+            
         # integrate x and labels with respect to time.
         for ntail,nbrs in G.adjacency_iter():
             G.node[ntail]['label'] = G.node[ntail]['label'] + G.node[ntail]['label_thin_flow']*h
@@ -2890,6 +2891,47 @@ def compute_dynamic_equilibrium_for_pwconstant_inputflow(G, source, sink, timeof
         print( '#################################################################################\n')
         #raw_input()
 
+
+def check_continuity_thin_flow(G,E,Estar,source,sink,u,d,t_i,h,param):
+    # check that the label_thin_flow and the thin flow are continuous over the step 
+    # perform an integration with a time step h/10 a recompute the thin_flow
+
+    h_small=h/10
+    H=G.copy()
+    
+    # integrate x and labels with respect to time.
+    for ntail,nbrs in H.adjacency_iter():
+        H.node[ntail]['label'] = H.node[ntail]['label'] + H.node[ntail]['label_thin_flow']*h_small
+        H.node[ntail]['label_overtime'].append(H.node[ntail]['label'])
+        H.node[ntail]['label_overtime_theta'].append(t_i)
+        for nhead,eattr in nbrs.items():
+            for k,keydata in eattr.items():
+                H[ntail][nhead][k]['x']=H[ntail][nhead][k]['x'] + H[ntail][nhead][k]['thin_flow']*h_small
+                H[ntail][nhead][k]['x_overtime'].append(H[ntail][nhead][k]['x'])
+
+    # compute a new shortest path
+    EH,EHstar,EH_comp=current_shortest_path_graph(H,source,sink)
+
+    if (EH.edges()!=E.edges() or EHstar.edges()!=Estar.edges()):
+        print('# nodes =', len(H.nodes()),\
+              '     # edges =', len(H.edges()),\
+              '     # edges in E =', len(EH.edges()),\
+              '     # edges in Estar=', len(EHstar.edges()))
+        print(' Make comparison of thin flows ')
+        
+        # Compute thin flow and associated labels (label_thin_flow) on E
+        if (d == 0.0) :
+            compute_thin_flow_ofzerosize(EH,source,u,EHstar)
+        else:
+            #compute_thin_flow(E,source,u,Estar,d, param)
+            compute_thin_flow_short_circuit(EH,source,u,EHstar,d, param)
+        # make a comparison
+        for  e in H.edges(keys=True):
+            #print(H[e[0]][e[1]][e[2]]['thin_flow'],G[e[0]][e[1]][e[2]]['thin_flow'])
+            if abs(H[e[0]][e[1]][e[2]]['thin_flow']-G[e[0]][e[1]][e[2]]['thin_flow']) > param.tol_thin_flow:
+                print("Warning: e", e, "different thin flow")
+                raw_input()
+        
 def compute_dynamic_equilibrium_timestepping(G, source, sink, h, t0, N, flow_function, param=None):
 
     if param==None:
@@ -3995,3 +4037,64 @@ def plot_extravalues(G):
     plt.xlim([min_x,max_x])
     min_y,max_y=plt.ylim()
     plt.ylim([-0.1,max_y+0.1])
+
+def plot_label_vs_label(G):
+
+
+    # compute the number of total plots
+    
+    iplot =0
+    list_of_edges = list(set(G.edges()))
+    nplot = len(list_of_edges)
+    print(list_of_edges)
+    nfigure =nplot/4
+    subplot_idx=[221,222,223,224]
+    
+    for nfig in range(nfigure):
+        print("nfigure",nfigure)
+        
+        plt.figure("Label vs label "+str(nfig), figsize = [20,10])
+        current_edges=list_of_edges[iplot:min(iplot+4,len(list_of_edges))]
+        nsubplot = len(current_edges)
+        # plot nsubplot edges graph
+        for nsub in range(nsubplot):
+            print("plot number", nsub)
+            plt.subplot(subplot_idx[nsub])
+            plt.grid()
+            e_current = current_edges[nsub]
+            print("e_current", e_current)
+            ntail=e_current[0]
+            nhead=e_current[1]
+            plt.title('label '+nhead+' vs label '+ntail)
+            plt.plot(G.node[ntail]['label_overtime'][:],G.node[nhead]['label_overtime'][:],label=repr(ntail),marker='+')
+            for e in G.out_edges(ntail,keys=True):
+                if e[1]==nhead:
+                    print(" edges between tail and head e=",e)
+                    print("line e=",e)
+                    x_data=[0,max(G.node[ntail]['label_overtime'][:])]
+                    y_data=[G[ntail][nhead][e[2]]['time'],max(G.node[ntail]['label_overtime'][:])+G[ntail][nhead][e[2]]['time']]
+                    plt.plot(x_data,y_data)
+            for e in G.in_edges(nhead,keys=True):
+                print("in edges at head of e=",e)
+                x_data=[0,max(G.node[nhead]['label_overtime'][:])]
+                y_data=[G[e[0]][nhead][e[2]]['time'],G[e[0]][nhead][e[2]]['time']]
+                plt.plot(x_data,y_data)
+                
+            for e in G.in_edges(ntail,keys=True):
+                print("in edges at tail of e=",e)
+                x_data=[0,max(G.node[ntail]['label_overtime'][:])]
+                y_data=[G[e[0]][e[1]][e[2]]['time'],G[e[0]][e[1]][e[2]]['time']]
+                plt.plot(y_data,x_data)
+        iplot=iplot+4
+
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        x = G.node['s']['label_overtime'][:]
+        y = G.node['i']['label_overtime'][:]
+        z = G.node['j']['label_overtime'][:]
+        ax.plot(x, y, z, label='z = f(x, y)', marker='+')
+        ax.legend()
+        plt.show()
+        
+        
+    

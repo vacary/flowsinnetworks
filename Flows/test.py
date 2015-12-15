@@ -997,7 +997,7 @@ def test24(pars):
     print( '################ start test 24 ###############')
     G=examples.example_roberto2()
     G=examples.example_robertoplus()
-    timeofevent=[0.0,10.0]
+    timeofevent=[0.0,8.0]
     inputflow=[1.0,1.0]
 
     #G=examples.example_neil()
@@ -1062,11 +1062,11 @@ def test24(pars):
         plt.figure("Flows, Cumulative flows and queues", figsize = [8,10])
         flows.plot_flows_queues_cumulativeflows(G)
 
-    if with_draw :
-        plt.figure("Flows, Extra values", figsize = [8,10])
-
-        flows.plot_extravalues(G)
-
+        #plt.figure("Flows, Extra values", figsize = [8,10])
+        #flows.plot_extravalues(G)
+        flows.plot_label_vs_label(G)
+        
+        
     flows.postprocess_extravalues_der_phi(G, source, sink, inputflow)
 
     G.name['is_der_phi_positive']= flows.is_der_phi_positive(G,param.tol_thin_flow,source,sink)
