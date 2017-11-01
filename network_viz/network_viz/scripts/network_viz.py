@@ -11,7 +11,7 @@ import argparse
 
 home = os.path.expanduser("~") ## Source folder
 #-------
-root_dir_path =  "/home/max/flowsinnetworks" #important!
+root_dir_path =  "/Users/acary/Work/flowsinnetworks" #important!
 #-------
 vroot_dir_path = os.path.join(root_dir_path,'network_viz','network_viz')
 src_dir_path = os.path.join(vroot_dir_path,'src')

@@ -9,7 +9,6 @@ def example1():
     G.add_edge('v','w',weight= 1)
     G.add_edge('v','t',weight= 5)
     G.add_edge('w','t',weight= 1)
-
     return G
 
 
@@ -58,8 +57,6 @@ def example4():
     return G
 
 
-
-
 def example5():
     G=nx.MultiDiGraph()
     G.add_nodes_from("suvt")
@@ -75,6 +72,20 @@ def example5():
     return G
 
 def example_KochSkutella2011_Fig3_Fig4():
+    G=nx.MultiDiGraph()
+    G.add_nodes_from("svwt")
+    G.node['s']['label'] = 0
+    G.node['v']['label'] = 0
+    G.node['w']['label'] = 0
+    G.node['t']['label'] = 0
+    G.add_edge('s','v',time= 1, capacity=2, flow =0)
+    G.add_edge('s','w',time= 6, capacity=1, flow =0)
+    G.add_edge('v','w',time= 1, capacity=1, flow =0)
+    G.add_edge('v','t',time= 5, capacity=2, flow =0)
+    G.add_edge('w','t',time= 1, capacity=1, flow =0)
+    return G
+
+def example_KochSkutella2011_Fig3_Fig4_try():
     G=nx.MultiDiGraph()
     G.add_nodes_from("svwt")
     G.node['s']['label'] = 0

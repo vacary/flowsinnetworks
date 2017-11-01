@@ -42,12 +42,21 @@ def tranversality_check(G,E1,E2,l1,l2):
 def test0():
     print( '################ start test 11 ###############')
     G=examples.example_KochSkutella2011_Fig3_Fig4()
+    
     b= {} # dictionary of flows in nodes
     b['s'] = 3.0
     b['v'] = 0
     b['w'] = 0
     b['t'] = -3.0
     demand=3.0
+    
+    # G=examples.example_KochSkutella2011_Fig3_Fig4_try()
+    
+    # b= {} # dictionary of flows in nodes
+    # b['s'] = 3.0
+    # b['v'] = 0
+    # b['t'] = -3.0
+    # demand=3.0
     
     # G=examples.example_Fig1_Cominetti()
     # G=examples.example_Fig1_Cominetti_variant1()
@@ -109,22 +118,27 @@ def test0():
             s_comp = set(E1_comp.edges(keys=True))
             if s_ref.issubset(s_comp):
                 # some edges of E1_ref entered in E1_comp
-                print(s_ref,s_comp)
-                print(len(s_comp.difference(s_ref)), "edges are entering in R ")
+                print("\n",len(s_comp.difference(s_ref)), "edges are entering in R ")
+                print("  ",s_ref,s_comp)
+                               
+                discontinuity=False
                 for e in s_comp.difference(s_ref):
-                    print("edge ",e, "is entering in R")
-                    print("with ref labels", l1_ref[e[0]], l1_ref[e[1]], "and comp labels", l1_comp[e[0]], l1_comp[e[1]])
-                    print("and ref thin flow",result_ref[2][e],"and comp thin flow",result_comp[2][e] )
+                    print("  edge ",e, "is entering in R (comp)")
+                    print("    with ref labels l_v=", l1_ref[e[0]]," l_w=", l1_ref[e[1]], "and comp labels l_v", l1_comp[e[0]]," l_w=", l1_comp[e[1]])
+                    print("    and ref thin flow",result_ref[2][e],"and comp thin flow",result_comp[2][e] )
                     check_val = (l1_ref[e[0]]- l1_ref[e[1]])*(l1_comp[e[0]]- l1_comp[e[1]])
                     if (check_val < 0.0) :
                         print("tranversality warning", check_val)
                     if (l1_ref[e[1]]- l1_ref[e[0]] > 0):
                         if (abs(l1_ref[e[1]]-l1_comp[e[1]])) >= 1e-07  or (abs(l1_ref[e[1]]-l1_comp[e[1]]) >= 1e-07 ):
-                            print("############# Discontinuity when entering ...")
-                            raw_input()
-                        else:
-                            print("############# Continuity when entering ...")
-
+                            #print("############# Discontinuity when entering ...")
+                            #raw_input()
+                            discontinuity=True
+                        #else:
+                            #print("############# Continuity when entering ...")
+                if (discontinuity):
+                    print("############# Discontinuity when entering ...")
+                    raw_input()     
     print( '################ end test 11 ###############'  )
     
 

@@ -4,7 +4,7 @@ import sys
 
 def test_random_varyingdn():
     degree = 5
-    number_nodes_init=50
+    number_nodes_init=500
     k=0
     while (True and k<20):
 
