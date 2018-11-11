@@ -1,3 +1,5 @@
+![alt text](http://flowsinnetworks.gforge.inria.fr/_images/example_Tobalaba.png)
+
 # flowsinnetworks
 http://flowsinnetworks.gforge.inria.fr
 
